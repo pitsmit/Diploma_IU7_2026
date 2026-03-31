@@ -1,0 +1,1068 @@
+openapi: 3.0.1
+info:
+  title: DLP система для личного пользования
+  version: 1.0.0
+
+paths:
+  /api/v1/settings/log/size/max:
+    put:
+      summary: Установка максимального размера журнала
+      operationId: updateLogMaxSize
+      tags: [Настройки журнала]
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaxLogSize"
+
+      responses:
+        "200":
+          description: Максимальный размер журнала успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaxLogSize"
+
+        "400":
+          description: Некорректное значение размера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      
+    get:
+      summary: Получение максимального размера журнала
+      operationId: getLogMaxSize
+      tags: [Настройки журнала]
+
+      responses:
+        "200":
+          description: Значение максимального размера журнала
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaxLogSize"
+        
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/settings/log/events:
+    put:
+      summary: Установка типов журналируемых событий
+      operationId: updateLogEvents
+      tags: [Настройки журнала]
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/LogEventOption"
+
+      responses:
+        "200":
+          description: Список событий успешно обновлён
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogEventOption"
+
+        "400":
+          description: Некорректный список событий
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    
+    get:
+      summary: Получение типов журналируемых событий
+      operationId: getLogEvents
+      tags: [Настройки журнала]
+
+      responses:
+        "200":
+          description: Список событий успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogEventOption"
+        
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/settings/shadowstor/size/max:
+    put:
+      summary: Установка максимального размера хранилища теневых копий
+      operationId: updateShadowstorMaxSize
+      tags: [Настройки теневого хранилища]
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaxShadowStorSize"
+
+      responses:
+        "200":
+          description: Максимальный размер хранилища теневых копий успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaxShadowStorSize"
+
+        "400":
+          description: Некорректное значение размера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    get:
+      summary: Получение максимального размера хранилища теневых копий
+      operationId: getShadowstorMaxSize
+      tags: [Настройки теневого хранилища]
+
+      responses:
+        "200":
+          description: Максимальный размер хранилища теневых копий
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaxShadowStorSize"
+
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/settings/shadowstor/range:
+    put:
+      summary: Установка диапазона размера файлов, для которых будут создаваться теневые копии
+      operationId: updateShadowstorRange
+      tags: [Настройки теневого хранилища]
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RangeFileSize"
+
+      responses:
+        "200":
+          description: Диапазон размера файлов успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RangeFileSize"
+
+        "400":
+          description: Некорректное значение диапазона
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    
+    get:
+      summary: Получение диапазона размера файлов, для которых будут создаваться теневые копии
+      operationId: getShadowstorRange
+      tags: [Настройки теневого хранилища]
+
+      responses:
+        "200":
+          description: Диапазон размера файлов
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RangeFileSize"
+        
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  
+  /api/v1/shadowstor:
+    get:
+      summary: Получение сообщения о месте хранения теневых копий
+      operationId: getShadowstorPath
+      tags: [Место хранения теневых копий]
+
+      responses:
+        "200":
+          description: Сообщение о месте хранения теневых копий
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Теневые копии хранятся по адресу /usr/home/shadowstor/"
+          
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/whitelist/usbdev:
+    get:
+      summary: Получение белого списка устройств
+      operationId: getUsbWhiteList
+      tags: [Белый список устройств]
+
+      responses:
+        "200":
+          description: Белый список устройств
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WhiteListUsbDevice"
+          
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    
+    post:
+      summary: Добавление устройства в белый список
+      operationId: addDeviceToWhiteList
+      tags: [Белый список устройств]
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsbDevice"
+
+      responses:
+        "201":
+          description: Устройство успешно добавлено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WhiteListUsbDevice"
+        
+        "400":
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "409":
+          description: Устройство уже существует
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/whitelist/usbdev/{id}: 
+    delete:
+      summary: Удаление устройства из белого списка
+      operationId: deleteDeviceFromWhiteList
+      tags: [Белый список устройств]
+
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          $ref: "#/components/schemas/Id"
+
+      responses:
+        "204":
+          description: Устройство успешно удалено
+          
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "404":
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    
+    patch:
+      summary: Обновление даты действия устройства в белом списке
+      operationId: patchDeviceDateInWhiteList
+      tags: [Белый список устройств]
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                validTo:
+                  $ref: "#/components/schemas/ValidTo"
+                  nullable: true
+
+      responses:
+        "200":
+          description: Дата успешно обновлена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WhiteListUsbDevice"
+
+        "400":
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/list/usbdev:
+    get:
+      summary: Получение списка подключённых в данный момент устройств
+      operationId: getUsbList
+      tags: [Список подключённых устройств]
+
+      responses:
+        "200":
+          description: Список подключённых устройств
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UsbDevice"
+          
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/whitelist/process:
+    get:
+      summary: Получение белого списка процессов
+      operationId: getProcessWhiteList
+      tags: [Белый список процессов]
+
+      responses:
+        "200":
+          description: Белый список процессов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WhiteListProcess"
+          
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    
+    post:
+      summary: Добавление процесса в белый список
+      operationId: addProcessToWhiteList
+      tags: [Белый список процессов]
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Process"
+
+      responses:
+        "201":
+          description: Процесс успешно добавлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WhiteListProcess"
+        
+        "400":
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "409":
+          description: Процесс уже существует
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/whitelist/process/{id}: 
+    delete:
+      summary: Удаление процесса из белого списка
+      operationId: deleteProcessFromWhiteList
+      tags: [Белый список процессов]
+
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          $ref: "#/components/schemas/Id"
+
+      responses:
+        "204":
+          description: Процесс успешно удален
+          
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+        "404":
+          description: Процесс не найдено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    
+    patch:
+      summary: Обновление даты действия процесса в белом списке
+      operationId: patchProcessDateInWhiteList
+      tags: [Белый список процессов]
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/Id"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                validTo:
+                  $ref: "#/components/schemas/ValidTo"
+                  nullable: true
+
+      responses:
+        "200":
+          description: Дата успешно обновлена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WhiteListProcess"
+
+        "400":
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: Процесс не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    
+  /api/v1/log:
+    get:
+      summary: Получение журнала
+      operationId: getLog
+      tags: [Получение журнала]
+
+      parameters:
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+
+      - in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 100
+
+      # фильтр по периоду
+      - in: query
+        name: dateFrom
+        required: false
+        schema:
+          type: string
+          format: date-time
+        description: Начало периода (включительно)
+
+      - in: query
+        name: dateTo
+        required: false
+        schema:
+          type: string
+          format: date-time
+        description: Конец периода (включительно)
+
+      # фильтр по типу события
+      - in: query
+        name: eventType
+        required: false
+        explode: true
+        schema:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogEventType"
+
+      # 🔹 фильтр по устройству
+      - in: query
+        name: vendorId
+        required: false
+        schema:
+          $ref: "#/components/schemas/VendorId"
+
+      - in: query
+        name: productId
+        required: false
+        schema:
+          $ref: "#/components/schemas/ProductId"
+
+      - in: query
+        name: devName
+        required: false
+        schema:
+          $ref: "#/components/schemas/DevName"
+
+      responses:
+        "200":
+          description: Журнал успешно получен
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                  - total
+                  - page
+                  - limit
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Record"
+                  total:
+                    type: integer
+                    example: 1234
+                  page:
+                    type: integer
+                    example: 1
+                  limit:
+                    type: integer
+                    example: 10
+
+        "400":
+          description: Некорректные параметры пагинации
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "500":
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+components:
+  schemas:
+    VendorId:
+      type: string
+      pattern: "^[0-9a-fA-F]{4}$"
+      description: Идентификатор вендора
+      example: "0781"
+
+    ProductId:
+      type: string
+      pattern: "^[0-9a-fA-F]{4}$"
+      description: Идентификатор устройства
+      example: "5567" 
+    
+    Serial:
+      type: string
+      description: Серийный номер
+      example: "2222"
+
+    DevName:
+      type: string
+      maxLength: 255
+      description: Пользовательское название устройства
+      example: "Флешка для работы"
+
+    ProcPath:
+      type: string
+      minLength: 1
+      maxLength: 1024
+      description: Путь к исполняемому файлу процесса
+      example: "/usr/home/photoshop"
+    
+    ProcName:
+      type: string
+      maxLength: 255
+      description: Пользовательское название процесса
+      example: "Adobe Photoshop"
+    
+    ValidTo:
+      type: string
+      format: date
+      nullable: true
+      description: Дата до которой объект(устройство/процесс) в белом списке включительно. Если не указана, то действует бессрочно.
+      example: "2027-03-15"
+    
+    Id:
+      type: integer
+      example: 1
+      description: идентификатор из БД
+
+    LogEventType:
+      type: string
+      enum:
+        - insert
+        - extract
+        - read
+        - write
+        - execute
+
+    LogEventOption:
+      type: object
+      required:
+        - type
+        - enabled
+      properties:
+        type:
+          $ref: "#/components/schemas/LogEventType"
+        enabled:
+          type: boolean
+          description: Включено ли логирование данного типа события
+          example: true
+
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: "Неверно значение размера журнала"
+        code:
+          type: string
+          example: "INVALID_INPUT"
+
+    MaxLogSize:
+      type: object
+      required:
+        - maxSizeMb
+      properties:
+        maxSizeMb:
+          type: integer
+          description: Максимальный размер журнала в мегабайтах
+          minimum: 1
+          maximum: 10240
+          example: 500
+
+    MaxShadowStorSize:
+      type: object
+      required:
+        - maxSizeMb
+      properties:
+        maxSizeMb:
+          type: integer
+          description: Максимальный размер хранилища теневых копий в мегабайтах
+          minimum: 1
+          maximum: 20480
+          example: 500
+
+    RangeFileSize:
+      type: object
+      required:
+        - minSizeMb
+        - maxSizeMb
+      properties:
+        minSizeMb:
+          type: integer
+          minimum: 0
+          maximum: 1024
+          description: Минимальный размер файла в мегабайтах
+          example: 500
+        maxSizeMb:
+          type: integer
+          minimum: 0
+          maximum: 1024
+          description: Максимальный размер файла в мегабайтах
+          example: 500
+
+    UsbDevice:
+      type: object
+      additionalProperties: false
+      required:
+        - vendorId
+        - productId
+      properties:
+        name:
+          nullable: true
+          $ref: "#/components/schemas/DevName"
+        vendorId:
+          $ref: "#/components/schemas/VendorId"
+        productId:
+          $ref: "#/components/schemas/ProductId"
+        serial:
+          nullable: true
+          $ref: "#/components/schemas/Serial"
+        validTo:
+          nullable: true
+          $ref: "#/components/schemas/ValidTo"
+
+    WhiteListUsbDevice:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - vendorId
+        - productId
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        name:
+          nullable: true
+          $ref: "#/components/schemas/DevName"
+        vendorId:
+          $ref: "#/components/schemas/VendorId"
+        productId:
+          $ref: "#/components/schemas/ProductId"
+        serial:
+          nullable: true
+          $ref: "#/components/schemas/Serial"
+        validTo:
+          nullable: true
+          $ref: "#/components/schemas/ValidTo"
+
+    Process:
+      type: object
+      additionalProperties: false
+      required:
+       - path
+      properties:
+        name:
+          $ref: "#/components/schemas/ProcName"
+          nullable: true
+        path:
+          $ref: "#/components/schemas/ProcPath"
+        validTo:
+          nullable: true
+          $ref: "#/components/schemas/ValidTo"
+    
+    WhiteListProcess:
+      type: object
+      additionalProperties: false
+      required:
+       - id
+       - path
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        name:
+          $ref: "#/components/schemas/ProcName"
+          nullable: true
+        path:
+          $ref: "#/components/schemas/ProcPath"
+        validTo:
+          nullable: true
+          $ref: "#/components/schemas/ValidTo"
+  
+    Record:
+      type: object
+      additionalProperties: false
+      required:
+       - id
+       - datetime
+       - eventType
+       - vendorId
+       - productId
+       - result
+      properties:
+        id:
+          $ref: "#/components/schemas/Id"
+        datetime:
+          type: string
+          format: date-time
+          description: Дата и время выполнения операции
+          example: "2027-03-15T11:39:00Z"
+        eventType:
+          $ref: "#/components/schemas/LogEventType"
+        devName:
+          nullable: true
+          $ref: "#/components/schemas/DevName"
+        vendorId:
+          $ref: "#/components/schemas/VendorId"
+        productId:
+          $ref: "#/components/schemas/ProductId"
+        serial:
+          nullable: true
+          $ref: "#/components/schemas/Serial"
+        procName:
+          nullable: true
+          $ref: "#/components/schemas/ProcName"
+        procPath:
+          nullable: true
+          $ref: "#/components/schemas/ProcPath"
+        filePath:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          nullable: true
+          description: Путь к файлу, с которым производилась работа
+          example: "/usr/home/photo.png"  
+        result:
+          type: string
+          description: Результат выполнения операции 
+          enum: [success, denied, error]

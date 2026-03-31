@@ -1,5 +1,6 @@
 ## https://www.staffcop.ru/enterprise/control-of-usb-devices
 ## https://www.staffcop.ru/enterprise/sistemnye-trebovaniya
+## https://www.staffcop.ru/enterprise/tekhnicheskie-vozmozhnosti
 
 В Staffcop Enterprise реализована функция контроля USB-портов и устройств, обеспечивающая защиту конфиденциальных данных путём мониторинга и контроля передачи информации от компьютера на съемные устройства хранения: флэшки, внешние жёсткие диски, картридеры с картами памяти, смартфоны и пр.
 
