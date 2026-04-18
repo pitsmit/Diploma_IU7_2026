@@ -1,0 +1,6 @@
+[submodule "Notes/src/external/spdlog"]
+	path = Notes/src/external/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "Notes/external/spdlog"]
+	path = Notes/external/spdlog
+	url = https://github.com/gabime/spdlog.git
