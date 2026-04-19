@@ -8,3 +8,6 @@ deprecated/
 external/
 logs.txt
 *.o
+*.d
+app
+*.db

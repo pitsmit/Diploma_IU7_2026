@@ -120,35 +120,35 @@ public:
 #include "ProcessCommands.hpp"
 #include "LogCommands.hpp"
 #include "DBInitializer.hpp"
+#include "HttpServer.hpp"
+#include <thread>
+#include <chrono>
 
 class App {
 private:
     DBConnection db;
     Facade facade;
+    //HttpServer http;
 
 public:
     App()
         : db("app.db"),
           facade()
+          //http(facade)
     {
         db.execute("PRAGMA foreign_keys = ON;");
         DBInitializer::init(db);
-        logger->info("System start");
+        mylog->info("System start");
     }
 
     void run() {
-        Device d;
-        d.name = "USB Drive";
-        d.vendorId = "1234";
-        d.productId = "5678";
-        d.serial = "ABCDEF123456";
-        d.validTo = "2026-12-31";
+        //http.start();
 
-        AddDeviceToWhiteListCommand addCmd(d);
-        facade.execute(addCmd);
+        //while (true) {
+        //    std::this_thread::sleep_for(std::chrono::seconds(10));
+        //}
 
-        GetWhiteListDeviceCommand getCmd;
-        facade.execute(getCmd);
+        spdlog::shutdown();
     }
 };
 

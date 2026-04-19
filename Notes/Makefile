@@ -1,22 +1,32 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra
-INCLUDES = -Isrc/commands -Isrc/managers -Isrc/essenses -Isrc/facade -Isrc/repositories -Iexternal/spdlog/include
 
-# Все cpp файлы
-SRC = $(shell find src/ -name "*.cpp")
+INCLUDES = \
+    -Isrc/commands \
+    -Isrc/managers \
+    -Isrc/essenses \
+    -Isrc/facade \
+    -Isrc/repositories \
+    -Iexternal/spdlog/include \
+    -Iapi-stubs/api \
 
-# Объектные файлы
+SRC = $(shell find src/ api-stubs/api -name "*.cpp")
 OBJ = $(SRC:.cpp=.o)
+DEP = $(OBJ:.o=.d)
 
 TARGET = app
 
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ) -lsqlite3 -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(OBJ) -lsqlite3 -lpistache -pthread -o $(TARGET)
 
+# Компиляция + генерация .d файлов
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
+
+# Подключаем зависимости
+-include $(DEP)
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f $(OBJ) $(DEP) $(TARGET)

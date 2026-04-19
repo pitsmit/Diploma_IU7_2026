@@ -9,8 +9,14 @@ private:
     std::shared_ptr<spdlog::logger> logger;
 
     DevLogger() {
-        logger = spdlog::basic_logger_mt("system_logger", "logs.txt");
+        if (!spdlog::get("system_logger")) {
+            logger = spdlog::basic_logger_mt("system_logger", "logs.txt");
+        } else {
+            logger = spdlog::get("system_logger");
+        }
+
         logger->set_level(spdlog::level::info);
+        logger->flush_on(spdlog::level::info);
     }
 
 public:
@@ -24,4 +30,4 @@ public:
     }
 };
 
-#define logger DevLogger::instance().get()
+#define mylog DevLogger::instance().get()

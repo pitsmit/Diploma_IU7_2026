@@ -6,7 +6,6 @@
 #include "DeviceManager.hpp"
 #include "ProcessManager.hpp"
 #include "LogManager.hpp"
-#include "SettingsManager.hpp"
 #include "PolicyManager.hpp"
 
 class Facade {
@@ -16,7 +15,6 @@ private:
     DeviceManager deviceManager;
     ProcessManager processManager;
     LogManager logManager;
-    SettingsManager settingsManager;
     PolicyManager policyManager;
 
     CommandContext ctx;
@@ -26,14 +24,12 @@ public:
         : db("app.db"),
           deviceManager(db),
           processManager(db),
-          logManager(),
-          settingsManager(),
+          logManager(db),
           policyManager(),
           ctx{
               deviceManager,
               processManager,
               logManager,
-              settingsManager,
               policyManager
           }
     {}

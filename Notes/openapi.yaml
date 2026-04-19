@@ -340,6 +340,14 @@ components:
       type: integer
       example: 1
       description: идентификатор из БД
+    vendorName:
+      type: string
+      example: "OnlyDisk"
+      description: название вендора для пользователя
+    productName:
+      type: string
+      example: "Netac 179"
+      description: название продукта для пользователя
     LogEventType:
       type: string
       enum:
@@ -386,6 +394,16 @@ components:
         validTo:
           nullable: true
           $ref: "#/components/schemas/ValidTo"
+    UserUsbDevice:
+      allOf:
+        - $ref: "#/components/schemas/UsbDevice"
+        - type: object
+          required: [vendorName, productName]
+          properties:
+            vendorName:
+              $ref: "#/components/schemas/vendorName"
+            productName:
+              $ref: "#/components/schemas/productName"
     AllowedUsbDevice:
       allOf:
         - $ref: "#/components/schemas/UsbDevice"
@@ -489,7 +507,7 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/UsbDevice"
+              $ref: "#/components/schemas/UserUsbDevice"
     Unauthorized:
       description: Не авторизован
       content:

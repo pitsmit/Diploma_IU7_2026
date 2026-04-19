@@ -12,15 +12,17 @@ public:
 
 class GetWhiteListDeviceCommand : public DeviceCommand {
 public:
-    void execute(CommandContext& ctx) override {
-        auto list = ctx.deviceManager.getWhitelist();
+    std::vector<Device> list;
 
-        for (const auto& d : list) {
+    void execute(CommandContext& ctx) override {
+        list = ctx.deviceManager.getWhitelist();
+
+        /*for (const auto& d : list) {
             std::cout << "Device: " << d.name
                     << " VID: " << d.vendorId
                     << " PID: " << d.productId
                     << std::endl;
-        }
+        }*/
     }
 };
 

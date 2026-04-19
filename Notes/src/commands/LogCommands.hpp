@@ -15,12 +15,25 @@ public:
         : options(opts) {}
 
     void execute(CommandContext& ctx) override {
+        ctx.logManager.setLogEvents(options);
+    }
+};
+
+class GetLogEventsCommand : public Command {
+public:
+    void execute(CommandContext& ctx) override {
+        auto events = ctx.logManager.getLogEvents();
+
+        for (const auto& e : events) {
+            std::cout << "Event: " << toString(e.type)
+                    << " enabled: " << (e.enabled ? "true" : "false")
+                    << std::endl;
+        }
     }
 };
 
 class GetLogsCommand : public Command {
 public:
     void execute(CommandContext& ctx) override {
-        logger->info("Device connected");
     }
 };

@@ -73,5 +73,14 @@ CREATE TABLE IF NOT EXISTS "Record" (
 );
 
         )");
+
+		db.execute(R"(
+INSERT OR IGNORE INTO Event (id, name, isJournaling) VALUES
+(1, 'INSERT', 1),
+(2, 'REMOVE', 1),
+(3, 'READ', 1),
+(4, 'WRITE', 1),
+(5, 'EXECUTE', 1);
+)");
     }
 };

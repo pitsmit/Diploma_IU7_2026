@@ -124,6 +124,7 @@ package "Commands" {
   }
   class DeviceCommand
   class SetLogEventsCommand
+  class GetLogEventsCommand
   class ProcessCommand
   class GetLogsCommand
 
@@ -141,6 +142,7 @@ package "Commands" {
 
 Command <|-- DeviceCommand
 Command <|-- SetLogEventsCommand
+Command <|-- GetLogEventsCommand
 Command <|-- ProcessCommand
 Command <|-- GetLogsCommand
 
@@ -148,6 +150,7 @@ Facade ..> Command
 
 GetLogsCommand ..> Record
 SetLogEventsCommand ..> LogEventOption
+GetLogEventsCommand ..> LogEventOption
 
 DeviceCommand <|-- GetWhiteListDeviceCommand
 DeviceCommand <|-- AddDeviceToWhiteListCommand
