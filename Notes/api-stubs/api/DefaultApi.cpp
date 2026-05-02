@@ -30,6 +30,9 @@ void DefaultApi::setupRoutes() {
 
     Routes::Get(*router, base + "/api/v1/whitelist/usbdev",
         Routes::bind(&DefaultApi::get_usb_white_list_handler, this));
+    
+    Routes::Get(*router, base + "/api/v1/list/usbdev",
+        Routes::bind(&DefaultApi::get_current_connected_devices_list_handler, this));
 
     router->addCustomHandler(
         Routes::bind(&DefaultApi::default_handler, this)
@@ -52,6 +55,22 @@ void DefaultApi::get_usb_white_list_handler(
     facade.execute(command);
 
     json j = command.list;
+
+    response.send(
+        Pistache::Http::Code::Ok,
+        j.dump()
+    );
+}
+
+void DefaultApi::get_current_connected_devices_list_handler(
+    const Pistache::Rest::Request&,
+    Pistache::Http::ResponseWriter response)
+{
+    GetCurrentConnectedDevicesCommand command;
+
+    facade.execute(command);
+
+    json j = command.devices;
 
     response.send(
         Pistache::Http::Code::Ok,

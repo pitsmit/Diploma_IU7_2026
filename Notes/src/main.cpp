@@ -1,7 +1,5 @@
 #include "Facade.hpp"
 #include "DeviceCommands.hpp"
-#include "ProcessCommands.hpp"
-#include "LogCommands.hpp"
 #include "DBInitializer.hpp"
 #include "HttpServer.hpp"
 #include <thread>
@@ -10,55 +8,54 @@
 #include <thread>
 
 #include "EventQueue.hpp"
-#include "Watchers.hpp"
+#include "Watcher.hpp"
 #include "EventLoop.hpp"
 
 class App {
 private:
     DBConnection db;
     Facade facade;
-    //HttpServer http;
+    HttpServer http;
 
 public:
     App()
         : db("app.db"),
-          facade()
-          //http(facade)
+          facade(),
+          http(facade)
     {
-        db.execute("PRAGMA foreign_keys = ON;");
         DBInitializer::init(db);
         mylog->info("System start");
     }
 
-    void run() {
-        //http.start();
-
-        //while (true) {
-        //    std::this_thread::sleep_for(std::chrono::seconds(10));
-        //}
-
-        EventQueue<SecurityEvent> queue;
+    void run()
+    {
+        EventQueue<MountEvent> queue;
 
         MountWatcher watcher(queue);
 
         DeviceControlService service(
             facade.devices(),
-            facade.processes(),
-            facade.logs(),
             facade.policies()
         );
+
+        EventLoop loop(queue, service);
 
         std::jthread watcherThread([&] {
             watcher.run();
         });
 
-        EventLoop loop(queue, service);
+        std::jthread loopThread([&] {
+            loop.run();
+        });
 
-        loop.run();
+        std::jthread httpThread([&] {
+            http.start();
+        });
 
-        spdlog::shutdown();
-
-        watcherThread.join();
+        while (true) {
+            std::this_thread::sleep_for(
+                std::chrono::seconds(10));
+        }
     }
 };
 

@@ -20,9 +20,9 @@ private:
     void setupRoutes();
     Facade& facade;
 
-    // HTTP handlers
     void add_device_to_white_list_handler(const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response);
     void get_usb_white_list_handler(const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response);
+    void get_current_connected_devices_list_handler(const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response);
     void default_handler(const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response);
 };
 

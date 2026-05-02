@@ -4,42 +4,6 @@ info:
   version: 1.0.0
 
 paths:
-  /api/v1/settings/log/events:
-    put:
-      summary: Установка типов журналируемых событий
-      operationId: updateLogEvents
-      tags: [Настройки журнала]
-
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LogEventOptionList"
-
-      responses:
-        "200":
-          description: OK
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "500":
-          $ref: "#/components/responses/InternalError"
-    
-    get:
-      summary: Получение типов журналируемых событий
-      operationId: getLogEvents
-      tags: [Настройки журнала]
-
-      responses:
-        "200":
-          $ref: "#/components/responses/LogEventOptionListResponse"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "500":
-          $ref: "#/components/responses/InternalError"
-
   /api/v1/whitelist/usbdev:
     get:
       summary: Получение белого списка устройств
@@ -134,169 +98,6 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 
-  /api/v1/whitelist/process:
-    get:
-      summary: Получение белого списка процессов
-      operationId: getProcessWhiteList
-      tags: [Белый список процессов]
-
-      responses:
-        "200":
-          $ref: "#/components/responses/AllowedProcessListResponse"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "500":
-          $ref: "#/components/responses/InternalError"
-    
-    post:
-      summary: Добавление процесса в белый список
-      operationId: addProcessToWhiteList
-      tags: [Белый список процессов]
-
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Process"
-
-      responses:
-        "201":
-          description: OK
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalError"
-
-  /api/v1/whitelist/process/{id}: 
-    delete:
-      summary: Удаление процесса из белого списка
-      operationId: deleteProcessFromWhiteList
-      tags: [Белый список процессов]
-
-      parameters:
-      - $ref: "#/components/parameters/IdPath"
-
-      responses:
-        "204":
-          $ref: "#/components/responses/NoContent"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "500":
-          $ref: "#/components/responses/InternalError"
-    
-    patch:
-      summary: Обновление даты действия процесса в белом списке
-      operationId: patchProcessDateInWhiteList
-      tags: [Белый список процессов]
-
-      parameters:
-      - $ref: "#/components/parameters/IdPath"
-
-      requestBody:
-        $ref: "#/components/requestBodies/ValidToPatch"
-
-      responses:
-        "200":
-          description: OK
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "500":
-          $ref: "#/components/responses/InternalError"
-    
-  /api/v1/log:
-    get:
-      summary: Получение журнала
-      operationId: getLog
-      tags: [Получение журнала]
-
-      parameters:
-      - $ref: "#/components/parameters/PageQuery"
-      - $ref: "#/components/parameters/LimitQuery"
-
-      # фильтр по периоду
-      - in: query
-        name: dateFrom
-        required: false
-        schema:
-          type: string
-          format: date-time
-        description: Начало периода (включительно)
-
-      - in: query
-        name: dateTo
-        required: false
-        schema:
-          type: string
-          format: date-time
-        description: Конец периода (включительно)
-
-      # фильтр по типу события
-      - in: query
-        name: eventType
-        required: false
-        explode: true
-        schema:
-          type: array
-          items:
-            $ref: "#/components/schemas/LogEventType"
-
-      # фильтр по устройству
-      - in: query
-        name: vendorId
-        required: false
-        schema:
-          $ref: "#/components/schemas/VendorId"
-
-      - in: query
-        name: productId
-        required: false
-        schema:
-          $ref: "#/components/schemas/ProductId"
-
-      - in: query
-        name: devName
-        required: false
-        schema:
-          $ref: "#/components/schemas/DevName"
-
-      responses:
-        "200":
-          description: Журнал успешно получен
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [items, total, page, limit]
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Record"
-                  total:
-                    type: integer
-                    example: 1234
-                  page:
-                    type: integer
-                  limit:
-                    type: integer
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "500":
-          $ref: "#/components/responses/InternalError"
-
 
 components:
   schemas:
@@ -314,27 +115,11 @@ components:
       type: string
       description: Серийный номер
       example: "2222"
-    DevName:
-      type: string
-      maxLength: 255
-      description: Пользовательское название устройства
-      example: "Флешка для работы"
-    ProcPath:
-      type: string
-      minLength: 1
-      maxLength: 1024
-      description: Путь к исполняемому файлу процесса
-      example: "/usr/home/photoshop"
-    ProcName:
-      type: string
-      maxLength: 255
-      description: Пользовательское название процесса
-      example: "Adobe Photoshop"
     ValidTo:
       type: string
       format: date
       nullable: true
-      description: Дата до которой объект(устройство/процесс) в белом списке включительно. Если не указана, то действует бессрочно.
+      description: Дата до которой устройство в белом списке включительно. Если не указана, то действует бессрочно.
       example: "2027-03-15"
     Id:
       type: integer
@@ -348,24 +133,6 @@ components:
       type: string
       example: "Netac 179"
       description: название продукта для пользователя
-    LogEventType:
-      type: string
-      enum:
-        - insert
-        - extract
-        - read
-        - write
-        - execute
-    LogEventOption:
-      type: object
-      required: [type, enabled]
-      properties:
-        type:
-          $ref: "#/components/schemas/LogEventType"
-        enabled:
-          type: boolean
-          description: Включено ли логирование данного типа события
-          example: true
     Error:
       type: object
       required:
@@ -381,9 +148,6 @@ components:
       type: object
       required: [vendorId, productId]
       properties:
-        name:
-          nullable: true
-          $ref: "#/components/schemas/DevName"
         vendorId:
           $ref: "#/components/schemas/VendorId"
         productId:
@@ -394,16 +158,10 @@ components:
         validTo:
           nullable: true
           $ref: "#/components/schemas/ValidTo"
-    UserUsbDevice:
-      allOf:
-        - $ref: "#/components/schemas/UsbDevice"
-        - type: object
-          required: [vendorName, productName]
-          properties:
-            vendorName:
-              $ref: "#/components/schemas/vendorName"
-            productName:
-              $ref: "#/components/schemas/productName"
+        vendorName:
+          $ref: "#/components/schemas/vendorName"
+        productName:
+          $ref: "#/components/schemas/productName"
     AllowedUsbDevice:
       allOf:
         - $ref: "#/components/schemas/UsbDevice"
@@ -412,78 +170,8 @@ components:
           properties:
             id:
               $ref: "#/components/schemas/Id"
-    Process:
-      type: object
-      required: [path]
-      properties:
-        name:
-          $ref: "#/components/schemas/ProcName"
-          nullable: true
-        path:
-          $ref: "#/components/schemas/ProcPath"
-        validTo:
-          nullable: true
-          $ref: "#/components/schemas/ValidTo"
-    AllowedProcess:
-      allOf:
-        - $ref: "#/components/schemas/Process"
-        - type: object
-          required: [id]
-          properties:
-            id:
-              $ref: "#/components/schemas/Id"
-    Record:
-      type: object
-      required: [id, datetime, eventType, vendorId, productId, result]
-      properties:
-        id:
-          $ref: "#/components/schemas/Id"
-        datetime:
-          type: string
-          format: date-time
-          description: Дата и время выполнения операции
-          example: "2027-03-15T11:39:00Z"
-        eventType:
-          $ref: "#/components/schemas/LogEventType"
-        devName:
-          nullable: true
-          $ref: "#/components/schemas/DevName"
-        vendorId:
-          $ref: "#/components/schemas/VendorId"
-        productId:
-          $ref: "#/components/schemas/ProductId"
-        serial:
-          nullable: true
-          $ref: "#/components/schemas/Serial"
-        procName:
-          nullable: true
-          $ref: "#/components/schemas/ProcName"
-        procPath:
-          nullable: true
-          $ref: "#/components/schemas/ProcPath"
-        filePath:
-          type: string
-          minLength: 1
-          maxLength: 1024
-          nullable: true
-          description: Путь к файлу, с которым производилась работа
-          example: "/usr/home/photo.png"  
-        result:
-          type: string
-          description: Результат выполнения операции 
-          enum: [success, denied, error]
-    LogEventOptionList:
-      type: array
-      items:
-        $ref: "#/components/schemas/LogEventOption"
 
   responses:
-    LogEventOptionListResponse:
-      description: OK
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/LogEventOptionList"
     AllowedUsbDeviceListResponse:
       description: OK
       content:
@@ -492,14 +180,6 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/AllowedUsbDevice"
-    AllowedProcessListResponse:
-      description: OK
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/AllowedProcess"
     UsbDeviceListResponse:
       description: OK
       content:
@@ -507,7 +187,7 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/UserUsbDevice"
+              $ref: "#/components/schemas/UsbDevice"
     Unauthorized:
       description: Не авторизован
       content:
@@ -548,21 +228,6 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Id"
-    PageQuery:
-      in: query
-      name: page
-      schema:
-        type: integer
-        default: 1
-        minimum: 1
-    LimitQuery:
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        minimum: 1
-        maximum: 100
 
   requestBodies:
     ValidToPatch:

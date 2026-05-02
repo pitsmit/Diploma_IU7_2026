@@ -1,0 +1,4 @@
+http.port=8080
+db.schema=sql/schema/001_create_device.sql
+log.file=logs.txt
+log.level=info

@@ -67,8 +67,6 @@ public:
 
         DeviceInfo info;
 
-        info.devNode = *devNode;
-
         if (usb) {
 
             const char* vid =
@@ -86,6 +84,16 @@ public:
                     usb,
                     "serial");
 
+            const char* vendorName =
+                udev_device_get_sysattr_value(
+                    usb,
+                    "manufacturer");
+
+            const char* productName =
+                udev_device_get_sysattr_value(
+                    usb,
+                    "product");
+
             if (vid) {
                 info.vendorId = vid;
             }
@@ -96,6 +104,14 @@ public:
 
             if (serial) {
                 info.serial = serial;
+            }
+
+            if (vendorName) {
+                info.vendorName = vendorName;
+            }
+
+            if (productName) {
+                info.productName = productName;
             }
         }
 

@@ -1,42 +1,34 @@
 #pragma once
+
 #include <unordered_set>
 #include <fstream>
 #include <sstream>
 #include <thread>
 #include <chrono>
 
+#include "MountUtils.hpp"
 #include "UdevDeviceResolver.hpp"
 
 #include "EventQueue.hpp"
-#include "SecurityEvent.hpp"
+#include "MountEvent.hpp"
 #include "DevLogger.hpp"
 
-class Watcher {
-public:
-    virtual void run() = 0;
-    virtual ~Watcher() = default;
-};
-
-class MountWatcher : public Watcher {
+class MountWatcher {
 private:
-    EventQueue<SecurityEvent>& queue_;
+    EventQueue<MountEvent>& queue_;
 
     std::unordered_set<std::string> knownMounts_;
 
 public:
     explicit MountWatcher(
-    EventQueue<SecurityEvent>& queue) : queue_(queue) {}
+    EventQueue<MountEvent>& queue) : queue_(queue) {}
 
-    void run() override
+    void run()
     {
-        knownMounts_ = readMounts();
-
+        knownMounts_ = MountUtils::readMounts();
         while (true) {
-
-            auto current = readMounts();
-
+            auto current = MountUtils::readMounts();
             processChanges(current);
-
             std::this_thread::sleep_for(
                 std::chrono::seconds(1));
         }
@@ -52,17 +44,12 @@ private:
         std::string line;
 
         while (std::getline(file, line)) {
-
             std::istringstream iss(line);
-
             std::string token;
-
             int field = 0;
 
             while (iss >> token) {
-
                 ++field;
-
                 if (field == 5) {
                     mounts.insert(token);
                     break;
@@ -80,56 +67,24 @@ private:
         for (const auto& mount : current) {
 
             if (!knownMounts_.contains(mount)) {
-
                 queue_.push(
                     createEvent(
-                        mount,
-                        EventType::INSERT));
-            }
-        }
-
-        // удалённые mount
-        for (const auto& mount : knownMounts_) {
-
-            if (!current.contains(mount)) {
-
-                queue_.push(
-                    createEvent(
-                        mount,
-                        EventType::REMOVE));
+                        mount));
             }
         }
 
         knownMounts_ = current;
     }
 
-    SecurityEvent createEvent(
-        const std::string& mountPath,
-        EventType type)
+    MountEvent createEvent(const std::string& mountPath)
     {
         mylog->info("Create new event");
-        SecurityEvent event;
-
-        event.type = type;
+        MountEvent event;
         event.mountPath = mountPath;
-
         UdevDeviceResolver resolver;
-
         if (auto info = resolver.resolve(mountPath)) {
-
-            event.deviceNode = info->devNode;
-            event.vendorId = info->vendorId;
-            event.productId = info->productId;
-            event.serial = info->serial;
+            event.dev = *info;
         }
-
         return event;
     }
 };
-
-/*class FanotifyWatcher : public Watcher {
-public:
-    void start(EventQueue& queue) override {
-        queue.push({});
-    }
-};*/

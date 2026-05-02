@@ -1,7 +1,8 @@
 #pragma once
 
 #include "DeviceRepository.hpp"
-#include "SecurityEvent.hpp"
+#include "MountEvent.hpp"
+
 #include <vector>
 #include <iostream>
 
@@ -27,35 +28,5 @@ public:
 
     void patchValidTo(size_t id, const std::string& validTo) {
         repo.updateValidTo(id, validTo);
-    }
-
-    void handleMount(const SecurityEvent& event)
-    {
-        std::cout
-            << "[MOUNT] "
-            << event.mountPath
-            << "\n";
-
-        if (event.vendorId) {
-            std::cout
-                << "VID: "
-                << *event.vendorId
-                << "\n";
-        }
-
-        if (event.productId) {
-            std::cout
-                << "PID: "
-                << *event.productId
-                << "\n";
-        }
-    }
-
-    void handleUnmount(const SecurityEvent& event)
-    {
-        std::cout
-            << "[UNMOUNT] "
-            << event.mountPath
-            << "\n";
     }
 };

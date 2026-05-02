@@ -1,54 +1,33 @@
 #pragma once
 
 #include "DeviceManager.hpp"
-#include "LogManager.hpp"
-#include "ProcessManager.hpp"
 #include "PolicyManager.hpp"
-#include "SecurityEvent.hpp"
+#include "MountEvent.hpp"
 #include "DevLogger.hpp"
 
 class DeviceControlService {
 private:
     DeviceManager& deviceManager_;
-    ProcessManager& processManager_;
-    LogManager& logManager_;
     PolicyManager& policyManager_;
 
 public:
     DeviceControlService(
         DeviceManager& deviceManager,
-        ProcessManager& processManager,
-        LogManager& logManager,
-        PolicyManager& policyManager)
-        :
+        PolicyManager& policyManager) :
         deviceManager_(deviceManager),
-        processManager_(processManager),
-        logManager_(logManager),
-        policyManager_(policyManager)
-    {
-    }
+        policyManager_(policyManager) {}
 
-    void handleEvent(const SecurityEvent& event)
+    void handleEvent(const MountEvent& event)
     {
         mylog->info("Start handle event");
-        logManager_.log(event);
+        mylog->info(*event.dev.vendorName);
+        mylog->info(*event.dev.productName);
 
-        if (!policyManager_.isAllowed(event)) {
+        if (!policyManager_.isAllowed(event.dev)) {
+            mylog->info("USB IS NOT ALLOWED");
             return;
         }
 
-        switch (event.type) {
-
-            case EventType::INSERT:
-                deviceManager_.handleMount(event);
-                break;
-
-            case EventType::REMOVE:
-                deviceManager_.handleUnmount(event);
-                break;
-
-            default:
-                break;
-        }
+        mylog->info("USB IS ALLOWED");
     }
 };

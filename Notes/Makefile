@@ -1,12 +1,14 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra
+CXXFLAGS = -std=c++20 -Wall -Wextra
 
 INCLUDES = \
+    -Isrc/ \
     -Isrc/commands \
     -Isrc/managers \
     -Isrc/essenses \
     -Isrc/facade \
     -Isrc/repositories \
+    -Isrc/core \
     -Iexternal/spdlog/include \
     -Iapi-stubs/api \
 
@@ -19,13 +21,11 @@ TARGET = app
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ) -lsqlite3 -lpistache -pthread -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(OBJ) -lsqlite3 -lpistache -pthread -ludev -o $(TARGET)
 
-# Компиляция + генерация .d файлов
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -ludev -c $< -o $@
 
-# Подключаем зависимости
 -include $(DEP)
 
 clean:

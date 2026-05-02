@@ -58,7 +58,7 @@ public:
             db,
             sql.c_str(),
             trampoline,
-            &callback,   // теперь OK
+            &callback,
             &errMsg
         ) != SQLITE_OK) {
 

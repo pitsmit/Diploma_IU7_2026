@@ -15,93 +15,36 @@ left to right direction
 ' =========================
 ' СУЩНОСТИ
 ' =========================
-enum EventType {
-  INSERT
-  REMOVE
-  READ
-  WRITE
-  EXECUTE
+class Device {
+  - id: number
+  - name: String
+  - vendorId: String
+  - productId: String
+  - serial: String
+  - validTo: Date
 }
-package "Essenses" {
-    class Device {
-    - id: number
-    - name: String
-    - vendorId: String
-    - productId: String
-    - serial: String
-    - validTo: Date
-    }
-    class Process {
-    - id: number
-    - name: String
-    - path: String
-    - validTo: Date
-    }
-    class Record {
-    - id: number
-    - datetime: Date
-    - eventype: EventType
-    - devName: String
-    - vendorId: String
-    - productId: String
-    - serial: String
-    - procName: String
-    - procPath: String
-    - filePath: String
-    - result: enum
-    }
-    class LogEventOption {
-    - type: EventType
-    - enabled: boolean
-    }
-}
-
-Record --> EventType
-LogEventOption --> EventType
 
 ' =========================
 ' РЕПОЗИТОРИИ
 ' =========================
-package "Repositories" {
-  class SettingsRepository
-  class DeviceRepository
-  class ProcessRepository
-  class LogRepository
-}
-
+class DeviceRepository
 class DBConnection
-
-SettingsRepository --* DBConnection
 DeviceRepository --* DBConnection
-ProcessRepository --* DBConnection
-LogRepository --* DBConnection
 
 ' =========================
 ' МЕНЕДЖЕРЫ
 ' =========================
 package "Managers" {
-  class SettingsManager
   class DeviceManager
-  class ProcessManager
-  class LogManager
   class PolicyManager {
     +isDeviceAllowed(Device)
-    +isProcessAllowed(Process)
   }
 }
 
-SettingsManager --* SettingsRepository
 DeviceManager --* DeviceRepository
-ProcessManager --* ProcessRepository
-LogManager --* LogRepository
 
 DeviceManager ..> Device
-ProcessManager ..> Process
-LogManager ..> Record
-SettingsManager ..> LogEventOption
-
 PolicyManager ..> Device
-PolicyManager ..> Process
 
 ' =========================
 ' ФАСАД
@@ -110,10 +53,7 @@ class Facade {
   +execute(command)
 }
 
-Facade o-- SettingsManager
 Facade o-- DeviceManager
-Facade o-- LogManager
-Facade o-- ProcessManager
 
 ' =========================
 ' КОМАНДЫ
@@ -122,55 +62,25 @@ package "Commands" {
   class Command {
     +execute()
   }
-  class DeviceCommand
-  class SetLogEventsCommand
-  class GetLogEventsCommand
-  class ProcessCommand
-  class GetLogsCommand
-
   class GetWhiteListDeviceCommand
   class AddDeviceToWhiteListCommand
   class DeleteDeviceFromWhiteListCommand
   class PatchValidToDeivceCommand
   class GetCurrentConnectedDevicesCommand
-
-  class GetWhiteListProcessCommand
-  class AddProcessToWhiteListCommand
-  class DeleteProcessFromWhiteListCommand
-  class PatchValidToProcessCommand
 }
-
-Command <|-- DeviceCommand
-Command <|-- SetLogEventsCommand
-Command <|-- GetLogEventsCommand
-Command <|-- ProcessCommand
-Command <|-- GetLogsCommand
 
 Facade ..> Command
 
-GetLogsCommand ..> Record
-SetLogEventsCommand ..> LogEventOption
-GetLogEventsCommand ..> LogEventOption
-
-DeviceCommand <|-- GetWhiteListDeviceCommand
-DeviceCommand <|-- AddDeviceToWhiteListCommand
-DeviceCommand <|-- DeleteDeviceFromWhiteListCommand
-DeviceCommand <|-- PatchValidToDeivceCommand
-DeviceCommand <|-- GetCurrentConnectedDevicesCommand
+Command <|-- GetWhiteListDeviceCommand
+Command <|-- AddDeviceToWhiteListCommand
+Command <|-- DeleteDeviceFromWhiteListCommand
+Command <|-- PatchValidToDeivceCommand
+Command <|-- GetCurrentConnectedDevicesCommand
 
 GetCurrentConnectedDevicesCommand ..> Device
 PatchValidToDeivceCommand --> Device
 AddDeviceToWhiteListCommand --> Device
 GetWhiteListDeviceCommand ..> Device
-
-ProcessCommand <|-- GetWhiteListProcessCommand
-ProcessCommand <|-- AddProcessToWhiteListCommand
-ProcessCommand <|-- DeleteProcessFromWhiteListCommand
-ProcessCommand <|-- PatchValidToProcessCommand
-
-PatchValidToProcessCommand --> Process
-AddProcessToWhiteListCommand --> Process
-GetWhiteListProcessCommand ..> Process
 
 ' =========================
 ' WATCHERS
@@ -181,11 +91,9 @@ interface Watcher {
 }
 
 class MountWatcher
-class FanotifyWatcher
 }
 
 Watcher <|-- MountWatcher
-Watcher <|-- FanotifyWatcher
 
 ' =========================
 ' ОЧЕРЕДЬ
@@ -195,18 +103,12 @@ class EventQueue {
     +pop(event)
 }
 
-' =========================
-' ДИСПЕТЧЕР / WORKER
-' =========================
 class EventLoop {
     +run()
 }
 
 EventLoop --> EventQueue
 
-' =========================
-' ГЛАВНЫЙ СЕРВИС (ядро)
-' =========================
 class DeviceControlService {
     +handleEvent(event)
 }
@@ -214,9 +116,6 @@ class DeviceControlService {
 EventLoop --> DeviceControlService
 
 DeviceControlService --> DeviceManager
-DeviceControlService --> ProcessManager
-DeviceControlService --> LogManager
-DeviceControlService --> SettingsManager
 DeviceControlService --> PolicyManager
 
 MountWatcher --> EventQueue

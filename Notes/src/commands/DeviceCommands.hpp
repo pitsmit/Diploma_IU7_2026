@@ -1,32 +1,28 @@
 #pragma once
 
-#include "Command.hpp"
 #include "Device.hpp"
 #include "DeviceManager.hpp"
-#include <iostream>
+#include "CommandContext.hpp"
+#include "MountUtils.hpp"
+#include "UdevDeviceResolver.hpp"
 
-class DeviceCommand : public Command {
+class Command {
 public:
-    void execute([[maybe_unused]] CommandContext& ctx) override {}
+    virtual ~Command() = default;
+
+    virtual void execute(CommandContext& ctx) = 0;
 };
 
-class GetWhiteListDeviceCommand : public DeviceCommand {
+class GetWhiteListDeviceCommand : public Command {
 public:
     std::vector<Device> list;
 
     void execute(CommandContext& ctx) override {
         list = ctx.deviceManager.getWhitelist();
-
-        /*for (const auto& d : list) {
-            std::cout << "Device: " << d.name
-                    << " VID: " << d.vendorId
-                    << " PID: " << d.productId
-                    << std::endl;
-        }*/
     }
 };
 
-class AddDeviceToWhiteListCommand : public DeviceCommand {
+class AddDeviceToWhiteListCommand : public Command {
 private:
     Device device;
 
@@ -39,7 +35,7 @@ public:
     }
 };
 
-class DeleteDeviceFromWhiteListCommand : public DeviceCommand {
+class DeleteDeviceFromWhiteListCommand : public Command {
 private:
     size_t id;
 
@@ -52,7 +48,7 @@ public:
     }
 };
 
-class PatchValidToDeviceCommand : public DeviceCommand {
+class PatchValidToDeviceCommand : public Command {
 private:
     size_t id;
     std::string validTo;
@@ -66,8 +62,28 @@ public:
     }
 };
 
-class GetCurrentConnectedDevicesCommand : public DeviceCommand {
+class GetCurrentConnectedDevicesCommand : public Command {
 public:
-    void execute([[maybe_unused]] CommandContext& ctx) override {
+    std::vector<Device> devices;
+
+    void execute(CommandContext& /*ctx*/) override
+    {
+        devices.clear();
+
+        auto mounts = MountUtils::readMounts();
+
+        UdevDeviceResolver resolver;
+
+        for (const auto& mount : mounts) {
+            auto info = resolver.resolve(mount);
+
+            if (!info) {
+                continue;
+            }
+
+            Device d;
+            d.info = *info;
+            devices.push_back(d);
+        }
     }
 };

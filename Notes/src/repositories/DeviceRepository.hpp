@@ -2,6 +2,7 @@
 
 #include "DBConnection.hpp"
 #include "Device.hpp"
+#include "DeviceInfo.hpp"
 #include <vector>
 #include <string>
 
@@ -15,11 +16,12 @@ public:
 
     void add(const Device& device) {
         std::string sql =
-            "INSERT INTO Device (name, vendorId, productId, serial, validTo) VALUES ('" +
-            device.name + "','" +
-            device.vendorId + "','" +
-            device.productId + "','" +
-            device.serial + "','" +
+            "INSERT INTO Device (vendorId, productId, serial, productName, vendorName, validTo) VALUES ('" +
+            *device.info.vendorId + "','" +
+            *device.info.productId + "','" +
+            *device.info.serial + "','" +
+            *device.info.productName + "','" +
+            *device.info.vendorName + "','" +
             device.validTo + "');";
 
         db.execute(sql);
@@ -29,17 +31,18 @@ public:
         std::vector<Device> result;
 
         db.query(
-            "SELECT id, name, vendorId, productId, serial, validTo FROM Device;",
+            "SELECT id, vendorId, productId, serial, productName, vendorName, validTo FROM Device;",
             [&]([[maybe_unused]] int cols, char** values, [[maybe_unused]] char** names) {
 
                 Device d;
 
                 d.id = std::stoull(values[0] ? values[0] : "0");
-                d.name = values[1] ? values[1] : "";
-                d.vendorId = values[2] ? values[2] : "";
-                d.productId = values[3] ? values[3] : "";
-                d.serial = values[4] ? values[4] : "";
-                d.validTo = values[5] ? values[5] : "";
+                d.info.vendorId = values[2] ? values[2] : "";
+                d.info.productId = values[3] ? values[3] : "";
+                d.info.serial = values[4] ? values[4] : "";
+                d.info.productName = values[5] ? values[5] : "";
+                d.info.vendorName = values[6] ? values[6] : "";
+                d.validTo = values[7] ? values[7] : "";
 
                 result.push_back(d);
             });
@@ -58,5 +61,34 @@ public:
             "UPDATE Device SET validTo = '" + validTo +
             "' WHERE id = " + std::to_string(id) + ";"
         );
+    }
+
+    bool exists(const DeviceInfo& info) {
+        if (!info.vendorId || !info.productId) {
+            return false;
+        }
+
+        bool found = false;
+
+        std::string sql =
+            "SELECT 1 FROM Device WHERE "
+            "vendorId = '" + *info.vendorId + "' AND "
+            "productId = '" + *info.productId + "'";
+
+        if (info.serial) {
+            sql += " AND serial = '" + *info.serial + "'";
+        } else {
+            sql += " AND serial IS NULL";
+        }
+
+        sql += " LIMIT 1;";
+
+        db.query(
+            sql,
+            [&](int /*cols*/, char** /*values*/, char** /*names*/) {
+                found = true;
+            });
+
+        return found;
     }
 };
