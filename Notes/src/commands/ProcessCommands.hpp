@@ -10,7 +10,7 @@
 
 class ProcessCommand : public Command {
 public:
-    void execute(CommandContext& ctx) override {}
+    void execute([[maybe_unused]] CommandContext& ctx) override {}
 };
 
 class GetWhiteListProcessCommand : public ProcessCommand {

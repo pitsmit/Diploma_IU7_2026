@@ -30,7 +30,7 @@ public:
 
         db.query(
             "SELECT id, name, vendorId, productId, serial, validTo FROM Device;",
-            [&](int cols, char** values, char** names) {
+            [&]([[maybe_unused]] int cols, char** values, [[maybe_unused]] char** names) {
 
                 Device d;
 

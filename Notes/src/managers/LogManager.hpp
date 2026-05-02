@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LogRepository.hpp"
+#include <iostream>
 
 class LogManager {
 private:
@@ -16,5 +17,13 @@ public:
 
     std::vector<LogEventOption> getLogEvents() {
         return repo.getEvents();
+    }
+
+    void log(const SecurityEvent& event)
+    {
+        std::cout
+        << "[LOG] "
+        << event.mountPath
+        << "\n";
     }
 };

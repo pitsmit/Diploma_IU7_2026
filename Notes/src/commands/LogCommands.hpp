@@ -34,6 +34,6 @@ public:
 
 class GetLogsCommand : public Command {
 public:
-    void execute(CommandContext& ctx) override {
+    void execute([[maybe_unused]] CommandContext& ctx) override {
     }
 };

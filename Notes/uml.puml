@@ -180,12 +180,10 @@ interface Watcher {
     +start()
 }
 
-class UdevWatcher
 class MountWatcher
 class FanotifyWatcher
 }
 
-Watcher <|-- UdevWatcher
 Watcher <|-- MountWatcher
 Watcher <|-- FanotifyWatcher
 
@@ -221,7 +219,6 @@ DeviceControlService --> LogManager
 DeviceControlService --> SettingsManager
 DeviceControlService --> PolicyManager
 
-UdevWatcher --> EventQueue
 MountWatcher --> EventQueue
 FanotifyWatcher --> EventQueue
 

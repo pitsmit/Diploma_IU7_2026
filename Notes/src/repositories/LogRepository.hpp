@@ -29,7 +29,7 @@ public:
 
         db.query(
             "SELECT name, isJournaling FROM Event;",
-            [&](int cols, char** values, char** names) {
+            [&]([[maybe_unused]] int cols, char** values, [[maybe_unused]] char** names) {
 
                 std::string name = values[0] ? values[0] : "";
                 bool enabled = values[1] ? std::stoi(values[1]) : 0;

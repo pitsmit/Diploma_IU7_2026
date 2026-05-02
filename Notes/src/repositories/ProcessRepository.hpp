@@ -40,7 +40,7 @@ public:
         std::vector<Process> result;
 
         db.query("SELECT id, name, path, validTo FROM Process;",
-            [&](int cols, char** values, char** names) {
+            [&]([[maybe_unused]] int cols, char** values, [[maybe_unused]] char** names) {
 
                 Process p;
 

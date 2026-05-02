@@ -1,7 +1,8 @@
+#pragma once
 #include <string>
+#include "SecurityEvent.hpp"
 
 class PolicyManager {
 public:
-    bool isDeviceAllowed(const std::string&) { return true; }
-    bool isProcessAllowed(const std::string&) { return true; }
+    bool isAllowed([[maybe_unused]] const SecurityEvent r) { return true; }
 };

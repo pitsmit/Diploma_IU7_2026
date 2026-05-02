@@ -37,4 +37,20 @@ public:
     void execute(Command& command) {
         command.execute(ctx);
     }
+
+    DeviceManager& devices() {
+        return deviceManager;
+    }
+
+    ProcessManager& processes() {
+        return processManager;
+    }
+
+    LogManager& logs() {
+        return logManager;
+    }
+
+    PolicyManager& policies() {
+        return policyManager;
+    }
 };

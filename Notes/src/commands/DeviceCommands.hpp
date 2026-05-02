@@ -7,7 +7,7 @@
 
 class DeviceCommand : public Command {
 public:
-    void execute(CommandContext& ctx) override {}
+    void execute([[maybe_unused]] CommandContext& ctx) override {}
 };
 
 class GetWhiteListDeviceCommand : public DeviceCommand {
@@ -68,6 +68,6 @@ public:
 
 class GetCurrentConnectedDevicesCommand : public DeviceCommand {
 public:
-    void execute(CommandContext& ctx) override {
+    void execute([[maybe_unused]] CommandContext& ctx) override {
     }
 };
