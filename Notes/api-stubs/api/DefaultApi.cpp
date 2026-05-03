@@ -23,19 +23,19 @@ void DefaultApi::init() {
 void DefaultApi::setupRoutes() {
     using namespace Pistache::Rest;
 
-    Routes::Post(*router, "/api/v1/whitelist/usbdev",
+    Routes::Post(*router, "/api/v1/whitelist",
         Routes::bind(&DefaultApi::add_device_to_white_list_handler, this));
     
-    Routes::Delete(*router, "/api/v1/whitelist/usbdev/:id",
+    Routes::Delete(*router, "/api/v1/whitelist/:id",
         Routes::bind(&DefaultApi::delete_device_from_white_list_handler, this));
 
-    Routes::Patch(*router, "/api/v1/whitelist/usbdev/:id",
+    Routes::Patch(*router, "/api/v1/whitelist/:id",
         Routes::bind(&DefaultApi::patch_valid_to_device_handler, this));
 
-    Routes::Get(*router, "/api/v1/whitelist/usbdev",
+    Routes::Get(*router, "/api/v1/whitelist",
         Routes::bind(&DefaultApi::get_usb_white_list_handler, this));
     
-    Routes::Get(*router, "/api/v1/list/usbdev",
+    Routes::Get(*router, "/api/v1/list",
         Routes::bind(&DefaultApi::get_current_connected_devices_list_handler, this));
 }
 

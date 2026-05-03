@@ -4,7 +4,7 @@ info:
   version: 1.0.0
 
 paths:
-  /api/v1/whitelist/usbdev:
+  /api/v1/whitelist/:
     get:
       summary: Получение белого списка устройств
       operationId: getUsbWhiteList
@@ -42,7 +42,7 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 
-  /api/v1/whitelist/usbdev/{id}: 
+  /api/v1/whitelist/{id}: 
     delete:
       summary: Удаление устройства из белого списка
       operationId: deleteDeviceFromWhiteList
@@ -84,7 +84,7 @@ paths:
         "500":
           $ref: "#/components/responses/InternalError"
 
-  /api/v1/list/usbdev:
+  /api/v1/list/:
     get:
       summary: Получение списка подключённых в данный момент устройств
       operationId: getUsbList
