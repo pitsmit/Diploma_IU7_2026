@@ -11,3 +11,17 @@ logs.txt
 *.d
 app
 *.db
+
+
+*.aux
+*.xml
+*.log
+*.fls
+*.blg
+*.bcf
+*.bbl
+*.fdb_latexmk
+*.out
+*.bbl-SAVE-ERROR
+*.gz
+*.toc

@@ -10,20 +10,27 @@ class DeviceRepository {
 private:
     DBConnection& db;
 
+    static std::string sqlValue(const std::optional<std::string>& field) {
+        return field.has_value()
+            ? "'" + *field + "'"
+            : "NULL";
+    }
+
 public:
     explicit DeviceRepository(DBConnection& connection)
         : db(connection) {}
 
     void add(const Device& device) {
         std::string sql =
-            "INSERT INTO Device (vendorId, productId, serial, productName, vendorName, validTo) VALUES ('" +
-            *device.info.vendorId + "','" +
-            *device.info.productId + "','" +
-            *device.info.serial + "','" +
-            *device.info.productName + "','" +
-            *device.info.vendorName + "','" +
-            device.validTo + "');";
-
+            "INSERT INTO Device "
+            "(vendorId, productId, serial, productName, vendorName, validTo) VALUES (" +
+            sqlValue(device.info.vendorId) + "," +
+            sqlValue(device.info.productId) + "," +
+            sqlValue(device.info.serial) + "," +
+            sqlValue(device.info.productName) + "," +
+            sqlValue(device.info.vendorName) + "," +
+            sqlValue(device.validTo) + ");";
+        
         db.execute(sql);
     }
 
@@ -56,10 +63,10 @@ public:
         );
     }
 
-    void updateValidTo(size_t id, const std::string& validTo) {
+    void updateValidTo(size_t id, std::optional<std::string> validTo) {
         db.execute(
-            "UPDATE Device SET validTo = '" + validTo +
-            "' WHERE id = " + std::to_string(id) + ";"
+            "UPDATE Device SET validTo = " + sqlValue(validTo) +
+            " WHERE id = " + std::to_string(id) + ";"
         );
     }
 

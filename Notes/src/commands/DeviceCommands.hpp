@@ -31,7 +31,20 @@ public:
         : device(d) {}
 
     void execute(CommandContext& ctx) override {
+        /*std::cout << "========== Device ==========" << std::endl;
+        std::cout << "ID: " << device.id << std::endl;
+        std::cout << "Valid To: " << (device.validTo ? *device.validTo : "N/A") << std::endl;
+        std::cout << "---------- Device Info ----------" << std::endl;
+        std::cout << "  Vendor ID:    " << (device.info.vendorId ? *device.info.vendorId : "N/A") << std::endl;
+        std::cout << "  Product ID:   " << (device.info.productId ? *device.info.productId : "N/A") << std::endl;
+        std::cout << "  Serial:       " << (device.info.serial ? *device.info.serial : "N/A") << std::endl;
+        std::cout << "  Vendor Name:  " << (device.info.vendorName ? *device.info.vendorName : "N/A") << std::endl;
+        std::cout << "  Product Name: " << (device.info.productName ? *device.info.productName : "N/A") << std::endl;
+        std::cout << "==============================" << std::endl;*/
+
         ctx.deviceManager.addToWhitelist(device);
+        mylog->info(*device.mountPath);
+        //MountUtils::mountReadWrite(*device.mountPath);
     }
 };
 
@@ -51,10 +64,12 @@ public:
 class PatchValidToDeviceCommand : public Command {
 private:
     size_t id;
-    std::string validTo;
+    std::optional<std::string> validTo;
 
 public:
-    PatchValidToDeviceCommand(size_t id, const std::string& validTo)
+    PatchValidToDeviceCommand(
+        size_t id,
+        std::optional<std::string> validTo)
         : id(id), validTo(validTo) {}
 
     void execute(CommandContext& ctx) override {
@@ -70,7 +85,7 @@ public:
     {
         devices.clear();
 
-        auto mounts = MountUtils::readMounts();
+        /*auto mounts = MountUtils::readMounts();
 
         UdevDeviceResolver resolver;
 
@@ -83,7 +98,8 @@ public:
 
             Device d;
             d.info = *info;
+            d.mountPath = mount;
             devices.push_back(d);
-        }
+        }*/
     }
 };

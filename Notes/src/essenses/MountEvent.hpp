@@ -4,8 +4,15 @@
 
 #include "DeviceInfo.hpp"
 
+enum EventType {
+    INSERT,
+    REMOVE
+};
+
 struct MountEvent {
+    EventType type;
     std::string timestamp;
-    std::string mountPath;
+    std::string devNode;
+    std::string mountPoint;
     DeviceInfo dev;
 };

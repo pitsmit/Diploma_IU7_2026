@@ -12,17 +12,11 @@
 class UdevDeviceResolver {
 public:
     std::optional<DeviceInfo>
-    resolve(const std::string& mountPath)
+    resolve(const char *devNode)
     {
-        auto devNode = getDeviceNode(mountPath);
-
-        if (!devNode) {
-            return std::nullopt;
-        }
-
         struct stat st{};
 
-        if (stat(devNode->c_str(), &st) < 0) {
+        if (stat(devNode, &st) < 0) {
             return std::nullopt;
         }
 
@@ -119,31 +113,5 @@ public:
         udev_unref(udev);
 
         return info;
-    }
-
-private:
-    std::optional<std::string>
-    getDeviceNode(const std::string& mountPath)
-    {
-        std::ifstream mounts("/proc/self/mounts");
-
-        if (!mounts.is_open()) {
-            return std::nullopt;
-        }
-
-        std::string dev;
-        std::string mount;
-
-        while (mounts >> dev >> mount) {
-
-            if (mount == mountPath) {
-                return dev;
-            }
-
-            std::string rest;
-            std::getline(mounts, rest);
-        }
-
-        return std::nullopt;
     }
 };

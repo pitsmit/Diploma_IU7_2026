@@ -5,7 +5,7 @@
 #include <sstream>
 
 class DBInitializer {
-public:
+private:
     static std::string loadSQL(const std::string& path) {
         std::ifstream file(path);
         std::stringstream buffer;
@@ -13,6 +13,7 @@ public:
         return buffer.str();
     }
 
+public:
     static void init(DBConnection& db)
     {
         std::string schemaPath = Config::getSchemaPath();

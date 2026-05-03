@@ -26,7 +26,7 @@ public:
         repo.remove(id);
     }
 
-    void patchValidTo(size_t id, const std::string& validTo) {
+    void patchValidTo(size_t id, std::optional<std::string> validTo) {
         repo.updateValidTo(id, validTo);
     }
 };

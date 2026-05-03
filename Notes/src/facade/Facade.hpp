@@ -4,12 +4,14 @@
 #include "CommandContext.hpp"
 #include "DeviceManager.hpp"
 #include "PolicyManager.hpp"
+#include "MountRegistry.hpp"
 
 class Facade {
 private:
     DBConnection db;
     DeviceManager deviceManager;
     PolicyManager policyManager;
+    MountRegistry mountRegistry;
     CommandContext ctx;
 
 public:
@@ -24,11 +26,7 @@ public:
         command.execute(ctx);
     }
 
-    DeviceManager& devices() {
-        return deviceManager;
-    }
-    
-    PolicyManager& policies() {
-        return policyManager;
-    }
+    DeviceManager& devices() { return deviceManager; }
+    PolicyManager& policies() { return policyManager; }
+    MountRegistry& registry() { return mountRegistry; }
 };

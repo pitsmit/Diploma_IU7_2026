@@ -31,11 +31,12 @@ public:
     {
         EventQueue<MountEvent> queue;
 
-        MountWatcher watcher(queue);
+        UdevWatcher watcher(queue);
 
         DeviceControlService service(
             facade.devices(),
-            facade.policies()
+            facade.policies(),
+            facade.registry()
         );
 
         EventLoop loop(queue, service);
