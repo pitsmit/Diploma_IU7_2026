@@ -1,24 +1,19 @@
 #pragma once
 
-#include <unordered_set>
-#include <fstream>
-#include <sstream>
-#include <thread>
-#include <chrono>
+#include <libudev.h>
 
 #include "MountUtils.hpp"
 #include "UdevDeviceResolver.hpp"
-
 #include "EventQueue.hpp"
-#include "MountEvent.hpp"
+#include "DeviceEvent.hpp"
 #include "DevLogger.hpp"
 
 class UdevWatcher {
 private:
-    EventQueue<MountEvent>& queue_;
+    EventQueue<DeviceEvent>& queue_;
 
 public:
-    explicit UdevWatcher(EventQueue<MountEvent>& queue)
+    explicit UdevWatcher(EventQueue<DeviceEvent>& queue)
         : queue_(queue) {}
 
     void run()
@@ -39,11 +34,7 @@ public:
         }
 
         udev_monitor_filter_add_match_subsystem_devtype(
-            mon,
-            "block",
-            "partition"
-        );
-
+            mon, "block", "partition");
         udev_monitor_enable_receiving(mon);
 
         int fd = udev_monitor_get_fd(mon);
@@ -53,12 +44,9 @@ public:
             FD_ZERO(&fds);
             FD_SET(fd, &fds);
 
-            int ret = select(fd + 1, &fds, nullptr, nullptr, nullptr);
-
-            if (ret < 0) {
+            if (select(fd + 1, &fds, nullptr, nullptr, nullptr) < 0) {
                 if (errno == EINTR)
                     continue;
-
                 mylog->error("select() failed");
                 break;
             }
@@ -72,9 +60,7 @@ public:
             if (!dev)
                 continue;
 
-            const char* action =
-                udev_device_get_action(dev);
-
+            const char* action = udev_device_get_action(dev);
             if (!action) {
                 udev_device_unref(dev);
                 continue;
@@ -82,45 +68,20 @@ public:
 
             std::string act(action);
 
-            // =========================
-            // INSERT / CHANGE
-            // =========================
             if (act == "add" || act == "change") {
-
-                struct udev_device* parent =
-                    udev_device_get_parent_with_subsystem_devtype(
-                        dev,
-                        "usb",
-                        "usb_device");
-
-                if (!parent) {
+                if (!isUsbDevice(dev)) {
                     udev_device_unref(dev);
                     continue;
                 }
 
-                MountEvent event = createEvent(dev);
-
-                if (!event.devNode.empty()) {
-                    event.type = EventType::INSERT;
+                auto event = buildEvent(dev, EventType::INSERT);
+                if (!event.devNode.empty())
                     queue_.push(event);
-                }
             }
-
-            // =========================
-            // REMOVE
-            // =========================
             else if (act == "remove") {
-
-                const char* devnode =
-                    udev_device_get_devnode(dev);
-
-                if (devnode) {
-                    MountEvent event;
-                    event.type = EventType::REMOVE;
-                    event.devNode = devnode;
-
+                auto event = buildEvent(dev, EventType::REMOVE);
+                if (!event.devNode.empty())
                     queue_.push(event);
-                }
             }
 
             udev_device_unref(dev);
@@ -131,25 +92,26 @@ public:
     }
 
 private:
-    MountEvent createEvent(struct udev_device* dev)
+    bool isUsbDevice(struct udev_device* dev)
     {
-        MountEvent event;
+        struct udev_device* parent =
+            udev_device_get_parent_with_subsystem_devtype(
+                dev, "usb", "usb_device");
 
-        const char* devnode =
-            udev_device_get_devnode(dev);
+        return parent != nullptr;
+    }
 
+    DeviceEvent buildEvent(struct udev_device* dev, EventType type)
+    {
+        DeviceEvent event;
+        event.type = type;
+        const char* devnode = udev_device_get_devnode(dev);
         if (!devnode)
-            return event;
-
+            return {};
         event.devNode = devnode;
-
-        mylog->info("Create new event: " + event.devNode);
-
         UdevDeviceResolver resolver;
-
-        if (auto info = resolver.resolve(devnode)) {
+        if (auto info = resolver.resolve(devnode))
             event.dev = *info;
-        }
 
         return event;
     }

@@ -44,6 +44,10 @@ public:
     {
         return logger;
     }
+
+    void setLogger(std::shared_ptr<spdlog::logger> custom) {
+        logger = custom;
+    }
 };
 
 #define mylog DevLogger::instance().get()

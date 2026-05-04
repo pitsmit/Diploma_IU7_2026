@@ -67,6 +67,14 @@ public:
             : v;
     }
 
+    static std::string getDBPath()
+    {
+        std::string v = get("db.path");
+        return v.empty()
+            ? "app.db"
+            : v;
+    }
+
     static std::string getLogFile()
     {
         std::string v = get("log.file");

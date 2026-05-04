@@ -1,10 +1,7 @@
 #pragma once
 
 #include "DeviceRepository.hpp"
-#include "MountEvent.hpp"
-
 #include <vector>
-#include <iostream>
 
 class DeviceManager {
 private:

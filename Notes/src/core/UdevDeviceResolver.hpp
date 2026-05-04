@@ -2,8 +2,6 @@
 
 #include <optional>
 #include <string>
-#include <fstream>
-#include <sstream>
 #include <libudev.h>
 #include <sys/stat.h>
 
@@ -15,13 +13,11 @@ public:
     resolve(const char *devNode)
     {
         struct stat st{};
-
         if (stat(devNode, &st) < 0) {
             return std::nullopt;
         }
 
         struct udev* udev = udev_new();
-
         if (!udev) {
             return std::nullopt;
         }
@@ -31,7 +27,6 @@ public:
                 udev,
                 'b',
                 st.st_rdev);
-
         if (!dev) {
             udev_unref(udev);
             return std::nullopt;
@@ -67,51 +62,32 @@ public:
                 udev_device_get_sysattr_value(
                     usb,
                     "idVendor");
-
             const char* pid =
                 udev_device_get_sysattr_value(
                     usb,
                     "idProduct");
-
             const char* serial =
                 udev_device_get_sysattr_value(
                     usb,
                     "serial");
-
             const char* vendorName =
                 udev_device_get_sysattr_value(
                     usb,
                     "manufacturer");
-
             const char* productName =
                 udev_device_get_sysattr_value(
                     usb,
                     "product");
 
-            if (vid) {
-                info.vendorId = vid;
-            }
-
-            if (pid) {
-                info.productId = pid;
-            }
-
-            if (serial) {
-                info.serial = serial;
-            }
-
-            if (vendorName) {
-                info.vendorName = vendorName;
-            }
-
-            if (productName) {
-                info.productName = productName;
-            }
+            if (vid) info.vendorId = vid;
+            if (pid) info.productId = pid;
+            if (serial) info.serial = serial;
+            if (vendorName) info.vendorName = vendorName;
+            if (productName) info.productName = productName;
         }
 
         udev_device_unref(dev);
         udev_unref(udev);
-
         return info;
     }
 };

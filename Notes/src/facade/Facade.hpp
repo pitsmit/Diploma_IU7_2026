@@ -19,7 +19,7 @@ public:
         : db("app.db"),
           deviceManager(db),
           policyManager(db),
-          ctx {deviceManager}
+          ctx {deviceManager, mountRegistry}
     {}
 
     void execute(Command& command) {

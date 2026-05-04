@@ -1,13 +1,11 @@
 #pragma once
 
-#include <sys/mount.h>
-#include <unistd.h>
-
 #include "DeviceManager.hpp"
 #include "PolicyManager.hpp"
-#include "MountEvent.hpp"
+#include "DeviceEvent.hpp"
 #include "DevLogger.hpp"
 #include "MountRegistry.hpp"
+#include "MountPointBuilder.hpp"
 
 class DeviceControlService {
 private:
@@ -26,9 +24,9 @@ public:
         mountRegistry_(mountRegistry)
     {}
 
-    void handleEvent(const MountEvent& event)
+    void handleEvent(const DeviceEvent& event)
     {
-        mylog->info("Start handle event");
+        mylog->info("Start handle {} event", event.type == EventType::INSERT ? "INSERT" : "REMOVE");
 
         if (event.type == EventType::INSERT) {
             bool allowed = policyManager_.isAllowed(event.dev);
@@ -49,7 +47,7 @@ public:
                 mountRegistry_.remove(event.devNode);
             }
             else {
-                mylog->warn("No mount point for devNode: " + event.devNode);
+                mylog->warn("No mount point for {}", event.devNode);
             }
         }
     }

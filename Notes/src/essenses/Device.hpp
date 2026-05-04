@@ -9,5 +9,5 @@ struct Device {
     size_t id;
     DeviceInfo info;
     std::optional<std::string> validTo;
-    std::optional<std::string> mountPath;
+    std::optional<std::string> devNode;
 };

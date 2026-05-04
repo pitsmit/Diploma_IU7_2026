@@ -1,17 +1,17 @@
 #pragma once
 
 #include "EventQueue.hpp"
-#include "MountEvent.hpp"
+#include "DeviceEvent.hpp"
 #include "DeviceControlService.hpp"
 
 class EventLoop {
 private:
-    EventQueue<MountEvent>& queue_;
+    EventQueue<DeviceEvent>& queue_;
     DeviceControlService& service_;
 
 public:
     EventLoop(
-        EventQueue<MountEvent>& queue,
+        EventQueue<DeviceEvent>& queue,
         DeviceControlService& service) :
         queue_(queue),
         service_(service) {}

@@ -4,6 +4,7 @@
 #include "DeviceManager.hpp"
 #include "CommandContext.hpp"
 #include "MountUtils.hpp"
+#include "MountRegistry.hpp"
 #include "UdevDeviceResolver.hpp"
 
 class Command {
@@ -31,20 +32,20 @@ public:
         : device(d) {}
 
     void execute(CommandContext& ctx) override {
-        /*std::cout << "========== Device ==========" << std::endl;
-        std::cout << "ID: " << device.id << std::endl;
-        std::cout << "Valid To: " << (device.validTo ? *device.validTo : "N/A") << std::endl;
-        std::cout << "---------- Device Info ----------" << std::endl;
-        std::cout << "  Vendor ID:    " << (device.info.vendorId ? *device.info.vendorId : "N/A") << std::endl;
-        std::cout << "  Product ID:   " << (device.info.productId ? *device.info.productId : "N/A") << std::endl;
-        std::cout << "  Serial:       " << (device.info.serial ? *device.info.serial : "N/A") << std::endl;
-        std::cout << "  Vendor Name:  " << (device.info.vendorName ? *device.info.vendorName : "N/A") << std::endl;
-        std::cout << "  Product Name: " << (device.info.productName ? *device.info.productName : "N/A") << std::endl;
-        std::cout << "==============================" << std::endl;*/
-
         ctx.deviceManager.addToWhitelist(device);
-        mylog->info(*device.mountPath);
-        //MountUtils::mountReadWrite(*device.mountPath);
+
+        std::string mountPoint;
+        if (ctx.mountRegistry.get(*device.devNode, mountPoint)) {
+            MountUtils::handleUnmount(mountPoint);
+            MountUtils::mountDevice(
+                *device.devNode,
+                mountPoint,
+                false
+            );
+        }
+        else {
+            mylog->error("Failed to remount device: devNode={}.", *device.devNode);
+        }
     }
 };
 
@@ -81,16 +82,14 @@ class GetCurrentConnectedDevicesCommand : public Command {
 public:
     std::vector<Device> devices;
 
-    void execute(CommandContext& /*ctx*/) override
+    void execute(CommandContext& ctx) override
     {
-        devices.clear();
-
-        /*auto mounts = MountUtils::readMounts();
+        auto devNodes = ctx.mountRegistry.getAllDevNodes();
 
         UdevDeviceResolver resolver;
 
-        for (const auto& mount : mounts) {
-            auto info = resolver.resolve(mount);
+        for (const auto& devNode : devNodes) {
+            auto info = resolver.resolve(devNode.c_str());
 
             if (!info) {
                 continue;
@@ -98,8 +97,8 @@ public:
 
             Device d;
             d.info = *info;
-            d.mountPath = mount;
+            d.devNode = devNode;
             devices.push_back(d);
-        }*/
+        }
     }
 };

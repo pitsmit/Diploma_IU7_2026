@@ -1,6 +1,6 @@
 #pragma once
-#include <string>
-#include "MountEvent.hpp"
+
+#include "DeviceInfo.hpp"
 
 class PolicyManager {
 private:
@@ -10,7 +10,7 @@ public:
     explicit PolicyManager(DBConnection& db)
         : repo(db) {}
 
-    bool isAllowed([[maybe_unused]] const DeviceInfo dev) { 
+    bool isAllowed(const DeviceInfo dev) { 
         return repo.exists(dev);
     }
 };

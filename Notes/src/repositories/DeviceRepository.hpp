@@ -3,6 +3,7 @@
 #include "DBConnection.hpp"
 #include "Device.hpp"
 #include "DeviceInfo.hpp"
+
 #include <vector>
 #include <string>
 
@@ -39,7 +40,7 @@ public:
 
         db.query(
             "SELECT id, vendorId, productId, serial, productName, vendorName, validTo FROM Device;",
-            [&]([[maybe_unused]] int cols, char** values, [[maybe_unused]] char** names) {
+            [&](int /*cols*/, char** values, char** /*names*/) {
 
                 Device d;
 
@@ -88,6 +89,7 @@ public:
             sql += " AND serial IS NULL";
         }
 
+        sql += " AND validTo >= date('now')";
         sql += " LIMIT 1;";
 
         db.query(

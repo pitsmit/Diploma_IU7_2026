@@ -1,15 +1,13 @@
 #include "Facade.hpp"
-#include "DeviceCommands.hpp"
 #include "DBInitializer.hpp"
 #include "HttpServer.hpp"
-#include <thread>
-#include <chrono>
-
-#include <thread>
-
 #include "EventQueue.hpp"
 #include "Watcher.hpp"
 #include "EventLoop.hpp"
+#include "Config.hpp"
+
+#include <thread>
+#include <chrono>
 
 class App {
 private:
@@ -19,17 +17,16 @@ private:
 
 public:
     App()
-        : db("app.db"),
+        : db(Config::getDBPath()),
           facade(),
           http(facade)
     {
         DBInitializer::init(db);
-        mylog->info("System start");
     }
 
     void run()
     {
-        EventQueue<MountEvent> queue;
+        EventQueue<DeviceEvent> queue;
 
         UdevWatcher watcher(queue);
 

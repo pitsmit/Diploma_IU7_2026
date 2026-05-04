@@ -9,7 +9,7 @@ enum EventType {
     REMOVE
 };
 
-struct MountEvent {
+struct DeviceEvent {
     EventType type;
     std::string timestamp;
     std::string devNode;
