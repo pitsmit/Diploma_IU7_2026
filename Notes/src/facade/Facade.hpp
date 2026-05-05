@@ -5,21 +5,23 @@
 #include "DeviceManager.hpp"
 #include "PolicyManager.hpp"
 #include "MountRegistry.hpp"
+#include "MountUtils.hpp"
+#include "IMountSystem.hpp"
 
 class Facade {
-private:
-    DBConnection db;
+private: 
     DeviceManager deviceManager;
     PolicyManager policyManager;
     MountRegistry mountRegistry;
+    MountUtils mountUtils;
     CommandContext ctx;
 
 public:
-    Facade()
-        : db("app.db"),
-          deviceManager(db),
+    Facade(DBConnection &db, IMountSystem &sys)
+        : deviceManager(db),
           policyManager(db),
-          ctx {deviceManager, mountRegistry}
+          mountUtils(sys),
+          ctx {deviceManager, mountRegistry, mountUtils}
     {}
 
     void execute(Command& command) {
@@ -29,4 +31,5 @@ public:
     DeviceManager& devices() { return deviceManager; }
     PolicyManager& policies() { return policyManager; }
     MountRegistry& registry() { return mountRegistry; }
+    MountUtils& utils() { return mountUtils; }
 };

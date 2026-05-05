@@ -6,22 +6,26 @@
 #include "DevLogger.hpp"
 #include "MountRegistry.hpp"
 #include "MountPointBuilder.hpp"
+#include "MountUtils.hpp"
 
 class DeviceControlService {
 private:
     DeviceManager& deviceManager_;
     PolicyManager& policyManager_;
     MountRegistry& mountRegistry_;
+    MountUtils& mountUtils_;
 
 public:
     DeviceControlService(
         DeviceManager& deviceManager,
         PolicyManager& policyManager,
-        MountRegistry& mountRegistry
+        MountRegistry& mountRegistry,
+        MountUtils& mountUtils
     ) :
         deviceManager_(deviceManager),
         policyManager_(policyManager),
-        mountRegistry_(mountRegistry)
+        mountRegistry_(mountRegistry),
+        mountUtils_(mountUtils)
     {}
 
     void handleEvent(const DeviceEvent& event)
@@ -33,7 +37,7 @@ public:
             std::string mountPoint =
                 MountPointBuilder::build(event.dev);
             MountPointBuilder::ensureExists(mountPoint);
-            MountUtils::mountDevice(
+            mountUtils_.mountDevice(
                 event.devNode,
                 mountPoint,
                 !allowed
@@ -43,7 +47,7 @@ public:
         else if (event.type == EventType::REMOVE) {
             std::string mountPoint;
             if (mountRegistry_.get(event.devNode, mountPoint)) {
-                MountUtils::handleUnmount(mountPoint);
+                mountUtils_.handleUnmount(mountPoint);
                 mountRegistry_.remove(event.devNode);
             }
             else {

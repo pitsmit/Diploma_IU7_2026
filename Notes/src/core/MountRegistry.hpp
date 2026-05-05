@@ -5,6 +5,8 @@
 #include <mutex>
 #include <vector>
 
+#include "DevLogger.hpp"
+
 class MountRegistry {
 private:
     std::unordered_map<std::string, std::string> map_;

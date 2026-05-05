@@ -45,12 +45,12 @@ public:
                 Device d;
 
                 d.id = std::stoull(values[0] ? values[0] : "0");
-                d.info.vendorId = values[2] ? values[2] : "";
-                d.info.productId = values[3] ? values[3] : "";
-                d.info.serial = values[4] ? values[4] : "";
-                d.info.productName = values[5] ? values[5] : "";
-                d.info.vendorName = values[6] ? values[6] : "";
-                d.validTo = values[7] ? values[7] : "";
+                d.info.vendorId = values[1] ? values[1] : "";
+                d.info.productId = values[2] ? values[2] : "";
+                d.info.serial = values[3] ? values[3] : "";
+                d.info.productName = values[4] ? values[4] : "";
+                d.info.vendorName = values[5] ? values[5] : "";
+                d.validTo = values[6] ? values[6] : "";
 
                 result.push_back(d);
             });

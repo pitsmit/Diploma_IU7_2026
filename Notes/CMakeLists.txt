@@ -29,5 +29,8 @@ target_link_libraries(app
     udev
 )
 
+file(COPY ${CMAKE_SOURCE_DIR}/sql
+     DESTINATION ${CMAKE_BINARY_DIR}/tests)
+
 enable_testing()
 add_subdirectory(tests)

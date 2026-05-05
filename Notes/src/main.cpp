@@ -5,6 +5,7 @@
 #include "Watcher.hpp"
 #include "EventLoop.hpp"
 #include "Config.hpp"
+#include "LinuxMountSystem.hpp"
 
 #include <thread>
 #include <chrono>
@@ -14,11 +15,12 @@ private:
     DBConnection db;
     Facade facade;
     HttpServer http;
+    LinuxMountSystem linms;
 
 public:
     App()
         : db(Config::getDBPath()),
-          facade(),
+          facade(db, linms),
           http(facade)
     {
         DBInitializer::init(db);
@@ -33,7 +35,8 @@ public:
         DeviceControlService service(
             facade.devices(),
             facade.policies(),
-            facade.registry()
+            facade.registry(),
+            facade.utils()
         );
 
         EventLoop loop(queue, service);

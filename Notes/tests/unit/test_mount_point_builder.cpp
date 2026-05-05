@@ -51,7 +51,6 @@ TEST(MountPointBuilderTest, Build_MissingVendorAndProduct) {
 TEST(MountPointBuilderTest, EnsureExists_CreatesDirectory) {
     // ARRANGE
     std::string path = "/tmp/test_mount_point_builder_dir";
-
     std::filesystem::remove_all(path);
 
     // ACT
@@ -64,7 +63,6 @@ TEST(MountPointBuilderTest, EnsureExists_CreatesDirectory) {
 TEST(MountPointBuilderTest, EnsureExists_Idempotent) {
     // ARRANGE
     std::string path = "/tmp/test_mount_point_builder_dir2";
-
     std::filesystem::remove_all(path);
 
     // ACT

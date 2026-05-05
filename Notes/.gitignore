@@ -11,7 +11,8 @@ logs.txt
 *.d
 app
 *.db
-
+build/
+test_scripts/
 
 *.aux
 *.xml

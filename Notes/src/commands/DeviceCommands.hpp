@@ -36,8 +36,8 @@ public:
 
         std::string mountPoint;
         if (ctx.mountRegistry.get(*device.devNode, mountPoint)) {
-            MountUtils::handleUnmount(mountPoint);
-            MountUtils::mountDevice(
+            ctx.mountUtils.handleUnmount(mountPoint);
+            ctx.mountUtils.mountDevice(
                 *device.devNode,
                 mountPoint,
                 false
