@@ -3,6 +3,7 @@
 #include <sys/mount.h>
 #include <libudev.h>
 #include <unistd.h>
+#include <blkid/blkid.h>
 
 class LinuxMountSystem : public IMountSystem {
 public:
@@ -31,7 +32,15 @@ public:
     }
 
     std::string getFsType(const std::string& devnode) override {
-        struct udev* udev = udev_new();
+        blkid_cache cache = nullptr;
+        if (blkid_get_cache(&cache, nullptr) != 0) {
+            return "";
+        }
+        char* type = blkid_get_tag_value(cache, "TYPE", devnode.c_str());
+        std::string result = type ? type : "";
+        blkid_put_cache(cache);
+        return result;
+        /*struct udev* udev = udev_new();
         struct udev_device* dev =
             udev_device_new_from_subsystem_sysname(
                 udev,
@@ -46,6 +55,6 @@ public:
         std::string result = fs ? fs : "";
         udev_device_unref(dev);
         udev_unref(udev);
-        return result;
+        return result;*/
     }
 };

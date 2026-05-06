@@ -1,6 +1,8 @@
 include(FetchContent)
 
-cmake_policy(SET CMP0135 NEW)
+if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif()
 FetchContent_Declare(
     googletest
     URL https://github.com/google/googletest/archive/refs/heads/main.zip
@@ -11,7 +13,7 @@ FetchContent_MakeAvailable(googletest)
 
 
 # =========================
-# UNIT TESTS (без sqlite)
+# UNIT TESTS
 # =========================
 add_executable(unit_tests
     unit/test_mount_point_builder.cpp
@@ -38,6 +40,7 @@ target_link_libraries(unit_tests
 include(GoogleTest)
 gtest_discover_tests(unit_tests
     PROPERTIES LABELS "unit"
+    blkid
 )
 
 # =========================
@@ -47,6 +50,7 @@ add_executable(integration_tests
     integration/test_device_repository.cpp
     integration/test_get_white_list_command.cpp
     integration/test_add_device_to_white_list_command.cpp
+    integration/test_real_mount.cpp
 )
 
 target_include_directories(integration_tests PUBLIC
@@ -65,6 +69,7 @@ target_link_libraries(integration_tests
     GTest::gtest_main
     sqlite3
     udev
+    blkid
 )
 
 gtest_discover_tests(integration_tests

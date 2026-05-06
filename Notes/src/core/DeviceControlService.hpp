@@ -1,6 +1,5 @@
 #pragma once
 
-#include "DeviceManager.hpp"
 #include "PolicyManager.hpp"
 #include "DeviceEvent.hpp"
 #include "DevLogger.hpp"
@@ -10,19 +9,16 @@
 
 class DeviceControlService {
 private:
-    DeviceManager& deviceManager_;
     PolicyManager& policyManager_;
     MountRegistry& mountRegistry_;
     MountUtils& mountUtils_;
 
 public:
     DeviceControlService(
-        DeviceManager& deviceManager,
         PolicyManager& policyManager,
         MountRegistry& mountRegistry,
         MountUtils& mountUtils
     ) :
-        deviceManager_(deviceManager),
         policyManager_(policyManager),
         mountRegistry_(mountRegistry),
         mountUtils_(mountUtils)
@@ -33,10 +29,10 @@ public:
         mylog->info("Start handle {} event", event.type == EventType::INSERT ? "INSERT" : "REMOVE");
 
         if (event.type == EventType::INSERT) {
-            bool allowed = policyManager_.isAllowed(event.dev);
             std::string mountPoint =
                 MountPointBuilder::build(event.dev);
             MountPointBuilder::ensureExists(mountPoint);
+            bool allowed = policyManager_.isAllowed(event.dev);
             mountUtils_.mountDevice(
                 event.devNode,
                 mountPoint,

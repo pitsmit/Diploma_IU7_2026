@@ -27,6 +27,7 @@ target_link_libraries(app
     pistache
     pthread
     udev
+    blkid
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/sql

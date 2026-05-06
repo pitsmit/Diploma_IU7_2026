@@ -1,4 +1,4 @@
-CXX = g++
+CXX = ccache g++
 CXXFLAGS = -std=c++20 -Wall -Wextra
 
 INCLUDES = \
@@ -22,10 +22,10 @@ TARGET = app
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ) -lsqlite3 -lpistache -pthread -ludev -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(OBJ) -lsqlite3 -lpistache -pthread -ludev -lblkid -o $(TARGET)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -ludev -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
 
 -include $(DEP)
 

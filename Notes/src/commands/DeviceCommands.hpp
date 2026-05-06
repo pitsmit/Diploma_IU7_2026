@@ -95,10 +95,12 @@ public:
                 continue;
             }
 
-            Device d;
-            d.info = *info;
-            d.devNode = devNode;
-            devices.push_back(d);
+            devices.push_back(
+                DeviceBuilder()
+                    .withInfo(*info)
+                    .withDevNode(devNode)
+                    .build()
+            );
         }
     }
 };

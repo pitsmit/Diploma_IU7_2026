@@ -6,6 +6,7 @@
 #include "EventLoop.hpp"
 #include "Config.hpp"
 #include "LinuxMountSystem.hpp"
+#include "UdevDeviceResolver.hpp"
 
 #include <thread>
 #include <chrono>
@@ -29,11 +30,11 @@ public:
     void run()
     {
         EventQueue<DeviceEvent> queue;
+        UdevDeviceResolver resolver;
 
-        UdevWatcher watcher(queue);
+        UdevWatcher watcher(queue, resolver);
 
         DeviceControlService service(
-            facade.devices(),
             facade.policies(),
             facade.registry(),
             facade.utils()

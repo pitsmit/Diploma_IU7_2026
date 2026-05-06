@@ -42,17 +42,24 @@ public:
             "SELECT id, vendorId, productId, serial, productName, vendorName, validTo FROM Device;",
             [&](int /*cols*/, char** values, char** /*names*/) {
 
-                Device d;
+                DeviceInfoBuilder infoBuilder;
 
-                d.id = std::stoull(values[0] ? values[0] : "0");
-                d.info.vendorId = values[1] ? values[1] : "";
-                d.info.productId = values[2] ? values[2] : "";
-                d.info.serial = values[3] ? values[3] : "";
-                d.info.productName = values[4] ? values[4] : "";
-                d.info.vendorName = values[5] ? values[5] : "";
-                d.validTo = values[6] ? values[6] : "";
+                if (values[1]) infoBuilder.withVendorId(values[1]);
+                if (values[2]) infoBuilder.withProductId(values[2]);
+                if (values[3]) infoBuilder.withSerial(values[3]);
+                if (values[4]) infoBuilder.withProductName(values[4]);
+                if (values[5]) infoBuilder.withVendorName(values[5]);
 
-                result.push_back(d);
+                DeviceBuilder deviceBuilder;
+
+                if (values[6]) deviceBuilder.withValidTo(values[6]);
+
+                Device device = deviceBuilder
+                    .withId(std::stoull(values[0] ? values[0] : "0"))
+                    .withInfo(infoBuilder.build())
+                    .build();
+
+                result.push_back(device);
             });
 
         return result;

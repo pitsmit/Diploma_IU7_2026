@@ -6,8 +6,9 @@
 #include <sys/stat.h>
 
 #include "DeviceInfo.hpp"
+#include "IDeviceResolver.hpp"
 
-class UdevDeviceResolver {
+class UdevDeviceResolver : public IDeviceResolver {
 public:
     std::optional<DeviceInfo>
     resolve(const char *devNode)
@@ -54,40 +55,22 @@ public:
             }
         }
 
-        DeviceInfo info;
-
+        DeviceInfoBuilder builder;
         if (usb) {
-
-            const char* vid =
-                udev_device_get_sysattr_value(
-                    usb,
-                    "idVendor");
-            const char* pid =
-                udev_device_get_sysattr_value(
-                    usb,
-                    "idProduct");
-            const char* serial =
-                udev_device_get_sysattr_value(
-                    usb,
-                    "serial");
-            const char* vendorName =
-                udev_device_get_sysattr_value(
-                    usb,
-                    "manufacturer");
-            const char* productName =
-                udev_device_get_sysattr_value(
-                    usb,
-                    "product");
-
-            if (vid) info.vendorId = vid;
-            if (pid) info.productId = pid;
-            if (serial) info.serial = serial;
-            if (vendorName) info.vendorName = vendorName;
-            if (productName) info.productName = productName;
+            if (const char* vid = udev_device_get_sysattr_value(usb, "idVendor"))
+                builder.withVendorId(vid);
+            if (const char* pid = udev_device_get_sysattr_value(usb, "idProduct"))
+                builder.withProductId(pid);
+            if (const char* serial = udev_device_get_sysattr_value(usb, "serial"))
+                builder.withSerial(serial);
+            if (const char* vendorName = udev_device_get_sysattr_value(usb, "manufacturer"))
+                builder.withVendorName(vendorName);
+            if (const char* productName = udev_device_get_sysattr_value(usb, "product"))
+                builder.withProductName(productName);
         }
-
+        
         udev_device_unref(dev);
         udev_unref(udev);
-        return info;
+        return builder.build();
     }
 };

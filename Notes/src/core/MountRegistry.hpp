@@ -43,14 +43,11 @@ public:
     std::vector<std::string> getAllDevNodes()
     {
         std::lock_guard<std::mutex> lock(mtx_);
-
         std::vector<std::string> result;
         result.reserve(map_.size());
-
         for (const auto& [devNode, _] : map_) {
             result.push_back(devNode);
         }
-
         return result;
     }
 };

@@ -3,18 +3,19 @@
 #include <libudev.h>
 
 #include "MountUtils.hpp"
-#include "UdevDeviceResolver.hpp"
 #include "EventQueue.hpp"
 #include "DeviceEvent.hpp"
 #include "DevLogger.hpp"
+#include "IDeviceResolver.hpp"
 
 class UdevWatcher {
 private:
     EventQueue<DeviceEvent>& queue_;
+    IDeviceResolver& resolver_;
 
 public:
-    explicit UdevWatcher(EventQueue<DeviceEvent>& queue)
-        : queue_(queue) {}
+    explicit UdevWatcher(EventQueue<DeviceEvent>& queue, IDeviceResolver& resolver)
+        : queue_(queue), resolver_(resolver) {}
 
     void run()
     {
@@ -103,16 +104,14 @@ private:
 
     DeviceEvent buildEvent(struct udev_device* dev, EventType type)
     {
-        DeviceEvent event;
-        event.type = type;
         const char* devnode = udev_device_get_devnode(dev);
         if (!devnode)
             return {};
-        event.devNode = devnode;
-        UdevDeviceResolver resolver;
-        if (auto info = resolver.resolve(devnode))
-            event.dev = *info;
-
-        return event;
+        
+        return DeviceEventBuilder()
+            .withType(type)
+            .withDevNode(devnode)
+            .withDeviceInfo(resolver_.resolve(devnode).value_or(DeviceInfo{}))
+            .build();
     }
 };
