@@ -12,10 +12,13 @@
 #include "DeviceEvent.hpp"
 #include "MountRegistry.hpp"
 #include "MountUtils.hpp"
+#include "MountRecord.hpp"
+#include "UdevDeviceResolver.hpp"
 
 #include "../helpers/DataBaseTestHelper.hpp"
 #include "../helpers/LoggerTestHelper.hpp"
 #include "../helpers/MountHelpers.hpp"
+#include "../mocks/MockDeviceResolver.hpp"
 
 class RealMountTest : public ::testing::Test {
 protected:
@@ -27,9 +30,11 @@ protected:
     std::unique_ptr<DeviceControlService> svc;
     std::unique_ptr<MountUtils> utils;
     std::unique_ptr<PolicyManager> policy;
+    std::unique_ptr<MockDeviceResolver> resolver;
 
     std::unique_ptr<DeviceInfo> info;
     std::unique_ptr<DeviceEvent> event;
+    std::unique_ptr<MountRecord> mount_rec;
 
     void SetUp() override {
         logger.disable();
@@ -38,11 +43,13 @@ protected:
 
         utils = std::make_unique<MountUtils>(sys);
         policy = std::make_unique<PolicyManager>(dbHelper.get_db());
+        resolver = std::make_unique<MockDeviceResolver>();
 
         svc = std::make_unique<DeviceControlService>(
             *policy,
             registry,
-            *utils
+            *utils,
+            *resolver
         );
 
         info = std::make_unique<DeviceInfo>(
@@ -52,20 +59,33 @@ protected:
                 .build()
         );
 
+        resolver->setResult(*info);
+
         event = std::make_unique<DeviceEvent>(
             DeviceEventBuilder()
                 .withType(EventType::INSERT)
-                .withDevNode(devNode)
-                .withDeviceInfo(*info)
+                .withDevNode(devNode.c_str())
                 .build()
         );
+
+        mount_rec = std::make_unique<MountRecord>(
+            MountRecordBuilder()
+                .withInfo(*info)
+                .withDevNode(devNode)
+                .withMountPoint("/dev/test")
+                .build()
+        );
+
+
     }
 
     void TearDown() override {
-        svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode});
-        system("losetup -D");
+        svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
+        //system("losetup -D");
 
         svc.reset();
+        resolver.reset();
+        mount_rec.reset();
         utils.reset();
         policy.reset();
         logger.restore();
@@ -81,30 +101,25 @@ TEST_F(RealMountTest, MountLoopDeviceReadOnly)
     svc->handleEvent(*event);
 
     // ASSERT
-    std::string mountPoint;
-    registry.get(devNode, mountPoint);
+    auto mount_rec = registry.getByDevNode(devNode);
 
-    ASSERT_TRUE(isMounted(mountPoint));
-    ASSERT_TRUE(isMountedAs(mountPoint, "ro"));
+    ASSERT_TRUE(mount_rec.has_value());
+    ASSERT_TRUE(isMounted(mount_rec->mountPoint));
+    ASSERT_TRUE(isMountedAs(mount_rec->mountPoint, "ro"));
 }
 
 TEST_F(RealMountTest, MountLoopDeviceReadWrite)
 {
     // ARRANGE
-    auto device = DeviceBuilder()
-        .withInfo(*info)
-        .withValidTo("2099-01-01")
-        .build();
-
-    dbHelper.get_repo().add(device);
+    std::string validTo = "2099-01-01";
+    dbHelper.get_repo().add(*mount_rec, validTo);
 
     // ACT
     svc->handleEvent(*event);
 
     // ASSERT
-    std::string mountPoint;
-    registry.get(devNode, mountPoint);
-
-    ASSERT_TRUE(isMounted(mountPoint));
-    ASSERT_TRUE(isMountedAs(mountPoint, "rw"));
+    auto mnt_r = registry.getByDevNode(devNode);
+    ASSERT_TRUE(mnt_r.has_value());
+    ASSERT_TRUE(isMounted(mnt_r->mountPoint));
+    ASSERT_TRUE(isMountedAs(mnt_r->mountPoint, "rw"));
 }

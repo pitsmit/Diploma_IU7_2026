@@ -11,8 +11,8 @@ public:
     explicit DeviceManager(DBConnection& db)
         : repo(db) {}
 
-    void addToWhitelist(const Device& d) {
-        repo.add(d);
+    int addToWhitelist(const MountRecord& d, std::optional<std::string> vld) {
+        return repo.add(d, vld);
     }
 
     std::vector<Device> getWhitelist() {

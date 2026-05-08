@@ -10,6 +10,12 @@ add_executable(app
     api-stubs/api/DefaultApi.cpp
 )
 
+option(ENABLE_COVERAGE "Enable coverage" ON)
+
+if(ENABLE_COVERAGE)
+    message(STATUS "Coverage ENABLED")
+endif()
+
 target_include_directories(app PUBLIC
     ${PROJECT_SOURCE_DIR}/src/commands
     ${PROJECT_SOURCE_DIR}/src/core
@@ -35,3 +41,15 @@ file(COPY ${CMAKE_SOURCE_DIR}/sql
 
 enable_testing()
 add_subdirectory(tests)
+
+add_compile_options(
+    -Wall
+    -Wextra
+    -Wunused
+    -Wshadow
+)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    add_compile_options(--coverage -O0 -g)
+    add_link_options(--coverage)
+endif()

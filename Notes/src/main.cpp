@@ -32,12 +32,13 @@ public:
         EventQueue<DeviceEvent> queue;
         UdevDeviceResolver resolver;
 
-        UdevWatcher watcher(queue, resolver);
+        UdevWatcher watcher(queue);
 
         DeviceControlService service(
             facade.policies(),
             facade.registry(),
-            facade.utils()
+            facade.utils(),
+            resolver
         );
 
         EventLoop loop(queue, service);

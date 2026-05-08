@@ -1,5 +1,5 @@
 CXX = ccache g++
-CXXFLAGS = -std=c++20 -Wall -Wextra
+CXXFLAGS = -std=c++20 -Wall -Wextra -Wunused
 
 INCLUDES = \
     -Isrc/ \
@@ -31,6 +31,29 @@ $(TARGET): $(OBJ)
 
 clean:
 	rm -f $(OBJ) $(DEP) $(TARGET)
+
+pre-bld-test:
+	cmake -S . -B build
+
+bld-test:
+	cmake --build build
+
+test:
+	ctest --test-dir build --output-on-failure
+
+dcr-bld-test:
+	docker build -t usb-test .
+
+dcr-test:
+	mkdir -p coverage-report
+
+	CID=$$(docker create \
+		--privileged \
+		-v /dev:/dev \
+		usb-test) && \
+	docker start -a $$CID && \
+	docker cp $$CID:/app/coverage-report ./coverage-report && \
+	docker rm $$CID
 
 
 install:

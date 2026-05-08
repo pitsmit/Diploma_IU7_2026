@@ -1,9 +1,5 @@
 #pragma once
 
-#include <string>
-
-#include "DeviceInfo.hpp"
-
 enum EventType {
     INSERT,
     REMOVE
@@ -11,8 +7,7 @@ enum EventType {
 
 struct DeviceEvent {
     EventType type;
-    std::string devNode;
-    DeviceInfo dev;
+    const char *devNode;
 };
 
 
@@ -26,13 +21,8 @@ public:
         return *this;
     }
 
-    DeviceEventBuilder& withDevNode(const std::string& node) {
+    DeviceEventBuilder& withDevNode(const char *node) {
         event_.devNode = node;
-        return *this;
-    }
-
-    DeviceEventBuilder& withDeviceInfo(const DeviceInfo& info) {
-        event_.dev = info;
         return *this;
     }
 

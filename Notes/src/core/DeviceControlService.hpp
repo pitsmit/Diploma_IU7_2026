@@ -5,6 +5,8 @@
 #include "DevLogger.hpp"
 #include "MountRegistry.hpp"
 #include "MountPointBuilder.hpp"
+#include "IDeviceResolver.hpp"
+#include "MountRecord.hpp"
 #include "MountUtils.hpp"
 
 class DeviceControlService {
@@ -12,16 +14,19 @@ private:
     PolicyManager& policyManager_;
     MountRegistry& mountRegistry_;
     MountUtils& mountUtils_;
+    IDeviceResolver& resolver_;
 
 public:
     DeviceControlService(
         PolicyManager& policyManager,
         MountRegistry& mountRegistry,
-        MountUtils& mountUtils
+        MountUtils& mountUtils,
+        IDeviceResolver& resolver
     ) :
         policyManager_(policyManager),
         mountRegistry_(mountRegistry),
-        mountUtils_(mountUtils)
+        mountUtils_(mountUtils),
+        resolver_(resolver)
     {}
 
     void handleEvent(const DeviceEvent& event)
@@ -29,22 +34,29 @@ public:
         mylog->info("Start handle {} event", event.type == EventType::INSERT ? "INSERT" : "REMOVE");
 
         if (event.type == EventType::INSERT) {
-            std::string mountPoint =
-                MountPointBuilder::build(event.dev);
+            std::optional<DeviceInfo> info = resolver_.resolve(event.devNode);
+            std::string mountPoint = MountPointBuilder::build(*info);
             MountPointBuilder::ensureExists(mountPoint);
-            bool allowed = policyManager_.isAllowed(event.dev);
+
+            int id = policyManager_.isAllowed(*info);
             mountUtils_.mountDevice(
                 event.devNode,
                 mountPoint,
-                !allowed
+                !id
             );
-            mountRegistry_.add(event.devNode, mountPoint);
+            auto record = MountRecordBuilder()
+                            .withDevNode(event.devNode)
+                            .withId(id)
+                            .withInfo(*info)
+                            .withMountPoint(mountPoint)
+                            .build();
+
+            mountRegistry_.add(record);
         }
         else if (event.type == EventType::REMOVE) {
-            std::string mountPoint;
-            if (mountRegistry_.get(event.devNode, mountPoint)) {
-                mountUtils_.handleUnmount(mountPoint);
-                mountRegistry_.remove(event.devNode);
+            if (std::optional<MountRecord> record = mountRegistry_.getByDevNode(event.devNode)) {
+                mountUtils_.handleUnmount((*record).mountPoint);
+                mountRegistry_.removeByDevNode(event.devNode);
             }
             else {
                 mylog->warn("No mount point for {}", event.devNode);

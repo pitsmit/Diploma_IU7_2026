@@ -42,8 +42,7 @@ inline void to_json(nlohmann::json& j, const Device& d)
     j = nlohmann::json{
         {"id", d.id},
         {"info", d.info},
-        {"validTo", *d.validTo},
-        {"devNode", *d.devNode}
+        {"validTo", *d.validTo}
     };
 }
 
@@ -79,9 +78,5 @@ inline void from_json(const nlohmann::json& j, Device& d)
 
     if (j.contains("validTo") && !j["validTo"].is_null()) {
         d.validTo = j["validTo"].get<std::string>();
-    }
-
-    if (j.contains("devNode") && !j["devNode"].is_null()) {
-        d.devNode = j["devNode"].get<std::string>();
     }
 }

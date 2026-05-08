@@ -2,20 +2,17 @@
 
 #include <libudev.h>
 
-#include "MountUtils.hpp"
 #include "EventQueue.hpp"
 #include "DeviceEvent.hpp"
 #include "DevLogger.hpp"
-#include "IDeviceResolver.hpp"
 
 class UdevWatcher {
 private:
     EventQueue<DeviceEvent>& queue_;
-    IDeviceResolver& resolver_;
 
 public:
-    explicit UdevWatcher(EventQueue<DeviceEvent>& queue, IDeviceResolver& resolver)
-        : queue_(queue), resolver_(resolver) {}
+    explicit UdevWatcher(EventQueue<DeviceEvent>& queue)
+        : queue_(queue) {}
 
     void run()
     {
@@ -75,13 +72,21 @@ public:
                     continue;
                 }
 
-                auto event = buildEvent(dev, EventType::INSERT);
-                if (!event.devNode.empty())
+                auto event = DeviceEventBuilder()
+                                .withType(EventType::INSERT)
+                                .withDevNode(udev_device_get_devnode(dev))
+                                .build();
+
+                if (event.devNode)
                     queue_.push(event);
             }
             else if (act == "remove") {
-                auto event = buildEvent(dev, EventType::REMOVE);
-                if (!event.devNode.empty())
+                auto event = DeviceEventBuilder()
+                                .withType(EventType::REMOVE)
+                                .withDevNode(udev_device_get_devnode(dev))
+                                .build();
+
+                if (event.devNode)
                     queue_.push(event);
             }
 
@@ -100,18 +105,5 @@ private:
                 dev, "usb", "usb_device");
 
         return parent != nullptr;
-    }
-
-    DeviceEvent buildEvent(struct udev_device* dev, EventType type)
-    {
-        const char* devnode = udev_device_get_devnode(dev);
-        if (!devnode)
-            return {};
-        
-        return DeviceEventBuilder()
-            .withType(type)
-            .withDevNode(devnode)
-            .withDeviceInfo(resolver_.resolve(devnode).value_or(DeviceInfo{}))
-            .build();
     }
 };

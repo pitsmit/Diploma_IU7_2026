@@ -3,6 +3,7 @@ include(FetchContent)
 if(POLICY CMP0135)
     cmake_policy(SET CMP0135 NEW)
 endif()
+
 FetchContent_Declare(
     googletest
     URL https://github.com/google/googletest/archive/refs/heads/main.zip
@@ -11,6 +12,19 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+enable_testing()
+
+# =========================
+# COVERAGE OPTION HANDLING
+# =========================
+option(ENABLE_COVERAGE "Enable coverage" ON)
+
+function(enable_coverage target)
+    if(ENABLE_COVERAGE)
+        target_compile_options(${target} PRIVATE --coverage -O0 -g)
+        target_link_options(${target} PRIVATE --coverage)
+    endif()
+endfunction()
 
 # =========================
 # UNIT TESTS
@@ -37,10 +51,11 @@ target_link_libraries(unit_tests
     GTest::gtest_main
 )
 
+enable_coverage(unit_tests)
+
 include(GoogleTest)
 gtest_discover_tests(unit_tests
     PROPERTIES LABELS "unit"
-    blkid
 )
 
 # =========================
@@ -48,9 +63,9 @@ gtest_discover_tests(unit_tests
 # =========================
 add_executable(integration_tests
     integration/test_device_repository.cpp
-    integration/test_get_white_list_command.cpp
-    integration/test_add_device_to_white_list_command.cpp
+    integration/test_white_list_command.cpp
     integration/test_real_mount.cpp
+    integration/test_delete_device_command.cpp
 )
 
 target_include_directories(integration_tests PUBLIC
@@ -72,6 +87,18 @@ target_link_libraries(integration_tests
     blkid
 )
 
+enable_coverage(integration_tests)
+
 gtest_discover_tests(integration_tests
     PROPERTIES LABELS "integration"
+)
+
+# =========================
+# WARNINGS (GLOBAL SAFE)
+# =========================
+add_compile_options(
+    -Wall
+    -Wextra
+    -Wunused
+    -Wshadow
 )

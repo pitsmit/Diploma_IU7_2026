@@ -1,53 +1,149 @@
 #pragma once
 
-#include <unordered_map>
+#include <vector>
 #include <string>
 #include <mutex>
-#include <vector>
+#include <optional>
+#include <algorithm>
 
+#include "MountRecord.hpp"
 #include "DevLogger.hpp"
 
 class MountRegistry {
 private:
-    std::unordered_map<std::string, std::string> map_;
-    std::mutex mtx_;
+    std::vector<MountRecord> records_;
+    mutable std::mutex mtx_;
 
 public:
-    void add(
-        const std::string& devNode, 
-        const std::string& mountPoint)
+    void add(const MountRecord& record)
     {
         std::lock_guard<std::mutex> lock(mtx_);
-        map_[devNode] = mountPoint;
-    }
 
-    bool get(const std::string& devNode, std::string& out)
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        auto it = map_.find(devNode);
-        if (it == map_.end()) {
-            mylog->debug("Mount point not found for devNode: {}", devNode);
-            return false;
+        auto it = std::find_if(
+            records_.begin(),
+            records_.end(),
+            [&](const MountRecord& r) {
+                return r.devNode == record.devNode;
+            }
+        );
+
+        if (it != records_.end()) {
+            *it = record;
+
+            mylog->debug(
+                "Updated mount record: devNode={}",
+                record.devNode
+            );
         }
-        out = it->second;
-        mylog->trace("Retrieved mount point for {}: {}", devNode, out);
-        return true;
-    }
+        else {
+            records_.push_back(record);
 
-    void remove(const std::string& devNode)
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        map_.erase(devNode);
-    }
-
-    std::vector<std::string> getAllDevNodes()
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        std::vector<std::string> result;
-        result.reserve(map_.size());
-        for (const auto& [devNode, _] : map_) {
-            result.push_back(devNode);
+            mylog->debug(
+                "Added mount record: devNode={}",
+                record.devNode
+            );
         }
-        return result;
+    }
+
+    std::optional<MountRecord> getByDevNode(
+        const std::string& devNode)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+
+        auto it = std::find_if(
+            records_.begin(),
+            records_.end(),
+            [&](const MountRecord& r) {
+                return r.devNode == devNode;
+            }
+        );
+
+        if (it == records_.end()) {
+            mylog->debug(
+                "Mount record not found for {}",
+                devNode
+            );
+
+            return std::nullopt;
+        }
+
+        return *it;
+    }
+
+    std::optional<MountRecord> getById(
+        const size_t& id)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+
+        auto it = std::find_if(
+            records_.begin(),
+            records_.end(),
+            [&](const MountRecord& r) {
+                return r.id == id;
+            }
+        );
+
+        if (it == records_.end()) {
+            mylog->debug(
+                "Mount record not found for {}",
+                id
+            );
+
+            return std::nullopt;
+        }
+
+        return *it;
+    }
+
+    void removeByDevNode(const std::string& devNode)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+
+        auto oldSize = records_.size();
+
+        records_.erase(
+            std::remove_if(
+                records_.begin(),
+                records_.end(),
+                [&](const MountRecord& r) {
+                    return r.devNode == devNode;
+                }
+            ),
+            records_.end()
+        );
+
+        if (records_.size() != oldSize) {
+            mylog->debug(
+                "Removed mount record: devNode={}",
+                devNode
+            );
+        }
+    }
+
+    std::vector<MountRecord> getAll()
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+
+        return records_;
+    }
+
+    bool exists(const std::string& devNode)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+
+        return std::any_of(
+            records_.begin(),
+            records_.end(),
+            [&](const MountRecord& r) {
+                return r.devNode == devNode;
+            }
+        );
+    }
+
+    size_t size()
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+
+        return records_.size();
     }
 };

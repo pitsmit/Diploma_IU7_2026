@@ -2,14 +2,13 @@
 
 #include "Facade.hpp"
 #include "DeviceCommands.hpp"
-#include "Device.hpp"
-#include "DeviceInfo.hpp"
+#include "MountRecord.hpp"
 
 #include "../helpers/LoggerTestHelper.hpp"
 #include "../helpers/DataBaseTestHelper.hpp"
 #include "../mocks/MockMountSystem.hpp"
 
-class GetWhiteListDeviceCommandTest : public ::testing::Test {
+class WhiteListDeviceCommandTest : public ::testing::Test {
 protected:
     LoggerTestHelper logger;
     DataBaseTestHelper dbHelper;
@@ -31,13 +30,13 @@ protected:
     }
 };
 
-TEST_F(GetWhiteListDeviceCommandTest, ReturnsWhitelistFill) {
+TEST_F(WhiteListDeviceCommandTest, ReturnsWhitelistFill) {
     // ARRANGE
-    Device d;
+    MountRecord d;
     d.info.vendorId = "1234";
     d.info.productId = "ABCD";
-    d.validTo = "2099-01-01";
-    facade->devices().addToWhitelist(d);
+    std::string validTo = "2099-01-01";
+    facade->devices().addToWhitelist(d, validTo);
     GetWhiteListDeviceCommand cmd;
 
     // ACT
@@ -48,7 +47,7 @@ TEST_F(GetWhiteListDeviceCommandTest, ReturnsWhitelistFill) {
     EXPECT_EQ(*cmd.list[0].info.vendorId, "1234");
 }
 
-TEST_F(GetWhiteListDeviceCommandTest, ReturnsEmptyWhiteList) {
+TEST_F(WhiteListDeviceCommandTest, ReturnsEmptyWhiteList) {
     // ARRANGE
     GetWhiteListDeviceCommand cmd;
 

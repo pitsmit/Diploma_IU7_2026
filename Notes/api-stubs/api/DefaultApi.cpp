@@ -53,11 +53,11 @@ void DefaultApi::add_device_to_white_list_handler(
 
         nlohmann::json json_body = nlohmann::json::parse(body);
         
-        Device d;
-        from_json(json_body, d);
+        //MountRecord r;
+        //from_json(json_body, r);
         
-        AddDeviceToWhiteListCommand command(d);
-        facade.execute(command);
+        //AddDeviceToWhiteListCommand command(r);
+        //facade.execute(command);
         
         response.send(Pistache::Http::Code::Created, "Device added to white list");
         
@@ -226,11 +226,11 @@ void DefaultApi::get_current_connected_devices_list_handler(
 
     facade.execute(command);
 
-    json j = command.devices;
+    //json j = command.records;
 
     response.send(
-        Pistache::Http::Code::Ok,
-        j.dump()
+        Pistache::Http::Code::Ok
+        //j.dump()
     );
 }
 

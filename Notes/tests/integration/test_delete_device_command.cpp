@@ -2,14 +2,13 @@
 
 #include "Facade.hpp"
 #include "DeviceCommands.hpp"
-#include "Device.hpp"
-#include "DeviceInfo.hpp"
+#include "MountRecord.hpp"
 
 #include "../helpers/LoggerTestHelper.hpp"
 #include "../helpers/DataBaseTestHelper.hpp"
 #include "../mocks/MockMountSystem.hpp"
 
-class AddDeviceToWhiteListCommandTest : public ::testing::Test {
+class DeleteDeviceCommandTest : public ::testing::Test {
 protected:
     LoggerTestHelper logger;
     DataBaseTestHelper dbHelper;
@@ -31,24 +30,26 @@ protected:
     }
 };
 
-TEST_F(AddDeviceToWhiteListCommandTest, CorrectAdd) {
+TEST_F(DeleteDeviceCommandTest, DeleteOk) {
     // ARRANGE
-    Device d;
-    d.devNode = "/dev/sda1";
+    MountRecord d;
     d.info.vendorId = "1234";
     d.info.productId = "ABCD";
-    d.validTo = "2099-01-01";
-    facade->registry().add("/dev/sda1", "/mnt/test");
-    AddDeviceToWhiteListCommand cmd(d);
+    d.devNode = "/dev/test";
+    d.mountPoint = "/media/test";
+    std::string validTo = "2099-01-01";
+    int id = facade->devices().addToWhitelist(d, validTo);
+    DeleteDeviceFromWhiteListCommand cmd(id);
 
     // ACT
     facade->execute(cmd);
 
     // ASSERT
-    auto all = facade->devices().getWhitelist();
-    ASSERT_EQ(all.size(), 1);
-    EXPECT_TRUE(mock.syncCalled);
-    EXPECT_TRUE(mock.umountCalled);
-    EXPECT_TRUE(mock.mountCalled);
-    EXPECT_EQ(mock.lastTarget, "/mnt/test");
+    auto devices = facade->devices().getWhitelist();
+    auto it = std::find_if(devices.begin(), devices.end(),
+        [&](const auto& dev) {
+            return dev.id == id;
+        });
+    EXPECT_EQ(it, devices.end());
+    EXPECT_FALSE(facade->registry().getById(id).has_value());
 }

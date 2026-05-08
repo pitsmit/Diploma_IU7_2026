@@ -67,4 +67,8 @@ public:
             throw std::runtime_error(error);
         }
     }
+
+    int lastInsertId() {
+        return static_cast<int>(sqlite3_last_insert_rowid(db));
+    }
 };

@@ -5,7 +5,6 @@
 #include "CommandContext.hpp"
 #include "MountUtils.hpp"
 #include "MountRegistry.hpp"
-#include "UdevDeviceResolver.hpp"
 
 class Command {
 public:
@@ -25,27 +24,22 @@ public:
 
 class AddDeviceToWhiteListCommand : public Command {
 private:
-    Device device;
+    const MountRecord record;
+    std::optional<std::string> validTo;
 
 public:
-    AddDeviceToWhiteListCommand(const Device& d)
-        : device(d) {}
+    AddDeviceToWhiteListCommand(const MountRecord& d, std::optional<std::string> vld)
+        : record(d), validTo(vld) {}
 
     void execute(CommandContext& ctx) override {
-        ctx.deviceManager.addToWhitelist(device);
+        ctx.deviceManager.addToWhitelist(record, validTo);
 
-        std::string mountPoint;
-        if (ctx.mountRegistry.get(*device.devNode, mountPoint)) {
-            ctx.mountUtils.handleUnmount(mountPoint);
-            ctx.mountUtils.mountDevice(
-                *device.devNode,
-                mountPoint,
-                false
-            );
-        }
-        else {
-            mylog->error("Failed to remount device: devNode={}.", *device.devNode);
-        }
+        ctx.mountUtils.handleUnmount(record.mountPoint);
+        ctx.mountUtils.mountDevice(
+            record.devNode,
+            record.mountPoint,
+            false
+        );
     }
 };
 
@@ -58,6 +52,11 @@ public:
         : id(id) {}
 
     void execute(CommandContext& ctx) override {
+        std::optional<MountRecord> r = ctx.mountRegistry.getById(id);
+        if (r) {
+            ctx.mountUtils.handleUnmount(r->mountPoint);
+            ctx.mountRegistry.removeByDevNode(r->devNode);
+        }
         ctx.deviceManager.removeFromWhitelist(id);
     }
 };
@@ -80,27 +79,10 @@ public:
 
 class GetCurrentConnectedDevicesCommand : public Command {
 public:
-    std::vector<Device> devices;
+    std::vector<MountRecord> records;
 
     void execute(CommandContext& ctx) override
     {
-        auto devNodes = ctx.mountRegistry.getAllDevNodes();
-
-        UdevDeviceResolver resolver;
-
-        for (const auto& devNode : devNodes) {
-            auto info = resolver.resolve(devNode.c_str());
-
-            if (!info) {
-                continue;
-            }
-
-            devices.push_back(
-                DeviceBuilder()
-                    .withInfo(*info)
-                    .withDevNode(devNode)
-                    .build()
-            );
-        }
+        auto records = ctx.mountRegistry.getAll();
     }
 };

@@ -2,6 +2,7 @@
 
 #include "Device.hpp"
 #include "DeviceInfo.hpp"
+#include "MountRecord.hpp"
 
 #include "../helpers/LoggerTestHelper.hpp"
 #include "../helpers/DataBaseTestHelper.hpp"
@@ -25,12 +26,12 @@ protected:
 
 TEST_F(DeviceRepositoryTest, AddAndGetAll) {
     // ARRANGE
-    Device d;
-    d.info.vendorId = "1234";
-    d.info.productId = "ABCD";
-    d.info.serial = "ABCDEF123456";
-    d.validTo = "2099-01-01";
-    dbHelper.get_repo().add(d);
+    MountRecord r;
+    r.info.vendorId = "1234";
+    r.info.productId = "ABCD";
+    r.info.serial = "ABCDEF123456";
+    std::string validTo = "2099-01-01";
+    dbHelper.get_repo().add(r, validTo);
 
     // ACT
     auto all = dbHelper.get_repo().getAll();
@@ -42,30 +43,30 @@ TEST_F(DeviceRepositoryTest, AddAndGetAll) {
 
 TEST_F(DeviceRepositoryTest, Exists_ReturnsTrue) {
     // ARRANGE
-    Device d;
-    d.info.vendorId = "1234";
-    d.info.productId = "ABCD";
-    d.validTo = "2099-01-01";
-    dbHelper.get_repo().add(d);
+    MountRecord r;
+    r.info.vendorId = "1234";
+    r.info.productId = "ABCD";
+    std::string validTo = "2099-01-01";
+    dbHelper.get_repo().add(r, validTo);
 
     // ACT
-    bool r = dbHelper.get_repo().exists(d.info);
+    auto id = dbHelper.get_repo().exists(r.info);
 
     // ASSERT
-    EXPECT_TRUE(r);
+    EXPECT_TRUE(id);
 }
 
 TEST_F(DeviceRepositoryTest, Exists_Expired_ReturnsFalse) {
     // ARRANGE
-    Device d;
-    d.info.vendorId = "1234";
-    d.info.productId = "ABCD";
-    d.validTo = "2000-01-01";
-    dbHelper.get_repo().add(d);
+    MountRecord r;
+    r.info.vendorId = "1234";
+    r.info.productId = "ABCD";
+    std::string validTo = "2005-01-01";
+    dbHelper.get_repo().add(r, validTo);
 
     // ACT
-    bool r = dbHelper.get_repo().exists(d.info);
+    auto id = dbHelper.get_repo().exists(r.info);
 
     // ASSERT
-    EXPECT_FALSE(r);
+    EXPECT_FALSE(id);
 }

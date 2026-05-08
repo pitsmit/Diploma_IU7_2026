@@ -17,7 +17,9 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     libsqlite3-dev \
     nlohmann-json3-dev \
-    libblkid-dev
+    libblkid-dev \
+    lcov \
+    gcovr
 
 RUN git clone https://github.com/pistacheio/pistache.git && \
     cd pistache && \
@@ -25,10 +27,32 @@ RUN git clone https://github.com/pistacheio/pistache.git && \
     ninja -C build && \
     ninja -C build install
 
+# =========================
+# Project
+# =========================
 WORKDIR /app
 
-COPY . .
+COPY CMakeLists.txt ./
+COPY src ./src
+COPY tests ./tests
+COPY sql ./sql
+COPY api-stubs ./api-stubs
+COPY external ./external
+COPY config.txt ./
 
-RUN cmake -B build -S . && cmake --build build
+# =========================
+# Configure with coverage
+# =========================
+RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Coverage
 
-CMD ["ctest", "--test-dir", "build", "--output-on-failure"]
+# =========================
+# Build
+# =========================
+RUN cmake --build build
+
+# =========================
+# Run tests + generate coverage
+# =========================
+COPY run-tests.sh /app/run-tests.sh
+
+CMD ["/app/run-tests.sh"]

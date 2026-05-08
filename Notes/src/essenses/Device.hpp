@@ -9,7 +9,6 @@ struct Device {
     size_t id;
     DeviceInfo info;
     std::optional<std::string> validTo;
-    std::optional<std::string> devNode;
 };
 
 class DeviceBuilder {
@@ -29,11 +28,6 @@ public:
 
     DeviceBuilder& withValidTo(const std::string& validTo) {
         device_.validTo = validTo;
-        return *this;
-    }
-
-    DeviceBuilder& withDevNode(const std::string& devNode) {
-        device_.devNode = devNode;
         return *this;
     }
 

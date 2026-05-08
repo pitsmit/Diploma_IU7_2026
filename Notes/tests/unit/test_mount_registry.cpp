@@ -1,89 +1,242 @@
 #include <gtest/gtest.h>
 
 #include "MountRegistry.hpp"
+#include "MountRecord.hpp"
 #include "DevLogger.hpp"
 #include "../helpers/LoggerTestHelper.hpp"
 
 class MountRegistryTest : public ::testing::Test {
 protected:
     LoggerTestHelper logger;
+    MountRegistry reg;
+    MountRecordBuilder builder;
 
-    void SetUp() override {
+    void SetUp() override
+    {
         logger.disable();
     }
 
-    void TearDown() override {
+    void TearDown() override
+    {
         logger.restore();
     }
 };
 
 TEST_F(MountRegistryTest, AddAndGet_ReturnsValue) {
     // ARRANGE
-    MountRegistry reg;
-    reg.add("/dev/sda1", "/media/dlp/1234_ABCD_XYZ");
-    std::string out;
+    const size_t id = 1;
+    const std::string devNode = "/dev/sda1";
+    const std::string mountPoint =
+        "/media/dlp/1234_ABCD_XYZ";
+
+    reg.add(
+        builder
+            .withId(id)
+            .withDevNode(devNode)
+            .withMountPoint(mountPoint)
+            .build()
+    );
 
     // ACT
-    bool found = reg.get("/dev/sda1", out);
+    auto record = reg.getByDevNode(devNode);
 
     // ASSERT
-    EXPECT_TRUE(found);
-    EXPECT_EQ(out, "/media/dlp/1234_ABCD_XYZ");
+    ASSERT_TRUE(record.has_value());
+
+    EXPECT_EQ(record->id, id);
+    EXPECT_EQ(record->devNode, devNode);
+    EXPECT_EQ(record->mountPoint, mountPoint);
 }
 
-TEST_F(MountRegistryTest, Get_NonExisting_ReturnsFalse) {
+TEST_F(MountRegistryTest, Get_NonExisting_ReturnsNullopt) {
     // ARRANGE
-    MountRegistry reg;
-    std::string out;
+    const std::string devNode =
+        "/dev/does_not_exist";
 
     // ACT
-    bool found = reg.get("/dev/does_not_exist", out);
+    auto record =
+        reg.getByDevNode(devNode);
 
     // ASSERT
-    EXPECT_FALSE(found);
+    EXPECT_FALSE(record.has_value());
 }
 
 TEST_F(MountRegistryTest, Add_OverwriteExistingValue) {
     // ARRANGE
-    MountRegistry reg;
-    reg.add("/dev/sda1", "first");
-    reg.add("/dev/sda1", "second");
-    std::string out;
+    const std::string devNode = "/dev/sda1";
+    const std::string firstMount = "first";
+    const std::string secondMount = "second";
+
+    reg.add(
+        builder
+            .withId(1)
+            .withDevNode(devNode)
+            .withMountPoint(firstMount)
+            .build()
+    );
+
+    reg.add(
+        builder
+            .withId(2)
+            .withDevNode(devNode)
+            .withMountPoint(secondMount)
+            .build()
+    );
 
     // ACT
-    reg.get("/dev/sda1", out);
+    auto record =
+        reg.getByDevNode(devNode);
 
     // ASSERT
-    EXPECT_EQ(out, "second");
+    ASSERT_TRUE(record.has_value());
+
+    EXPECT_EQ(record->id, 2);
+    EXPECT_EQ(record->mountPoint, secondMount);
 }
 
 TEST_F(MountRegistryTest, Remove_DeletesEntry) {
     // ARRANGE
-    MountRegistry reg;
-    reg.add("/dev/sda1", "mount");
-    reg.remove("/dev/sda1");
-    std::string out;
+    const std::string devNode = "/dev/sda1";
+    const std::string mountPoint = "mount";
+
+    reg.add(
+        builder
+            .withId(1)
+            .withDevNode(devNode)
+            .withMountPoint(mountPoint)
+            .build()
+    );
+
+    reg.removeByDevNode(devNode);
 
     // ACT
-    bool found = reg.get("/dev/sda1", out);
+    auto record =
+        reg.getByDevNode(devNode);
 
     // ASSERT
-    EXPECT_FALSE(found);
+    EXPECT_FALSE(record.has_value());
 }
 
-TEST_F(MountRegistryTest, GetAllDevNodes_ReturnsAllKeys) {
+TEST_F(MountRegistryTest, GetAll_ReturnsAllRecords) {
     // ARRANGE
-    MountRegistry reg;
-    reg.add("/dev/sda1", "m1");
-    reg.add("/dev/sdb1", "m2");
-    reg.add("/dev/sdc1", "m3");
+    const std::string devNode1 = "/dev/sda1";
+    const std::string devNode2 = "/dev/sdb1";
+    const std::string devNode3 = "/dev/sdc1";
+
+    reg.add(
+        builder
+            .withId(1)
+            .withDevNode(devNode1)
+            .withMountPoint("m1")
+            .build()
+    );
+
+    reg.add(
+        builder
+            .withId(2)
+            .withDevNode(devNode2)
+            .withMountPoint("m2")
+            .build()
+    );
+
+    reg.add(
+        builder
+            .withId(3)
+            .withDevNode(devNode3)
+            .withMountPoint("m3")
+            .build()
+    );
 
     // ACT
-    auto nodes = reg.getAllDevNodes();
+    auto records = reg.getAll();
 
     // ASSERT
-    EXPECT_EQ(nodes.size(), 3);
-    EXPECT_NE(std::find(nodes.begin(), nodes.end(), "/dev/sda1"), nodes.end());
-    EXPECT_NE(std::find(nodes.begin(), nodes.end(), "/dev/sdb1"), nodes.end());
-    EXPECT_NE(std::find(nodes.begin(), nodes.end(), "/dev/sdc1"), nodes.end());
+    EXPECT_EQ(records.size(), 3);
+
+    EXPECT_TRUE(
+        std::any_of(
+            records.begin(),
+            records.end(),
+            [&](const MountRecord& r) {
+                return r.devNode == devNode1;
+            }
+        )
+    );
+
+    EXPECT_TRUE(
+        std::any_of(
+            records.begin(),
+            records.end(),
+            [&](const MountRecord& r) {
+                return r.devNode == devNode2;
+            }
+        )
+    );
+
+    EXPECT_TRUE(
+        std::any_of(
+            records.begin(),
+            records.end(),
+            [&](const MountRecord& r) {
+                return r.devNode == devNode3;
+            }
+        )
+    );
+}
+
+TEST_F(MountRegistryTest, Exists_ExistingRecord_ReturnsTrue) {
+    // ARRANGE
+    const std::string devNode = "/dev/sda1";
+
+    reg.add(
+        builder
+            .withId(1)
+            .withDevNode(devNode)
+            .withMountPoint("mount")
+            .build()
+    );
+
+    // ACT
+    bool exists =
+        reg.exists(devNode);
+
+    // ASSERT
+    EXPECT_TRUE(exists);
+}
+
+TEST_F(MountRegistryTest, Exists_NonExistingRecord_ReturnsFalse) {
+    // ARRANGE
+    const std::string devNode = "/dev/unknown";
+
+    // ACT
+    bool exists =
+        reg.exists(devNode);
+
+    // ASSERT
+    EXPECT_FALSE(exists);
+}
+
+TEST_F(MountRegistryTest, Size_ReturnsCorrectCount) {
+    // ARRANGE
+    reg.add(
+        builder
+            .withId(1)
+            .withDevNode("/dev/sda1")
+            .withMountPoint("m1")
+            .build()
+    );
+
+    reg.add(
+        builder
+            .withId(2)
+            .withDevNode("/dev/sdb1")
+            .withMountPoint("m2")
+            .build()
+    );
+
+    // ACT
+    size_t count = reg.size();
+
+    // ASSERT
+    EXPECT_EQ(count, 2);
 }

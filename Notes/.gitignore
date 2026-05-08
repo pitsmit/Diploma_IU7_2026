@@ -13,6 +13,7 @@ app
 *.db
 build/
 test_scripts/
+coverage-report/
 
 *.aux
 *.xml

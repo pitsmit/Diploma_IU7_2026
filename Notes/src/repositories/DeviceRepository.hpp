@@ -3,6 +3,7 @@
 #include "DBConnection.hpp"
 #include "Device.hpp"
 #include "DeviceInfo.hpp"
+#include "MountRecord.hpp"
 
 #include <vector>
 #include <string>
@@ -21,18 +22,19 @@ public:
     explicit DeviceRepository(DBConnection& connection)
         : db(connection) {}
 
-    void add(const Device& device) {
+    int add(const MountRecord& d, std::optional<std::string> vld) {
         std::string sql =
             "INSERT INTO Device "
             "(vendorId, productId, serial, productName, vendorName, validTo) VALUES (" +
-            sqlValue(device.info.vendorId) + "," +
-            sqlValue(device.info.productId) + "," +
-            sqlValue(device.info.serial) + "," +
-            sqlValue(device.info.productName) + "," +
-            sqlValue(device.info.vendorName) + "," +
-            sqlValue(device.validTo) + ");";
+            sqlValue(d.info.vendorId) + "," +
+            sqlValue(d.info.productId) + "," +
+            sqlValue(d.info.serial) + "," +
+            sqlValue(d.info.productName) + "," +
+            sqlValue(d.info.vendorName) + "," +
+            sqlValue(vld) + ");";
         
         db.execute(sql);
+        return db.lastInsertId();
     }
 
     std::vector<Device> getAll() {
@@ -78,21 +80,23 @@ public:
         );
     }
 
-    bool exists(const DeviceInfo& info) {
+    int exists(const DeviceInfo& info)
+    {
         if (!info.vendorId || !info.productId) {
-            return false;
+            return 0;
         }
 
-        bool found = false;
+        int id = 0;
 
         std::string sql =
-            "SELECT 1 FROM Device WHERE "
+            "SELECT id FROM Device WHERE "
             "vendorId = '" + *info.vendorId + "' AND "
             "productId = '" + *info.productId + "'";
 
         if (info.serial) {
             sql += " AND serial = '" + *info.serial + "'";
-        } else {
+        }
+        else {
             sql += " AND serial IS NULL";
         }
 
@@ -101,10 +105,13 @@ public:
 
         db.query(
             sql,
-            [&](int /*cols*/, char** /*values*/, char** /*names*/) {
-                found = true;
+            [&](int /*cols*/, char** values, char** /*names*/)
+            {
+                if (values && values[0]) {
+                    id = std::stoi(values[0]);
+                }
             });
 
-        return found;
+        return id;
     }
 };
