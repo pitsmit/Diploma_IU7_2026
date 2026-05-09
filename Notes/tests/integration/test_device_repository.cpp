@@ -50,7 +50,7 @@ TEST_F(DeviceRepositoryTest, Exists_ReturnsTrue) {
     dbHelper.get_repo().add(r, validTo);
 
     // ACT
-    auto id = dbHelper.get_repo().exists(r.info);
+    auto id = dbHelper.get_repo().findActiveId(r.info);
 
     // ASSERT
     EXPECT_TRUE(id);
@@ -65,7 +65,7 @@ TEST_F(DeviceRepositoryTest, Exists_Expired_ReturnsFalse) {
     dbHelper.get_repo().add(r, validTo);
 
     // ACT
-    auto id = dbHelper.get_repo().exists(r.info);
+    auto id = dbHelper.get_repo().findActiveId(r.info);
 
     // ASSERT
     EXPECT_FALSE(id);

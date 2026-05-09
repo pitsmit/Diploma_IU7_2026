@@ -3,6 +3,7 @@
 #include "Facade.hpp"
 #include "DeviceCommands.hpp"
 #include "MountRecord.hpp"
+#include "UdevDeviceResolver.hpp"
 
 #include "../helpers/LoggerTestHelper.hpp"
 #include "../helpers/DataBaseTestHelper.hpp"
@@ -12,7 +13,7 @@ class WhiteListDeviceCommandTest : public ::testing::Test {
 protected:
     LoggerTestHelper logger;
     DataBaseTestHelper dbHelper;
-
+    UdevDeviceResolver resolver;
     MockMountSystem mock;
     std::unique_ptr<Facade> facade;
 
@@ -20,7 +21,7 @@ protected:
         logger.disable();
         dbHelper.create();
 
-        facade = std::make_unique<Facade>(dbHelper.get_db(), mock);
+        facade = std::make_unique<Facade>(dbHelper.get_db(), mock, resolver);
     }
 
     void TearDown() override {

@@ -4,6 +4,7 @@ set -e
 
 ctest --test-dir build --output-on-failure
 
+
 lcov --capture \
     --directory build \
     --base-directory /app \

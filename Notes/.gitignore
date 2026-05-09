@@ -14,6 +14,7 @@ app
 build/
 test_scripts/
 coverage-report/
+coverage.info
 
 *.aux
 *.xml

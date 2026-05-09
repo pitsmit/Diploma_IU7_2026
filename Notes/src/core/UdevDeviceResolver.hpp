@@ -2,8 +2,11 @@
 
 #include <optional>
 #include <libudev.h>
+#include <libmount/libmount.h>
 #include <sys/stat.h>
+#include <string.h>
 
+#include "MountRecord.hpp"
 #include "DeviceInfo.hpp"
 #include "IDeviceResolver.hpp"
 
@@ -71,5 +74,70 @@ public:
         udev_device_unref(dev);
         udev_unref(udev);
         return builder.build();
+    }
+
+
+    std::optional<std::string> getMountPoint(const std::string& devNode)
+    {
+        struct libmnt_table* tb = mnt_new_table_from_file("/proc/self/mountinfo");
+        if (!tb)
+            return std::nullopt;
+        struct libmnt_iter* itr = mnt_new_iter(MNT_ITER_FORWARD);
+        struct libmnt_fs* fs = nullptr;
+        if (!itr) {
+            mnt_free_table(tb);
+            return std::nullopt;
+        }
+        while (mnt_table_next_fs(tb, itr, &fs) == 0) {
+            const char* src = mnt_fs_get_source(fs);
+            const char* target = mnt_fs_get_target(fs);
+            if (!src || !target)
+                continue;
+            if (devNode == src) {
+                std::string mountpoint(target);
+                mnt_free_iter(itr);
+                mnt_free_table(tb);
+                return mountpoint;
+            }
+        }
+        mnt_free_iter(itr);
+        mnt_free_table(tb);
+        return std::nullopt;
+    }
+
+
+    std::optional<MODE> getMountMode(const std::string& mountpoint)
+    {
+        struct libmnt_table* tb =
+            mnt_new_table_from_file("/proc/self/mountinfo");
+        if (!tb)
+            return std::nullopt;
+        struct libmnt_iter* itr = mnt_new_iter(MNT_ITER_FORWARD);
+        struct libmnt_fs* fs = nullptr;
+        if (!itr) {
+            mnt_free_table(tb);
+            return std::nullopt;
+        }
+        while (mnt_table_next_fs(tb, itr, &fs) == 0) {
+            const char* target = mnt_fs_get_target(fs);
+            if (!target)
+                continue;
+            if (mountpoint == target) {
+                const char* opts = mnt_fs_get_options(fs);
+                if (!opts)
+                    break;
+                std::string options(opts);
+                mnt_free_iter(itr);
+                mnt_free_table(tb);
+                if (options.find("ro") != std::string::npos)
+                    return MODE::RO;
+                if (options.find("rw") != std::string::npos)
+                    return MODE::RW;
+                return std::nullopt;
+            }
+        }
+        mnt_free_iter(itr);
+        mnt_free_table(tb);
+        return std::nullopt;
     }
 };

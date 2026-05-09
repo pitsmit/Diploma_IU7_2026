@@ -14,6 +14,7 @@
 #include "MountUtils.hpp"
 #include "MountRecord.hpp"
 #include "UdevDeviceResolver.hpp"
+#include "MountManager.hpp"
 
 #include "../helpers/DataBaseTestHelper.hpp"
 #include "../helpers/LoggerTestHelper.hpp"
@@ -26,11 +27,12 @@ protected:
     DataBaseTestHelper dbHelper;
     std::string devNode;
     LinuxMountSystem sys;
-    MountRegistry registry;
+    std::unique_ptr<MountRegistry> registry;
     std::unique_ptr<DeviceControlService> svc;
     std::unique_ptr<MountUtils> utils;
     std::unique_ptr<PolicyManager> policy;
     std::unique_ptr<MockDeviceResolver> resolver;
+    std::unique_ptr<MountManager> mntman;
 
     std::unique_ptr<DeviceInfo> info;
     std::unique_ptr<DeviceEvent> event;
@@ -44,12 +46,12 @@ protected:
         utils = std::make_unique<MountUtils>(sys);
         policy = std::make_unique<PolicyManager>(dbHelper.get_db());
         resolver = std::make_unique<MockDeviceResolver>();
+        mntman = std::make_unique<MountManager>(*policy, *utils, *resolver);
+        registry = std::make_unique<MountRegistry>(dbHelper.get_db());
 
         svc = std::make_unique<DeviceControlService>(
-            *policy,
-            registry,
-            *utils,
-            *resolver
+            *registry,
+            *mntman
         );
 
         info = std::make_unique<DeviceInfo>(
@@ -101,7 +103,7 @@ TEST_F(RealMountTest, MountLoopDeviceReadOnly)
     svc->handleEvent(*event);
 
     // ASSERT
-    auto mount_rec = registry.getByDevNode(devNode);
+    auto mount_rec = registry->getByDevNode(devNode);
 
     ASSERT_TRUE(mount_rec.has_value());
     ASSERT_TRUE(isMounted(mount_rec->mountPoint));
@@ -118,7 +120,7 @@ TEST_F(RealMountTest, MountLoopDeviceReadWrite)
     svc->handleEvent(*event);
 
     // ASSERT
-    auto mnt_r = registry.getByDevNode(devNode);
+    auto mnt_r = registry->getByDevNode(devNode);
     ASSERT_TRUE(mnt_r.has_value());
     ASSERT_TRUE(isMounted(mnt_r->mountPoint));
     ASSERT_TRUE(isMountedAs(mnt_r->mountPoint, "rw"));

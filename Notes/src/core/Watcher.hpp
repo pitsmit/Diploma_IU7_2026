@@ -72,21 +72,23 @@ public:
                     continue;
                 }
 
+                char *devNode = (char *) udev_device_get_devnode(dev);
                 auto event = DeviceEventBuilder()
                                 .withType(EventType::INSERT)
-                                .withDevNode(udev_device_get_devnode(dev))
+                                .withDevNode(devNode)
                                 .build();
 
-                if (event.devNode)
+                if (!event.devNode.empty())
                     queue_.push(event);
             }
             else if (act == "remove") {
+                char *devNode = (char *) udev_device_get_devnode(dev);
                 auto event = DeviceEventBuilder()
                                 .withType(EventType::REMOVE)
-                                .withDevNode(udev_device_get_devnode(dev))
+                                .withDevNode(devNode)
                                 .build();
 
-                if (event.devNode)
+                if (!event.devNode.empty())
                     queue_.push(event);
             }
 

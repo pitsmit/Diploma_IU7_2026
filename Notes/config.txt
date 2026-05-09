@@ -1,5 +1,5 @@
 http.port=8080
-db.schema=sql/schema/001_create_device.sql
+db.schema=sql/schema/001_device_info.sql;sql/schema/002_device.sql;sql/schema/003_mount_record.sql
 db.path=app.db
 log.file=logs.txt
 log.level=info

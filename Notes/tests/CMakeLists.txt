@@ -49,6 +49,7 @@ target_include_directories(unit_tests PUBLIC
 
 target_link_libraries(unit_tests
     GTest::gtest_main
+    sqlite3
 )
 
 enable_coverage(unit_tests)
@@ -85,6 +86,7 @@ target_link_libraries(integration_tests
     sqlite3
     udev
     blkid
+    mount
 )
 
 enable_coverage(integration_tests)
@@ -102,3 +104,36 @@ add_compile_options(
     -Wunused
     -Wshadow
 )
+
+
+# =========================
+# E2E TESTS
+# =========================
+
+#find_package(CURL REQUIRED)
+#
+#add_executable(e2e_tests
+#    e2e/test_get_whitelist.cpp
+#)
+#
+#target_include_directories(e2e_tests PUBLIC
+#    ${PROJECT_SOURCE_DIR}/src/commands
+#    ${PROJECT_SOURCE_DIR}/src/core
+#    ${PROJECT_SOURCE_DIR}/src/essenses
+#    ${PROJECT_SOURCE_DIR}/src/facade
+#    ${PROJECT_SOURCE_DIR}/src/managers
+#    ${PROJECT_SOURCE_DIR}/src/repositories
+#    ${PROJECT_SOURCE_DIR}/src/services
+#    ${PROJECT_SOURCE_DIR}/external/spdlog/include
+#    ${PROJECT_SOURCE_DIR}/api-stubs/api
+#)
+#
+#target_link_libraries(e2e_tests
+#    GTest::gtest_main
+#    CURL::libcurl
+#    mount
+#)
+#
+#gtest_discover_tests(e2e_tests
+#    PROPERTIES LABELS "e2e"
+#)

@@ -9,6 +9,20 @@ struct DeviceInfo {
     std::optional<std::string> serial;
     std::optional<std::string> vendorName;
     std::optional<std::string> productName;
+
+    bool operator==(const DeviceInfo& other) const
+    {
+        return vendorId    == other.vendorId &&
+               productId   == other.productId &&
+               serial      == other.serial &&
+               vendorName  == other.vendorName &&
+               productName == other.productName;
+    }
+
+    bool operator!=(const DeviceInfo& other) const
+    {
+        return !(*this == other);
+    }
 };
 
 class DeviceInfoBuilder {

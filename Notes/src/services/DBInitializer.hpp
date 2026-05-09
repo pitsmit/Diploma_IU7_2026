@@ -19,7 +19,13 @@ private:
 public:
     static void init(DBConnection& db)
     {
-        std::string schemaPath = Config::getSchemaPath();
-        db.execute(loadSQL(schemaPath));
+        db.execute("PRAGMA foreign_keys = ON;");
+        std::vector<std::string> schemas =
+            Config::getSchemaPaths();
+
+        for (const auto& path : schemas) {
+            std::string sql = loadSQL(path);
+            db.execute(sql);
+        }
     }
 };

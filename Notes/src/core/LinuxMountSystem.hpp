@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <blkid/blkid.h>
 
+#include "DevLogger.hpp"
+
 class LinuxMountSystem : public IMountSystem {
 public:
     int mount(

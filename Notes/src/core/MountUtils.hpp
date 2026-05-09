@@ -4,6 +4,7 @@
 
 #include "DevLogger.hpp"
 #include "IMountSystem.hpp"
+#include "MountRecord.hpp"
 
 class MountUtils {
 private:
@@ -58,5 +59,15 @@ public:
         } else {
             mylog->info("Unmounted: {}", mountPoint);
         }
+    }
+
+    void remount(const MountRecord &record)
+    {
+        handleUnmount(record.mountPoint);
+        mountDevice(
+            record.devNode,
+            record.mountPoint,
+            record.mode == MODE::RO ? true : false
+        );
     }
 };

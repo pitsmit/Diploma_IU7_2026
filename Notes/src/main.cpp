@@ -7,6 +7,7 @@
 #include "Config.hpp"
 #include "LinuxMountSystem.hpp"
 #include "UdevDeviceResolver.hpp"
+#include "MountRecoveryService.hpp"
 
 #include <thread>
 #include <chrono>
@@ -17,28 +18,30 @@ private:
     Facade facade;
     HttpServer http;
     LinuxMountSystem linms;
+    UdevDeviceResolver resolver;
+    MountRecoveryService rec;
 
 public:
     App()
         : db(Config::getDBPath()),
-          facade(db, linms),
-          http(facade)
+          facade(db, linms, resolver),
+          http(facade),
+          rec(facade.registry(), resolver, facade.mounts())
     {
         DBInitializer::init(db);
     }
 
     void run()
     {
+        rec.run();
+        
         EventQueue<DeviceEvent> queue;
-        UdevDeviceResolver resolver;
 
         UdevWatcher watcher(queue);
 
         DeviceControlService service(
-            facade.policies(),
             facade.registry(),
-            facade.utils(),
-            resolver
+            facade.mounts()
         );
 
         EventLoop loop(queue, service);

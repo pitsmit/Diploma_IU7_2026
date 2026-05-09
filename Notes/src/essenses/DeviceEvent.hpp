@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 enum EventType {
     INSERT,
     REMOVE
@@ -7,7 +9,7 @@ enum EventType {
 
 struct DeviceEvent {
     EventType type;
-    const char *devNode;
+    std::string devNode;
 };
 
 

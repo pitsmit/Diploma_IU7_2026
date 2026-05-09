@@ -1,11 +1,11 @@
 #pragma once
 
 class DeviceManager;
+class MountManager;
 class MountRegistry;
-class MountUtils;
 
 struct CommandContext {
     DeviceManager& deviceManager;
     MountRegistry& mountRegistry;
-    MountUtils& mountUtils;
+    MountManager& mountManager;
 };

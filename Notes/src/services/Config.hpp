@@ -2,7 +2,9 @@
 
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <unordered_map>
+#include <vector>
 
 class Config {
 private:
@@ -59,12 +61,26 @@ public:
         return v.empty() ? 8080 : std::stoi(v);
     }
 
-    static std::string getSchemaPath()
+    static std::vector<std::string> getSchemaPaths()
     {
         std::string v = get("db.schema");
-        return v.empty()
-            ? "sql/schema/001_create_device.sql"
-            : v;
+
+        if (v.empty()) {
+            return {
+                "sql/schema/001_device_info.sql"
+            };
+        }
+
+        std::vector<std::string> result;
+        std::stringstream ss(v);
+        std::string item;
+
+        while (std::getline(ss, item, ';')) {
+            if (!item.empty())
+                result.push_back(item);
+        }
+
+        return result;
     }
 
     static std::string getDBPath()
@@ -78,12 +94,16 @@ public:
     static std::string getLogFile()
     {
         std::string v = get("log.file");
-        return v.empty() ? "logs.txt" : v;
+        return v.empty() 
+            ? "logs.txt" 
+            : v;
     }
 
     static std::string getLogLevel()
     {
         std::string v = get("log.level");
-        return v.empty() ? "info" : v;
+        return v.empty() 
+            ? "info" 
+            : v;
     }
 };

@@ -34,10 +34,15 @@ target_link_libraries(app
     pthread
     udev
     blkid
+    mount
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/sql
      DESTINATION ${CMAKE_BINARY_DIR}/tests)
+
+file(COPY ${CMAKE_SOURCE_DIR}/config.txt
+     DESTINATION ${CMAKE_BINARY_DIR}/tests)
+
 
 enable_testing()
 add_subdirectory(tests)
@@ -52,4 +57,6 @@ add_compile_options(
 if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
     add_compile_options(--coverage -O0 -g)
     add_link_options(--coverage)
+    add_compile_options(-fno-inline)
+    add_compile_options(-fno-default-inline)
 endif()

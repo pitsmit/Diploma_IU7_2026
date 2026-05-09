@@ -1,0 +1,26 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    cmake \
+    ninja-build \
+    g++ \
+    build-essential \
+    curl \
+    libcurl4-openssl-dev \
+    nlohmann-json3-dev
+
+WORKDIR /tests
+
+COPY . .
+
+RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+
+RUN cmake --build build --target e2e_tests
+
+COPY scripts/wait-for-app.sh /wait-for-app.sh
+
+RUN chmod +x /wait-for-app.sh
+
+CMD ["/wait-for-app.sh"]

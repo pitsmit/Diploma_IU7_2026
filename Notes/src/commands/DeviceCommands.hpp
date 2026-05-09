@@ -3,8 +3,8 @@
 #include "Device.hpp"
 #include "DeviceManager.hpp"
 #include "CommandContext.hpp"
-#include "MountUtils.hpp"
 #include "MountRegistry.hpp"
+#include "MountManager.hpp"
 
 class Command {
 public:
@@ -24,22 +24,17 @@ public:
 
 class AddDeviceToWhiteListCommand : public Command {
 private:
-    const MountRecord record;
+    MountRecord record;
     std::optional<std::string> validTo;
 
 public:
-    AddDeviceToWhiteListCommand(const MountRecord& d, std::optional<std::string> vld)
+    AddDeviceToWhiteListCommand(MountRecord& d, std::optional<std::string> vld)
         : record(d), validTo(vld) {}
 
     void execute(CommandContext& ctx) override {
         ctx.deviceManager.addToWhitelist(record, validTo);
-
-        ctx.mountUtils.handleUnmount(record.mountPoint);
-        ctx.mountUtils.mountDevice(
-            record.devNode,
-            record.mountPoint,
-            false
-        );
+        record.mode = MODE::RW;
+        ctx.mountManager.remount(record);
     }
 };
 
@@ -54,7 +49,7 @@ public:
     void execute(CommandContext& ctx) override {
         std::optional<MountRecord> r = ctx.mountRegistry.getById(id);
         if (r) {
-            ctx.mountUtils.handleUnmount(r->mountPoint);
+            ctx.mountManager.unmount(r->mountPoint);
             ctx.mountRegistry.removeByDevNode(r->devNode);
         }
         ctx.deviceManager.removeFromWhitelist(id);

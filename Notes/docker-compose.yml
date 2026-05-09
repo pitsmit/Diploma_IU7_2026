@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./build/app 
+    ports:
+      - "8080:8080"
+
+  e2e:
+    build:
+      context: .
+      dockerfile: Dockerfile.e2e
+    depends_on:
+      - app

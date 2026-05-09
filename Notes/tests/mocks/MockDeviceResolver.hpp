@@ -4,6 +4,7 @@
 #include <string>
 #include "IDeviceResolver.hpp"
 #include "DeviceInfo.hpp"
+#include "MountRecord.hpp"
 
 class MockDeviceResolver : public IDeviceResolver {
 private:
@@ -29,5 +30,16 @@ public:
             return std::nullopt;
         }
         return info_;
+    }
+
+    std::optional<std::string> getMountPoint(const std::string& devNode)
+    {
+        return nullptr;
+    }
+
+    std::optional<MODE> getMountMode(const std::string& mountpoint)
+    {
+        std::optional<MODE> a = MODE::RO;
+        return a;
     }
 };

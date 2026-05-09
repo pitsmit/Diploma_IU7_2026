@@ -12,6 +12,6 @@ public:
         : repo(db) {}
 
     int isAllowed(const DeviceInfo& dev) { 
-        return repo.exists(dev);
+        return repo.findActiveId(dev);
     }
 };

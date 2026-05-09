@@ -19,7 +19,10 @@ RUN apt-get update && apt-get install -y \
     nlohmann-json3-dev \
     libblkid-dev \
     lcov \
-    gcovr
+    gcovr \
+    curl \
+    libcurl4-openssl-dev \
+    libmount-dev
 
 RUN git clone https://github.com/pistacheio/pistache.git && \
     cd pistache && \

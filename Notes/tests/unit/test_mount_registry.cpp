@@ -3,22 +3,30 @@
 #include "MountRegistry.hpp"
 #include "MountRecord.hpp"
 #include "DevLogger.hpp"
+#include "DeviceInfo.hpp"
 #include "../helpers/LoggerTestHelper.hpp"
+#include "../helpers/DataBaseTestHelper.hpp"
 
 class MountRegistryTest : public ::testing::Test {
 protected:
     LoggerTestHelper logger;
-    MountRegistry reg;
+    std::unique_ptr<MountRegistry> reg;
+    DataBaseTestHelper dbHelper;
     MountRecordBuilder builder;
+    DeviceInfoBuilder bld;
 
     void SetUp() override
     {
         logger.disable();
+        dbHelper.create();
+        reg = std::make_unique<MountRegistry>(dbHelper.get_db());
     }
 
     void TearDown() override
     {
         logger.restore();
+        dbHelper.reset();
+        reg.reset();
     }
 };
 
@@ -28,17 +36,23 @@ TEST_F(MountRegistryTest, AddAndGet_ReturnsValue) {
     const std::string devNode = "/dev/sda1";
     const std::string mountPoint =
         "/media/dlp/1234_ABCD_XYZ";
+    const std::string vendorId = "1234";
+    const std::string productId = "ABCD";
+    const DeviceInfo info = bld.withProductId(productId)
+                            .withVendorId(vendorId).build();
 
-    reg.add(
+    reg->add(
         builder
             .withId(id)
             .withDevNode(devNode)
             .withMountPoint(mountPoint)
+            .withInfo(info)
+            .withMode(MODE::RO)
             .build()
     );
 
     // ACT
-    auto record = reg.getByDevNode(devNode);
+    auto record = reg->getByDevNode(devNode);
 
     // ASSERT
     ASSERT_TRUE(record.has_value());
@@ -55,7 +69,7 @@ TEST_F(MountRegistryTest, Get_NonExisting_ReturnsNullopt) {
 
     // ACT
     auto record =
-        reg.getByDevNode(devNode);
+        reg->getByDevNode(devNode);
 
     // ASSERT
     EXPECT_FALSE(record.has_value());
@@ -67,30 +81,37 @@ TEST_F(MountRegistryTest, Add_OverwriteExistingValue) {
     const std::string firstMount = "first";
     const std::string secondMount = "second";
 
-    reg.add(
+    const std::string vendorId = "1234";
+    const std::string productId = "ABCD";
+    const DeviceInfo info = bld.withProductId(productId)
+                            .withVendorId(vendorId).build();
+
+    reg->add(
         builder
             .withId(1)
             .withDevNode(devNode)
             .withMountPoint(firstMount)
+            .withInfo(info)
+            .withMode(MODE::RO)
             .build()
     );
 
-    reg.add(
+    reg->refresh(
         builder
-            .withId(2)
+            .withId(1)
             .withDevNode(devNode)
             .withMountPoint(secondMount)
+            .withInfo(info)
+            .withMode(MODE::RO)
             .build()
     );
 
     // ACT
     auto record =
-        reg.getByDevNode(devNode);
+        reg->getByDevNode(devNode);
 
     // ASSERT
     ASSERT_TRUE(record.has_value());
-
-    EXPECT_EQ(record->id, 2);
     EXPECT_EQ(record->mountPoint, secondMount);
 }
 
@@ -99,19 +120,26 @@ TEST_F(MountRegistryTest, Remove_DeletesEntry) {
     const std::string devNode = "/dev/sda1";
     const std::string mountPoint = "mount";
 
-    reg.add(
+    const std::string vendorId = "1234";
+    const std::string productId = "ABCD";
+    const DeviceInfo info = bld.withProductId(productId)
+                            .withVendorId(vendorId).build();
+
+    reg->add(
         builder
             .withId(1)
             .withDevNode(devNode)
             .withMountPoint(mountPoint)
+            .withInfo(info)
+            .withMode(MODE::RO)
             .build()
     );
 
-    reg.removeByDevNode(devNode);
+    reg->removeByDevNode(devNode);
 
     // ACT
     auto record =
-        reg.getByDevNode(devNode);
+        reg->getByDevNode(devNode);
 
     // ASSERT
     EXPECT_FALSE(record.has_value());
@@ -123,32 +151,45 @@ TEST_F(MountRegistryTest, GetAll_ReturnsAllRecords) {
     const std::string devNode2 = "/dev/sdb1";
     const std::string devNode3 = "/dev/sdc1";
 
-    reg.add(
+    const DeviceInfo info1 = bld.withProductId("1234")
+                            .withVendorId("ABCD").build();
+    const DeviceInfo info2 = bld.withProductId("1244")
+                            .withVendorId("ABCD").build();
+    const DeviceInfo info3 = bld.withProductId("1254")
+                            .withVendorId("ABCD").build();
+
+    reg->add(
         builder
             .withId(1)
             .withDevNode(devNode1)
             .withMountPoint("m1")
+            .withInfo(info1)
+            .withMode(MODE::RO)
             .build()
     );
 
-    reg.add(
+    reg->add(
         builder
             .withId(2)
             .withDevNode(devNode2)
             .withMountPoint("m2")
+            .withInfo(info2)
+            .withMode(MODE::RO)
             .build()
     );
 
-    reg.add(
+    reg->add(
         builder
             .withId(3)
             .withDevNode(devNode3)
             .withMountPoint("m3")
+            .withInfo(info3)
+            .withMode(MODE::RO)
             .build()
     );
 
     // ACT
-    auto records = reg.getAll();
+    auto records = reg->getAll();
 
     // ASSERT
     EXPECT_EQ(records.size(), 3);
@@ -188,17 +229,22 @@ TEST_F(MountRegistryTest, Exists_ExistingRecord_ReturnsTrue) {
     // ARRANGE
     const std::string devNode = "/dev/sda1";
 
-    reg.add(
+    const DeviceInfo info = bld.withProductId("1234")
+                            .withVendorId("ABCD").build();
+
+    reg->add(
         builder
             .withId(1)
             .withDevNode(devNode)
             .withMountPoint("mount")
+            .withInfo(info)
+            .withMode(MODE::RO)
             .build()
     );
 
     // ACT
-    bool exists =
-        reg.exists(devNode);
+    auto exists =
+        reg->getByDevNode(devNode);
 
     // ASSERT
     EXPECT_TRUE(exists);
@@ -209,8 +255,8 @@ TEST_F(MountRegistryTest, Exists_NonExistingRecord_ReturnsFalse) {
     const std::string devNode = "/dev/unknown";
 
     // ACT
-    bool exists =
-        reg.exists(devNode);
+    auto exists =
+        reg->getByDevNode(devNode);
 
     // ASSERT
     EXPECT_FALSE(exists);
@@ -218,24 +264,33 @@ TEST_F(MountRegistryTest, Exists_NonExistingRecord_ReturnsFalse) {
 
 TEST_F(MountRegistryTest, Size_ReturnsCorrectCount) {
     // ARRANGE
-    reg.add(
+
+    const DeviceInfo info1 = bld.withProductId("1234")
+                            .withVendorId("ABCD").build();
+    const DeviceInfo info2 = bld.withProductId("1244")
+                            .withVendorId("ABCD").build();
+    reg->add(
         builder
             .withId(1)
             .withDevNode("/dev/sda1")
             .withMountPoint("m1")
+            .withInfo(info1)
+            .withMode(MODE::RO)
             .build()
     );
 
-    reg.add(
+    reg->add(
         builder
             .withId(2)
             .withDevNode("/dev/sdb1")
             .withMountPoint("m2")
+            .withInfo(info2)
+            .withMode(MODE::RO)
             .build()
     );
 
     // ACT
-    size_t count = reg.size();
+    size_t count = reg->getAll().size();
 
     // ASSERT
     EXPECT_EQ(count, 2);

@@ -22,7 +22,7 @@ TARGET = app
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ) -lsqlite3 -lpistache -pthread -ludev -lblkid -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(OBJ) -lsqlite3 -lpistache -pthread -ludev -lblkid -lmount -o $(TARGET)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
@@ -52,8 +52,11 @@ dcr-test:
 		-v /dev:/dev \
 		usb-test) && \
 	docker start -a $$CID && \
-	docker cp $$CID:/app/coverage-report ./coverage-report && \
+	docker cp $$CID:/app/coverage-report ./ && \
 	docker rm $$CID
+
+e2e:
+	docker-compose up --build
 
 
 install:

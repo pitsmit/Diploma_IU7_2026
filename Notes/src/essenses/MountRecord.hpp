@@ -4,11 +4,17 @@
 
 #include "DeviceInfo.hpp"
 
+enum MODE {
+    RO,
+    RW
+};
+
 struct MountRecord {
     size_t id;
     std::string devNode;
     std::string mountPoint;
     DeviceInfo info;
+    MODE mode;
 };
 
 class MountRecordBuilder {
@@ -40,6 +46,13 @@ public:
         const DeviceInfo& info)
     {
         record_.info = info;
+        return *this;
+    }
+
+    MountRecordBuilder& withMode(
+        const MODE& mode)
+    {
+        record_.mode = mode;
         return *this;
     }
 
