@@ -78,6 +78,6 @@ public:
     std::vector<MountRecord> records;
 
     void execute(CommandContext& ctx) override {
-        auto records = ctx.mountRegistry.getAll();
+        records = ctx.mountRegistry.getAll();
     }
 };

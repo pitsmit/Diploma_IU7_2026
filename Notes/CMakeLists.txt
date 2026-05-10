@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(ENABLE_COVERAGE "Enable coverage" ON)
 option(BUILD_HTTP_SERVER "Build HTTP server" ON)
-option(BUILD_E2E_TESTS "Build e2e tests" OFF)
+option(ENABLE_TEST_API "Enable test-only HTTP endpoints" ON)
 
 # =========================
 # Sources
@@ -72,6 +72,10 @@ if(BUILD_HTTP_SERVER)
     target_compile_definitions(app PUBLIC BUILD_HTTP_SERVER)
 endif()
 
+if(ENABLE_TEST_API)
+    target_compile_definitions(app PUBLIC ENABLE_TEST_API)
+endif()
+
 # =========================
 # Link libraries
 # =========================
@@ -100,6 +104,12 @@ file(COPY ${CMAKE_SOURCE_DIR}/sql
 
 file(COPY ${CMAKE_SOURCE_DIR}/config.txt
      DESTINATION ${CMAKE_BINARY_DIR}/tests)
+file(RENAME
+     ${CMAKE_BINARY_DIR}/tests/config.txt
+     ${CMAKE_BINARY_DIR}/tests/config.base.txt)
+     
+file(COPY ${CMAKE_SOURCE_DIR}/config.txt
+     DESTINATION ${CMAKE_BINARY_DIR}/tests)
 
 enable_testing()
 add_subdirectory(tests)
@@ -125,3 +135,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
     add_compile_options(-fno-default-inline)
     add_link_options(--coverage)
 endif()
+
+set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -fsanitize=address -g")

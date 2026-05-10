@@ -27,6 +27,12 @@ private:
     void patch_valid_to_device_handler(const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response);
     void get_usb_white_list_handler(const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response);
     void get_current_connected_devices_list_handler(const Pistache::Rest::Request&, Pistache::Http::ResponseWriter response);
+
+    #ifdef ENABLE_TEST_API
+    void seed_whitelist_handler(
+        const Pistache::Rest::Request&,
+        Pistache::Http::ResponseWriter);
+    #endif
 };
 
 }

@@ -18,6 +18,11 @@ services:
 
     ports:
       - "8080:8080"
+    
+    privileged: true
+
+    volumes:
+      - ./logs.txt:/app/logs.txt
 
   e2e:
     build:

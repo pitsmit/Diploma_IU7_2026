@@ -3,40 +3,58 @@
 #include <fstream>
 #include <cstdio>
 #include <string>
-#include <unordered_map>
+#include <filesystem>
 
 #include "Config.hpp"
 
-class ConfigFileBuilder {
-private:
-    std::unordered_map<std::string, std::string> data;
+#include "../helpers/ConfigFileBuilder.hpp"
 
-public:
-    ConfigFileBuilder& add(const std::string& key, const std::string& value) {
-        data[key] = value;
-        return *this;
+class ConfigTest : public ::testing::Test {
+protected:
+    inline static std::string originalContent;
+
+    inline static constexpr const char* FILE_NAME = "config.txt";
+    inline static constexpr const char* BASE_FILE_NAME = "config.base.txt";
+
+    static void restoreConfig()
+    {
+        std::ofstream output(
+            FILE_NAME,
+            std::ios::binary | std::ios::trunc);
+
+        output << originalContent;
     }
 
-    void build(const std::string& path = "config.txt") {
-        std::ofstream f(path);
+    static void SetUpTestSuite()
+    {
+        std::ifstream input(BASE_FILE_NAME, std::ios::binary);
 
-        for (const auto& [k, v] : data) {
-            f << k << "=" << v << "\n";
-        }
+        originalContent.assign(
+            std::istreambuf_iterator<char>(input),
+            std::istreambuf_iterator<char>());
+    }
+
+    static void TearDownTestSuite()
+    {
+        restoreConfig();
+    }
+
+    void SetUp() override
+    {
+        restoreConfig();
     }
 };
 
-TEST(ConfigTest, MissingConfigFile)
+TEST_F(ConfigTest, MissingConfigFile)
 {
     // ARRANGE
-    std::rename("config.txt", "config.txt.bak");
+    std::remove(FILE_NAME);
 
-    // ASSERT
+    // ACT && ASSERT
     EXPECT_THROW(Config::getHttpPort(), FileException);
-    std::rename("config.txt.bak", "config.txt");
 }
 
-TEST(ConfigTest, MissingHttpPortKey)
+TEST_F(ConfigTest, MissingHttpPortKey)
 {
     // ARRANGE
     ConfigFileBuilder()
@@ -44,22 +62,24 @@ TEST(ConfigTest, MissingHttpPortKey)
         .add("log.file", "/tmp/log")
         .build();
 
-    // ASSERT
+    // ACT && ASSERT
     EXPECT_THROW(Config::getHttpPort(), FileException);
 }
 
-TEST(ConfigTest, ValidConfigReturnsHttpPort)
+TEST_F(ConfigTest, ValidConfigReturnsHttpPort)
 {
     // ARRANGE
+    const int port = 8080;
+
     ConfigFileBuilder()
-        .add("http.port", "8080")
+        .add("http.port", std::to_string(port))
         .add("db.path", "/tmp/db")
         .add("log.file", "/tmp/log")
         .build();
 
     // ACT
-    int port = Config::getHttpPort();
+    int result = Config::getHttpPort();
 
     // ASSERT
-    EXPECT_EQ(port, 8080);
+    EXPECT_EQ(result, port);
 }

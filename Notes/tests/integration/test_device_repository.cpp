@@ -26,10 +26,18 @@ protected:
 
 TEST_F(DeviceRepositoryTest, AddAndGetAll) {
     // ARRANGE
-    MountRecord r;
-    r.info.vendorId = "1234";
-    r.info.productId = "ABCD";
-    r.info.serial = "ABCDEF123456";
+    DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withVendorId("1234")
+            .withProductId("ABCD")
+            .withSerial("ABCDEF123456")
+            .build();
+
+    MountRecord r = 
+            MountRecordBuilder()
+            .withInfo(info)
+            .build();
+
     std::string validTo = "2099-01-01";
     dbHelper.get_repo().add(r, validTo);
 
@@ -43,9 +51,17 @@ TEST_F(DeviceRepositoryTest, AddAndGetAll) {
 
 TEST_F(DeviceRepositoryTest, Exists_ReturnsTrue) {
     // ARRANGE
-    MountRecord r;
-    r.info.vendorId = "1234";
-    r.info.productId = "ABCD";
+    DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withVendorId("1234")
+            .withProductId("ABCD")
+            .build();
+
+    MountRecord r = 
+            MountRecordBuilder()
+            .withInfo(info)
+            .build();
+            
     std::string validTo = "2099-01-01";
     dbHelper.get_repo().add(r, validTo);
 
@@ -58,9 +74,17 @@ TEST_F(DeviceRepositoryTest, Exists_ReturnsTrue) {
 
 TEST_F(DeviceRepositoryTest, Exists_Expired_ReturnsFalse) {
     // ARRANGE
-    MountRecord r;
-    r.info.vendorId = "1234";
-    r.info.productId = "ABCD";
+    DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withVendorId("1234")
+            .withProductId("ABCD")
+            .build();
+
+    MountRecord r = 
+            MountRecordBuilder()
+            .withInfo(info)
+            .build();
+            
     std::string validTo = "2005-01-01";
     dbHelper.get_repo().add(r, validTo);
 

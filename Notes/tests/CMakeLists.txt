@@ -31,7 +31,6 @@ endfunction()
 # =========================
 add_executable(unit_tests
     unit/test_mount_point_builder.cpp
-    unit/test_mount_registry.cpp
     unit/test_mount_utils.cpp
     unit/test_config.cpp
 )
@@ -49,7 +48,6 @@ target_include_directories(unit_tests PUBLIC
 
 target_link_libraries(unit_tests
     GTest::gtest_main
-    sqlite3
 )
 
 enable_coverage(unit_tests)
@@ -67,6 +65,7 @@ add_executable(integration_tests
     integration/test_white_list_command.cpp
     integration/test_real_mount.cpp
     integration/test_delete_device_command.cpp
+    integration/test_mount_registry.cpp
 )
 
 target_include_directories(integration_tests PUBLIC

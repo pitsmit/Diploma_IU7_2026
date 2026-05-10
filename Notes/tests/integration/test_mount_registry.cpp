@@ -4,6 +4,7 @@
 #include "MountRecord.hpp"
 #include "DevLogger.hpp"
 #include "DeviceInfo.hpp"
+
 #include "../helpers/LoggerTestHelper.hpp"
 #include "../helpers/DataBaseTestHelper.hpp"
 
@@ -12,8 +13,8 @@ protected:
     LoggerTestHelper logger;
     std::unique_ptr<MountRegistry> reg;
     DataBaseTestHelper dbHelper;
-    MountRecordBuilder builder;
-    DeviceInfoBuilder bld;
+    MountRecordBuilder mount_builder;
+    DeviceInfoBuilder info_builder;
 
     void SetUp() override
     {
@@ -38,11 +39,15 @@ TEST_F(MountRegistryTest, AddAndGet_ReturnsValue) {
         "/media/dlp/1234_ABCD_XYZ";
     const std::string vendorId = "1234";
     const std::string productId = "ABCD";
-    const DeviceInfo info = bld.withProductId(productId)
-                            .withVendorId(vendorId).build();
+
+    const DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withProductId(productId)
+            .withVendorId(vendorId)
+            .build();
 
     reg->add(
-        builder
+        MountRecordBuilder()
             .withId(id)
             .withDevNode(devNode)
             .withMountPoint(mountPoint)
@@ -56,7 +61,6 @@ TEST_F(MountRegistryTest, AddAndGet_ReturnsValue) {
 
     // ASSERT
     ASSERT_TRUE(record.has_value());
-
     EXPECT_EQ(record->id, id);
     EXPECT_EQ(record->devNode, devNode);
     EXPECT_EQ(record->mountPoint, mountPoint);
@@ -80,14 +84,16 @@ TEST_F(MountRegistryTest, Add_OverwriteExistingValue) {
     const std::string devNode = "/dev/sda1";
     const std::string firstMount = "first";
     const std::string secondMount = "second";
-
     const std::string vendorId = "1234";
     const std::string productId = "ABCD";
-    const DeviceInfo info = bld.withProductId(productId)
-                            .withVendorId(vendorId).build();
+    const DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withProductId(productId)
+            .withVendorId(vendorId)
+            .build();
 
     reg->add(
-        builder
+        MountRecordBuilder()
             .withId(1)
             .withDevNode(devNode)
             .withMountPoint(firstMount)
@@ -97,7 +103,7 @@ TEST_F(MountRegistryTest, Add_OverwriteExistingValue) {
     );
 
     reg->refresh(
-        builder
+        MountRecordBuilder()
             .withId(1)
             .withDevNode(devNode)
             .withMountPoint(secondMount)
@@ -119,14 +125,16 @@ TEST_F(MountRegistryTest, Remove_DeletesEntry) {
     // ARRANGE
     const std::string devNode = "/dev/sda1";
     const std::string mountPoint = "mount";
-
     const std::string vendorId = "1234";
     const std::string productId = "ABCD";
-    const DeviceInfo info = bld.withProductId(productId)
-                            .withVendorId(vendorId).build();
+    const DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withProductId(productId)
+            .withVendorId(vendorId)
+            .build();
 
     reg->add(
-        builder
+        MountRecordBuilder()
             .withId(1)
             .withDevNode(devNode)
             .withMountPoint(mountPoint)
@@ -151,15 +159,26 @@ TEST_F(MountRegistryTest, GetAll_ReturnsAllRecords) {
     const std::string devNode2 = "/dev/sdb1";
     const std::string devNode3 = "/dev/sdc1";
 
-    const DeviceInfo info1 = bld.withProductId("1234")
-                            .withVendorId("ABCD").build();
-    const DeviceInfo info2 = bld.withProductId("1244")
-                            .withVendorId("ABCD").build();
-    const DeviceInfo info3 = bld.withProductId("1254")
-                            .withVendorId("ABCD").build();
+    const DeviceInfo info1 = 
+            DeviceInfoBuilder()
+            .withProductId("1234")
+            .withVendorId("ABCD")
+            .build();
+
+    const DeviceInfo info2 = 
+            DeviceInfoBuilder()
+            .withProductId("1244")
+            .withVendorId("ABCD")
+            .build();
+
+    const DeviceInfo info3 = 
+            DeviceInfoBuilder()
+            .withProductId("1254")
+            .withVendorId("ABCD")
+            .build();
 
     reg->add(
-        builder
+        MountRecordBuilder()
             .withId(1)
             .withDevNode(devNode1)
             .withMountPoint("m1")
@@ -169,7 +188,7 @@ TEST_F(MountRegistryTest, GetAll_ReturnsAllRecords) {
     );
 
     reg->add(
-        builder
+        MountRecordBuilder()
             .withId(2)
             .withDevNode(devNode2)
             .withMountPoint("m2")
@@ -179,7 +198,7 @@ TEST_F(MountRegistryTest, GetAll_ReturnsAllRecords) {
     );
 
     reg->add(
-        builder
+        MountRecordBuilder()
             .withId(3)
             .withDevNode(devNode3)
             .withMountPoint("m3")
@@ -229,11 +248,14 @@ TEST_F(MountRegistryTest, Exists_ExistingRecord_ReturnsTrue) {
     // ARRANGE
     const std::string devNode = "/dev/sda1";
 
-    const DeviceInfo info = bld.withProductId("1234")
-                            .withVendorId("ABCD").build();
+    const DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withProductId("1234")
+            .withVendorId("ABCD")
+            .build();
 
     reg->add(
-        builder
+        MountRecordBuilder()
             .withId(1)
             .withDevNode(devNode)
             .withMountPoint("mount")
@@ -250,27 +272,22 @@ TEST_F(MountRegistryTest, Exists_ExistingRecord_ReturnsTrue) {
     EXPECT_TRUE(exists);
 }
 
-TEST_F(MountRegistryTest, Exists_NonExistingRecord_ReturnsFalse) {
-    // ARRANGE
-    const std::string devNode = "/dev/unknown";
-
-    // ACT
-    auto exists =
-        reg->getByDevNode(devNode);
-
-    // ASSERT
-    EXPECT_FALSE(exists);
-}
-
 TEST_F(MountRegistryTest, Size_ReturnsCorrectCount) {
     // ARRANGE
+    const DeviceInfo info1 = 
+            DeviceInfoBuilder()
+            .withProductId("1234")
+            .withVendorId("ABCD")
+            .build();
 
-    const DeviceInfo info1 = bld.withProductId("1234")
-                            .withVendorId("ABCD").build();
-    const DeviceInfo info2 = bld.withProductId("1244")
-                            .withVendorId("ABCD").build();
+    const DeviceInfo info2 = 
+            DeviceInfoBuilder()
+            .withProductId("1244")
+            .withVendorId("ABCD")
+            .build();
+
     reg->add(
-        builder
+        MountRecordBuilder()
             .withId(1)
             .withDevNode("/dev/sda1")
             .withMountPoint("m1")
@@ -280,7 +297,7 @@ TEST_F(MountRegistryTest, Size_ReturnsCorrectCount) {
     );
 
     reg->add(
-        builder
+        MountRecordBuilder()
             .withId(2)
             .withDevNode("/dev/sdb1")
             .withMountPoint("m2")

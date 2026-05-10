@@ -1,51 +1,65 @@
 #include <gtest/gtest.h>
+#include <string>
 #include <filesystem>
 
 #include "MountPointBuilder.hpp"
 
+const std::string &base = "/media/dlp/";
+
 TEST(MountPointBuilderTest, Build_AllFieldsPresent) {
     // ARRANGE
-    DeviceInfo dev{
-        .vendorId = "1234",
-        .productId = "ABCD",
-        .serial = "ABCDEF123456"
-    };
+    const std::string &vendorId = "1234";
+    const std::string &productId = "7856";
+    const std::string &serial = "ACDC456IRHX";
+    const std::string &productName = "Galaxy";
+    const std::string &vendorName = "Samsung";
+
+    DeviceInfo dev = DeviceInfoBuilder()
+                        .withVendorId(vendorId)
+                        .withProductId(productId)
+                        .withSerial(serial)
+                        .withProductName(productName)
+                        .withVendorName(vendorName)
+                        .build();
+    
+    const std::string &expected = base + vendorId + "_" + productId + "_" + serial;
 
     // ACT
     std::string result = MountPointBuilder::build(dev);
 
     // ASSERT
-    EXPECT_EQ(result, "/media/dlp/1234_ABCD_ABCDEF123456");
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MountPointBuilderTest, Build_NoSerial) {
     // ARRANGE
-    DeviceInfo dev{
-        .vendorId = "1111",
-        .productId = "2222",
-        .serial = std::nullopt
-    };
+    const std::string &vendorId = "1234";
+    const std::string &productId = "7856";
+
+    DeviceInfo dev = DeviceInfoBuilder()
+                        .withVendorId(vendorId)
+                        .withProductId(productId)
+                        .build();
+
+    const std::string &expected = base + vendorId + "_" + productId + "_noserial";
 
     // ACT
     std::string result = MountPointBuilder::build(dev);
 
     // ASSERT
-    EXPECT_EQ(result, "/media/dlp/1111_2222_noserial");
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MountPointBuilderTest, Build_MissingVendorAndProduct) {
     // ARRANGE
-    DeviceInfo dev{
-        .vendorId = std::nullopt,
-        .productId = std::nullopt,
-        .serial = std::nullopt
-    };
+    DeviceInfo dev = DeviceInfoBuilder().build();
+    const std::string &expected = base + "unknown_unknown_noserial";
 
     // ACT
     std::string result = MountPointBuilder::build(dev);
 
     // ASSERT
-    EXPECT_EQ(result, "/media/dlp/unknown_unknown_noserial");
+    EXPECT_EQ(result, expected);
 }
 
 TEST(MountPointBuilderTest, EnsureExists_CreatesDirectory) {

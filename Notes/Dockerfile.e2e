@@ -33,10 +33,11 @@ COPY config.txt ./
 # Configure
 # =========================
 
-RUN cmake -S . -B build -G Ninja \
+RUN rm -rf build && cmake -S . -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Debug \
     -DBUILD_HTTP_SERVER=ON \
-    -DBUILD_E2E_TESTS=ON
+    -DBUILD_E2E_TESTS=ON \
+    -DENABLE_TEST_API=ON
 
 # =========================
 # Build

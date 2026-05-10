@@ -4,6 +4,7 @@
 #include "Facade.hpp"
 #include "DeviceCommands.hpp"
 #include "MountRecord.hpp"
+#include "DeviceInfo.hpp"
 #include "UdevDeviceResolver.hpp"
 
 #include "../helpers/LoggerTestHelper.hpp"
@@ -22,24 +23,34 @@ protected:
     void SetUp() override {
         logger.disable();
         dbHelper.create();
-
-        facade = std::make_unique<Facade>(dbHelper.get_db(), mock, resolver);
+        facade = std::make_unique<Facade>(
+                    dbHelper.get_db(), 
+                    mock, 
+                    resolver);
     }
 
     void TearDown() override {
         facade.reset();
-        logger.restore();
         dbHelper.reset();
+        logger.restore();
     }
 };
 
 TEST_F(DeleteDeviceCommandTest, DeleteOk) {
     // ARRANGE
-    MountRecord d;
-    d.info.vendorId = "1234";
-    d.info.productId = "ABCD";
-    d.devNode = "/dev/test";
-    d.mountPoint = "/media/test";
+    DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withVendorId("1234")
+            .withProductId("ABCD")
+            .build();
+
+    MountRecord d = 
+            MountRecordBuilder()
+            .withDevNode("/dev/test")
+            .withMountPoint("/media/test")
+            .withInfo(info)
+            .build();
+        
     std::string validTo = "2099-01-01";
     d.id = facade->devices().addToWhitelist(d, validTo);
     facade->registry().add(d);

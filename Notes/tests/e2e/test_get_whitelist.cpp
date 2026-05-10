@@ -2,58 +2,60 @@
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 
-static size_t WriteCallback(
-    void* contents,
-    size_t size,
-    size_t nmemb,
-    void* userp)
+#include "../helpers/E2EHelper.hpp"
+
+using json = nlohmann::json;
+
+TEST(GetWhiteListE2E, ReturnsWhiteList)
 {
-    ((std::string*)userp)->append(
-        (char*)contents,
-        size * nmemb);
+    // ARRANGE
+    const std::string vendorId = "1234";
+    const std::string productId = "ABCD";
 
-    return size * nmemb;
-}
+    json body = {
+        {"id", 1},
+        {"devNode", "/dev/sdb1"},
+        {"mountPoint", "/mnt/usb"},
+        {
+            "info",
+            {
+                {"vendorId", vendorId},
+                {"productId", productId},
+                {"serial", "123456"},
+                {"vendorName", "SanDisk"},
+                {"productName", "Ultra"}
+            }
+        },
+        {"mode", "RW"},
+        {"validTo", "2027-01-01"}
+    };
 
-TEST(GetWhiteListE2E, ReturnsEmptyList)
-{
-    CURL* curl = curl_easy_init();
+    long postCode = 0;
 
-    ASSERT_NE(curl, nullptr);
+    request(
+        "POST",
+        "http://app:8080/api/test/seed/whitelist",
+        body.dump(),
+        postCode);
 
-    std::string response;
+    ASSERT_EQ(postCode, 201);
+    long getCode = 0;
 
-    curl_easy_setopt(
-        curl,
-        CURLOPT_URL,
-        "http://app:8080/api/v1/whitelist/");
+    // ACT
+    std::string response = request(
+        "GET",
+        "http://app:8080/api/v1/whitelist",
+        "",
+        getCode);
 
-    curl_easy_setopt(
-        curl,
-        CURLOPT_WRITEFUNCTION,
-        WriteCallback);
+    // ASSERT
+    ASSERT_EQ(getCode, 200);
 
-    curl_easy_setopt(
-        curl,
-        CURLOPT_WRITEDATA,
-        &response);
+    json result = json::parse(response);
 
-    CURLcode res = curl_easy_perform(curl);
+    ASSERT_TRUE(result.is_array());
+    ASSERT_EQ(result.size(), 1);
 
-    ASSERT_EQ(res, CURLE_OK);
-
-    long httpCode = 0;
-
-    curl_easy_getinfo(
-        curl,
-        CURLINFO_RESPONSE_CODE,
-        &httpCode);
-
-    EXPECT_EQ(httpCode, 200);
-
-    auto json = nlohmann::json::parse(response);
-
-    ASSERT_TRUE(json.is_array());
-
-    curl_easy_cleanup(curl);
+    EXPECT_EQ(result[0]["info"]["vendorId"], vendorId);
+    EXPECT_EQ(result[0]["info"]["productId"], productId);
 }

@@ -83,17 +83,18 @@ protected:
 
     void TearDown() override {
         svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
-        //system("losetup -D");
 
-        svc.reset();
-        resolver.reset();
         mount_rec.reset();
-        utils.reset();
-        policy.reset();
-        logger.restore();
-        dbHelper.reset();
         event.reset();
         info.reset();
+        svc.reset();
+        registry.reset();
+        mntman.reset();
+        resolver.reset();
+        policy.reset();
+        utils.reset();
+        dbHelper.reset();
+        logger.restore();
     }
 };
 

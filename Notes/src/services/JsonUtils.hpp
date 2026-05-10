@@ -6,77 +6,90 @@
 
 #include "DeviceInfo.hpp"
 #include "Device.hpp"
+#include "MountRecord.hpp"
+
+NLOHMANN_JSON_SERIALIZE_ENUM(MODE, {
+    {RO, "RO"},
+    {RW, "RW"}
+})
+
+template <typename T>
+std::optional<T> get_optional(const nlohmann::json& j, const std::string& key)
+{
+    if (j.contains(key) && !j.at(key).is_null())
+        return j.at(key).get<T>();
+    return std::nullopt;
+}
+
+template <typename T>
+T get_value(const nlohmann::json& j, const std::string& key, const T& defaultValue)
+{
+    if (j.contains(key) && !j.at(key).is_null())
+        return j.at(key).get<T>();
+    return defaultValue;
+}
+
+template <typename T>
+void set_optional(nlohmann::json& j, const std::string& key, const std::optional<T>& value)
+{
+    if (value.has_value())
+        j[key] = *value;
+    else
+        j[key] = nullptr;
+}
 
 inline void to_json(nlohmann::json& j, const DeviceInfo& info)
 {
     j = nlohmann::json::object();
 
-    j["vendorId"] =
-        info.vendorId
-            ? nlohmann::json(*info.vendorId)
-            : nlohmann::json(nullptr);
+    set_optional(j, "vendorId", info.vendorId);
+    set_optional(j, "productId", info.productId);
+    set_optional(j, "serial", info.serial);
+    set_optional(j, "vendorName", info.vendorName);
+    set_optional(j, "productName", info.productName);
+}
 
-    j["productId"] =
-        info.productId
-            ? nlohmann::json(*info.productId)
-            : nlohmann::json(nullptr);
-
-    j["serial"] =
-        info.serial
-            ? nlohmann::json(*info.serial)
-            : nlohmann::json(nullptr);
-
-    j["vendorName"] =
-        info.vendorName
-            ? nlohmann::json(*info.vendorName)
-            : nlohmann::json(nullptr);
-
-    j["productName"] =
-        info.productName
-            ? nlohmann::json(*info.productName)
-            : nlohmann::json(nullptr);
+inline void from_json(const nlohmann::json& j, DeviceInfo& info)
+{
+    info.vendorId = get_optional<std::string>(j, "vendorId");
+    info.productId = get_optional<std::string>(j, "productId");
+    info.serial = get_optional<std::string>(j, "serial");
+    info.vendorName = get_optional<std::string>(j, "vendorName");
+    info.productName = get_optional<std::string>(j, "productName");
 }
 
 inline void to_json(nlohmann::json& j, const Device& d)
 {
-    j = nlohmann::json{
-        {"id", d.id},
-        {"info", d.info},
-        {"validTo", *d.validTo}
-    };
-}
+    j = nlohmann::json::object();
 
-
-inline void from_json(const nlohmann::json& j, DeviceInfo& info)
-{
-    if (j.contains("vendorId") && !j["vendorId"].is_null()) {
-        info.vendorId = j["vendorId"].get<std::string>();
-    }
-    if (j.contains("productId") && !j["productId"].is_null()) {
-        info.productId = j["productId"].get<std::string>();
-    }
-    if (j.contains("serial") && !j["serial"].is_null()) {
-        info.serial = j["serial"].get<std::string>();
-    }
-    if (j.contains("vendorName") && !j["vendorName"].is_null()) {
-        info.vendorName = j["vendorName"].get<std::string>();
-    }
-    if (j.contains("productName") && !j["productName"].is_null()) {
-        info.productName = j["productName"].get<std::string>();
-    }
+    j["id"] = d.id;
+    j["info"] = d.info;
+    set_optional(j, "validTo", d.validTo);
 }
 
 inline void from_json(const nlohmann::json& j, Device& d)
 {
-    d.id = 0;
+    d.id = get_value<int>(j, "id", 0);
+    d.info = get_value<DeviceInfo>(j, "info", DeviceInfo{});
+    d.validTo = get_optional<std::string>(j, "validTo");
+}
 
-    if (j.contains("info")) {
-        d.info = j["info"].get<DeviceInfo>();
-    } else {
-        from_json(j, d.info);
-    }
+inline void to_json(nlohmann::json& j, const MountRecord& m)
+{
+    j = nlohmann::json::object();
 
-    if (j.contains("validTo") && !j["validTo"].is_null()) {
-        d.validTo = j["validTo"].get<std::string>();
-    }
+    j["id"] = m.id;
+    j["devNode"] = m.devNode;
+    j["mountPoint"] = m.mountPoint;
+    j["info"] = m.info;
+    j["mode"] = m.mode;
+}
+
+inline void from_json(const nlohmann::json& j, MountRecord& m)
+{
+    m.id = get_value<size_t>(j, "id", 0);
+    m.devNode = get_value<std::string>(j, "devNode", "");
+    m.mountPoint = get_value<std::string>(j, "mountPoint", "");
+    m.info = get_value<DeviceInfo>(j, "info", DeviceInfo{});
+    m.mode = get_value<MODE>(j, "mode", MODE::RW);
 }

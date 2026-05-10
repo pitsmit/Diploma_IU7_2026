@@ -37,6 +37,7 @@ COPY tests ./tests
 COPY sql ./sql
 COPY external ./external
 COPY config.txt ./
+RUN cp config.txt config.base.txt
 
 # =========================
 # Configure
@@ -45,7 +46,8 @@ COPY config.txt ./
 RUN cmake -S . -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Coverage \
     -DBUILD_HTTP_SERVER=OFF \
-    -DBUILD_E2E_TESTS=OFF
+    -DBUILD_E2E_TESTS=OFF \
+    -DENABLE_TEST_API=OFF
 
 # =========================
 # Build

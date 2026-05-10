@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "MountUtils.hpp"
+#include "Exceptions.hpp"
 
 #include "../helpers/LoggerTestHelper.hpp"
 #include "../mocks/MockMountSystem.hpp"
@@ -11,6 +12,8 @@ protected:
     LoggerTestHelper logger;
     MockMountSystem mock;
     std::unique_ptr<MountUtils> utils;
+    const std::string mountPath = "/mnt/test";
+    const std::string devNode = "/dev/sda1";
 
     void SetUp() override {
         logger.disable();
@@ -25,20 +28,20 @@ protected:
 
 TEST_F(MountUtilsTest, Mount_ReadWrite_Success) {
     // ACT
-    utils->mountDevice("/dev/sda1", "/mnt/test", false);
+    utils->mountDevice(devNode, mountPath, false);
 
     // ASSERT
     EXPECT_TRUE(mock.syncCalled);
     EXPECT_TRUE(mock.mountCalled);
-    EXPECT_EQ(mock.lastDev, "/dev/sda1");
-    EXPECT_EQ(mock.lastTarget, "/mnt/test");
+    EXPECT_EQ(mock.lastDev, devNode);
+    EXPECT_EQ(mock.lastTarget, mountPath);
     EXPECT_EQ(mock.lastFs, "ext4");
     EXPECT_EQ(mock.lastOpts, "rw,umask=0000");
 }
 
 TEST_F(MountUtilsTest, Mount_ReadOnly_Success) {
     // ACT
-    utils->mountDevice("/dev/sda1", "/mnt/test", true);
+    utils->mountDevice(devNode, mountPath, true);
 
     // ASSERT
     EXPECT_EQ(mock.lastOpts, "ro,umask=0000");
@@ -50,8 +53,8 @@ TEST_F(MountUtilsTest, Mount_ThrowsOnUnknownFs) {
 
     // ACT && ASSERT
     EXPECT_THROW(
-        utils->mountDevice("/dev/sda1", "/mnt/test", false),
-        std::runtime_error
+        utils->mountDevice(devNode, mountPath, false),
+        UnknownFsError
     );
 }
 
@@ -59,11 +62,11 @@ TEST_F(MountUtilsTest, Mount_Failure_ReturnsError) {
     // ARRANGE
     mock.mountResult = -1;
 
-    // ACT
-    utils->mountDevice("/dev/sda1", "/mnt/test", false);
-
-    // ASSERT
-    EXPECT_TRUE(mock.mountCalled);
+    // ACT && ASSERT
+    EXPECT_THROW(
+        utils->mountDevice(devNode, mountPath, false),
+        MountError
+    );
 }
 
 TEST_F(MountUtilsTest, Unmount_Success) {
@@ -71,21 +74,21 @@ TEST_F(MountUtilsTest, Unmount_Success) {
     mock.umountResult = 0;
 
     // ACT
-    utils->handleUnmount("/mnt/test");
+    utils->handleUnmount(mountPath);
 
     // ASSERT
     EXPECT_TRUE(mock.syncCalled);
     EXPECT_TRUE(mock.umountCalled);
-    EXPECT_EQ(mock.lastTarget, "/mnt/test");
+    EXPECT_EQ(mock.lastTarget, mountPath);
 }
 
 TEST_F(MountUtilsTest, Unmount_Failure) {
     // ARRANGE
     mock.umountResult = -1;
 
-    // ACT
-    utils->handleUnmount("/mnt/test");
-
-    // ASSERT
-    EXPECT_TRUE(mock.umountCalled);
+    // ACT && ASSERT
+    EXPECT_THROW(
+        utils->handleUnmount(mountPath),
+        UnMountError
+    );
 }

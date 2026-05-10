@@ -56,7 +56,8 @@ COPY config.txt ./
 
 RUN cmake -S . -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Debug \
-    -DBUILD_HTTP_SERVER=ON
+    -DBUILD_HTTP_SERVER=ON \
+    -DENABLE_TEST_API=ON
 
 # =========================
 # Build

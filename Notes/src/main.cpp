@@ -12,6 +12,7 @@
 #include "MountRecoveryService.hpp"
 
 #include <thread>
+#include <iostream>
 #include <chrono>
 
 class App {
@@ -39,6 +40,14 @@ public:
 
     void run()
     {
+        #ifdef BUILD_HTTP_SERVER
+        mylog->info("BUILD_HTTP_SERVER");
+        #endif
+
+        #ifdef ENABLE_TEST_API
+        mylog->info("ENABLE_TEST_API");
+        #endif
+
         rec.run();
         
         EventQueue<DeviceEvent> queue;
@@ -53,20 +62,41 @@ public:
         EventLoop loop(queue, service);
 
         std::jthread watcherThread([&] {
-            watcher.run();
+            try {
+                watcher.run();
+            }
+            catch (const std::exception& e) {
+                std::cerr << "watcher thread: "
+                        << e.what()
+                        << std::endl;
+            }
         });
 
         std::jthread loopThread([&] {
-            loop.run();
+            try {
+                loop.run();
+            }
+            catch (const std::exception& e) {
+                std::cerr << "loop thread: "
+                        << e.what()
+                        << std::endl;
+            }
         });
 
-        #ifdef BUILD_HTTP_SERVER
+    #ifdef BUILD_HTTP_SERVER
         std::jthread httpThread([&] {
-            http.start();
+            try {
+                http.start();
+            }
+            catch (const std::exception& e) {
+                std::cerr << "http thread: "
+                        << e.what()
+                        << std::endl;
+            }
         });
-        #endif
+    #endif
 
-        while (true) {
+        for (;;) {
             std::this_thread::sleep_for(
                 std::chrono::seconds(10));
         }

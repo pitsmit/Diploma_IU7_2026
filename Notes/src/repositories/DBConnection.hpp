@@ -15,7 +15,7 @@ private:
 public:
     explicit DBConnection(const std::string& dbPath) {
         if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK) {
-            throw new SqlDataBaseError("Failed to open SQLite database");
+            throw SqlDataBaseError("Failed to open SQLite database");
         }
     }
 
@@ -36,7 +36,7 @@ public:
         if (sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &errMsg) != SQLITE_OK) {
             std::string error = errMsg ? errMsg : "Unknown SQLite error";
             sqlite3_free(errMsg);
-            throw new SqlDataBaseError(error.c_str());
+            throw SqlDataBaseError(error.c_str());
         }   
     }
 

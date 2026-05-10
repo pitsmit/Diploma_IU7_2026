@@ -55,7 +55,7 @@ e2e-tests:
 	docker compose run --rm e2e
 
 clean-all-docker:
-	docker compose down --remove-orphans
+	docker system prune -a --volumes
 
 install:
 	@echo "Installing DLP USB policy..."

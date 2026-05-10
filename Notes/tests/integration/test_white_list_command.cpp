@@ -20,8 +20,10 @@ protected:
     void SetUp() override {
         logger.disable();
         dbHelper.create();
-
-        facade = std::make_unique<Facade>(dbHelper.get_db(), mock, resolver);
+        facade = std::make_unique<Facade>(
+                    dbHelper.get_db(), 
+                    mock, 
+                    resolver);
     }
 
     void TearDown() override {
@@ -33,9 +35,20 @@ protected:
 
 TEST_F(WhiteListDeviceCommandTest, ReturnsWhitelistFill) {
     // ARRANGE
-    MountRecord d;
-    d.info.vendorId = "1234";
-    d.info.productId = "ABCD";
+    const std::string vendorId = "1234";
+    const std::string productId = "ABCD";
+
+    const DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withProductId(productId)
+            .withVendorId(vendorId)
+            .build();
+
+    const MountRecord d = 
+            MountRecordBuilder()
+            .withInfo(info)
+            .build();
+            
     std::string validTo = "2099-01-01";
     facade->devices().addToWhitelist(d, validTo);
     GetWhiteListDeviceCommand cmd;
@@ -45,7 +58,7 @@ TEST_F(WhiteListDeviceCommandTest, ReturnsWhitelistFill) {
 
     // ASSERT
     ASSERT_EQ(cmd.list.size(), 1);
-    EXPECT_EQ(*cmd.list[0].info.vendorId, "1234");
+    EXPECT_EQ(*cmd.list[0].info.vendorId, vendorId);
 }
 
 TEST_F(WhiteListDeviceCommandTest, ReturnsEmptyWhiteList) {
