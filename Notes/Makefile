@@ -38,26 +38,24 @@ pre-bld-test:
 bld-test:
 	cmake --build build
 
+run-unit-tests:
+	ctest --test-dir build -L unit
+
 test:
 	ctest --test-dir build --output-on-failure
 
-dcr-bld-test:
-	docker build -t usb-test .
+bld-all-cont:
+	docker compose build
 
-dcr-test:
-	mkdir -p coverage-report
+def-tests:
+	docker compose run --rm tests
 
-	CID=$$(docker create \
-		--privileged \
-		-v /dev:/dev \
-		usb-test) && \
-	docker start -a $$CID && \
-	docker cp $$CID:/app/coverage-report ./ && \
-	docker rm $$CID
+e2e-tests:
+	docker compose up -d app
+	docker compose run --rm e2e
 
-e2e:
-	docker-compose up --build
-
+clean-all-docker:
+	docker compose down --remove-orphans
 
 install:
 	@echo "Installing DLP USB policy..."

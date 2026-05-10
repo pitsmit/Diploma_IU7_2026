@@ -4,7 +4,9 @@
 #include <sqlite3.h>
 #include <stdexcept>
 #include <functional>
+
 #include "DevLogger.hpp"
+#include "Exceptions.hpp"
 
 class DBConnection {
 private:
@@ -13,7 +15,7 @@ private:
 public:
     explicit DBConnection(const std::string& dbPath) {
         if (sqlite3_open(dbPath.c_str(), &db) != SQLITE_OK) {
-            throw std::runtime_error("Failed to open SQLite database");
+            throw new SqlDataBaseError("Failed to open SQLite database");
         }
     }
 
@@ -34,7 +36,7 @@ public:
         if (sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &errMsg) != SQLITE_OK) {
             std::string error = errMsg ? errMsg : "Unknown SQLite error";
             sqlite3_free(errMsg);
-            throw std::runtime_error(error);
+            throw new SqlDataBaseError(error.c_str());
         }   
     }
 
@@ -64,7 +66,7 @@ public:
 
             std::string error = errMsg ? errMsg : "Query error";
             sqlite3_free(errMsg);
-            throw std::runtime_error(error);
+            throw new SqlDataBaseError(error.c_str());
         }
     }
 

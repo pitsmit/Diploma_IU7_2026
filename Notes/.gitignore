@@ -11,7 +11,7 @@ logs.txt
 *.d
 app
 *.db
-build/
+build*/
 test_scripts/
 coverage-report/
 coverage.info

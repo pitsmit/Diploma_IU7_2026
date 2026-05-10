@@ -49,8 +49,9 @@ public:
     void execute(CommandContext& ctx) override {
         std::optional<MountRecord> r = ctx.mountRegistry.getById(id);
         if (r) {
-            ctx.mountManager.unmount(r->mountPoint);
-            ctx.mountRegistry.removeByDevNode(r->devNode);
+            r->mode = MODE::RO;
+            const std::optional<MountRecord> newrec = ctx.mountManager.remount(*r);
+            ctx.mountRegistry.refresh(*newrec);
         }
         ctx.deviceManager.removeFromWhitelist(id);
     }
@@ -76,8 +77,7 @@ class GetCurrentConnectedDevicesCommand : public Command {
 public:
     std::vector<MountRecord> records;
 
-    void execute(CommandContext& ctx) override
-    {
+    void execute(CommandContext& ctx) override {
         auto records = ctx.mountRegistry.getAll();
     }
 };

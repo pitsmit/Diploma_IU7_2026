@@ -8,6 +8,7 @@
 #include "IDeviceResolver.hpp"
 #include "MountPointBuilder.hpp"
 #include "MountRecord.hpp"
+#include "Exceptions.hpp"
 
 class MountManager {
 private:
@@ -31,12 +32,13 @@ public:
     {
         std::optional<DeviceInfo> info =
             resolver_.resolve(devNode.c_str());
+        
+        if (!info)
+            throw ResolveInfoError(("Coud not extract deviceInfo from devnode: " + devNode).c_str());
 
         std::string mountPoint =
             MountPointBuilder::build(*info);
-
         MountPointBuilder::ensureExists(mountPoint);
-
         int id = policyManager_.isAllowed(*info);
 
         mountUtils_.mountDevice(

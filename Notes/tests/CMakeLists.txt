@@ -33,6 +33,7 @@ add_executable(unit_tests
     unit/test_mount_point_builder.cpp
     unit/test_mount_registry.cpp
     unit/test_mount_utils.cpp
+    unit/test_config.cpp
 )
 
 target_include_directories(unit_tests PUBLIC
@@ -44,7 +45,6 @@ target_include_directories(unit_tests PUBLIC
     ${PROJECT_SOURCE_DIR}/src/repositories
     ${PROJECT_SOURCE_DIR}/src/services
     ${PROJECT_SOURCE_DIR}/external/spdlog/include
-    ${PROJECT_SOURCE_DIR}/api-stubs/api
 )
 
 target_link_libraries(unit_tests
@@ -78,7 +78,6 @@ target_include_directories(integration_tests PUBLIC
     ${PROJECT_SOURCE_DIR}/src/repositories
     ${PROJECT_SOURCE_DIR}/src/services
     ${PROJECT_SOURCE_DIR}/external/spdlog/include
-    ${PROJECT_SOURCE_DIR}/api-stubs/api
 )
 
 target_link_libraries(integration_tests
@@ -110,30 +109,33 @@ add_compile_options(
 # E2E TESTS
 # =========================
 
-#find_package(CURL REQUIRED)
-#
-#add_executable(e2e_tests
-#    e2e/test_get_whitelist.cpp
-#)
-#
-#target_include_directories(e2e_tests PUBLIC
-#    ${PROJECT_SOURCE_DIR}/src/commands
-#    ${PROJECT_SOURCE_DIR}/src/core
-#    ${PROJECT_SOURCE_DIR}/src/essenses
-#    ${PROJECT_SOURCE_DIR}/src/facade
-#    ${PROJECT_SOURCE_DIR}/src/managers
-#    ${PROJECT_SOURCE_DIR}/src/repositories
-#    ${PROJECT_SOURCE_DIR}/src/services
-#    ${PROJECT_SOURCE_DIR}/external/spdlog/include
-#    ${PROJECT_SOURCE_DIR}/api-stubs/api
-#)
-#
-#target_link_libraries(e2e_tests
-#    GTest::gtest_main
-#    CURL::libcurl
-#    mount
-#)
-#
-#gtest_discover_tests(e2e_tests
-#    PROPERTIES LABELS "e2e"
-#)
+if(BUILD_E2E_TESTS)
+
+find_package(CURL REQUIRED)
+
+add_executable(e2e_tests
+    e2e/test_get_whitelist.cpp
+)
+
+target_include_directories(e2e_tests PUBLIC
+    ${PROJECT_SOURCE_DIR}/src/commands
+    ${PROJECT_SOURCE_DIR}/src/core
+    ${PROJECT_SOURCE_DIR}/src/essenses
+    ${PROJECT_SOURCE_DIR}/src/facade
+    ${PROJECT_SOURCE_DIR}/src/managers
+    ${PROJECT_SOURCE_DIR}/src/repositories
+    ${PROJECT_SOURCE_DIR}/src/services
+    ${PROJECT_SOURCE_DIR}/external/spdlog/include
+    ${PROJECT_SOURCE_DIR}/api-stubs/api
+)
+
+target_link_libraries(e2e_tests
+    GTest::gtest_main
+    CURL::libcurl
+)
+
+gtest_discover_tests(e2e_tests
+    PROPERTIES LABELS "e2e"
+)
+
+endif()

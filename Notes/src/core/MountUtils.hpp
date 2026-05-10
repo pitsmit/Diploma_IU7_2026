@@ -5,6 +5,7 @@
 #include "DevLogger.hpp"
 #include "IMountSystem.hpp"
 #include "MountRecord.hpp"
+#include "Exceptions.hpp"
 
 class MountUtils {
 private:
@@ -23,7 +24,7 @@ public:
         std::string fsType = sys.getFsType(devnode);
 
         if (fsType.empty()) {
-            throw std::runtime_error("Unknown filesystem");
+            throw UnknownFsError(("Unknown filesystem for devnode: " + devnode).c_str());
         }
 
         std::string opts;
@@ -43,9 +44,13 @@ public:
         );
 
         if (res < 0) {
-            mylog->error(
-                std::string("mount failed: ") + strerror(errno)
-            );
+            std::string msg = 
+                std::string("mount failed for devnode: ") 
+                + devnode 
+                + std::string(" and mountPoint: ") 
+                + mountPoint 
+                + strerror(errno);
+            throw MountError(msg.c_str());
         }
     }
 
@@ -54,11 +59,14 @@ public:
         sys.sync();
 
         if (sys.umount(mountPoint) < 0) {
-            mylog->error(std::string("umount failed: ") +
-                        strerror(errno));
-        } else {
-            mylog->info("Unmounted: {}", mountPoint);
+            std::string msg = 
+                std::string("mount failed for mountPoint: ") 
+                + mountPoint 
+                + strerror(errno);
+            throw UnMountError(msg.c_str());
         }
+
+        mylog->info("Unmounted: {}", mountPoint);
     }
 
     void remount(const MountRecord &record)

@@ -6,49 +6,44 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Exceptions.hpp"
+
 class Config {
 private:
-    static inline const std::string configFile = "config.txt";
-    static inline std::unordered_map<std::string, std::string> cache;
-
-    static void load()
+    static const std::unordered_map<std::string, std::string>& getCache()
     {
-        if (!cache.empty()) {
-            return;
-        }
+        static std::unordered_map<std::string, std::string> cache;
 
-        std::ifstream file(configFile);
-        if (!file.is_open()) {
-            return;
-        }
-
-        std::string line;
-
-        while (std::getline(file, line)) {
-
-            if (line.empty() || line[0] == '#') {
-                continue;
+        static bool initialized = [] {
+            std::ifstream file("config.txt");
+            if (!file.is_open()) {
+                throw FileException("config.txt not found");
             }
 
-            auto pos = line.find('=');
-            if (pos == std::string::npos) {
-                continue;
+            std::string line;
+            while (std::getline(file, line)) {
+                if (line.empty() || line[0] == '#') continue;
+
+                auto pos = line.find('=');
+                if (pos == std::string::npos) continue;
+
+                cache[line.substr(0, pos)] = line.substr(pos + 1);
             }
 
-            std::string key = line.substr(0, pos);
-            std::string value = line.substr(pos + 1);
+            return true;
+        }();
 
-            cache[key] = value;
-        }
+        (void)initialized;
+        return cache;
     }
 
     static std::string get(const std::string& key)
     {
-        load();
+        const auto& cache = getCache();
 
         auto it = cache.find(key);
         if (it == cache.end()) {
-            return "";
+            throw FileException(("Missing config key: " + key).c_str());
         }
 
         return it->second;
@@ -57,23 +52,16 @@ private:
 public:
     static int getHttpPort()
     {
-        std::string v = get("http.port");
-        return v.empty() ? 8080 : std::stoi(v);
+        return std::stoi(get("http.port"));
     }
 
     static std::vector<std::string> getSchemaPaths()
     {
         std::string v = get("db.schema");
 
-        if (v.empty()) {
-            return {
-                "sql/schema/001_device_info.sql"
-            };
-        }
-
-        std::vector<std::string> result;
         std::stringstream ss(v);
         std::string item;
+        std::vector<std::string> result;
 
         while (std::getline(ss, item, ';')) {
             if (!item.empty())
@@ -83,27 +71,7 @@ public:
         return result;
     }
 
-    static std::string getDBPath()
-    {
-        std::string v = get("db.path");
-        return v.empty()
-            ? "app.db"
-            : v;
-    }
-
-    static std::string getLogFile()
-    {
-        std::string v = get("log.file");
-        return v.empty() 
-            ? "logs.txt" 
-            : v;
-    }
-
-    static std::string getLogLevel()
-    {
-        std::string v = get("log.level");
-        return v.empty() 
-            ? "info" 
-            : v;
-    }
+    static std::string getDBPath()  { return get("db.path"); }
+    static std::string getLogFile() { return get("log.file"); }
+    static std::string getLogLevel(){ return get("log.level"); }
 };

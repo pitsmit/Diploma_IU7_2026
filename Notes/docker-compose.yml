@@ -1,16 +1,21 @@
-version: '3.9'
-
 services:
+
   tests:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.tests
+
+    privileged: true
+
+    volumes:
+      - /dev:/dev
+      - ./coverage-report:/app/coverage-report
 
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-    command: ./build/app 
+      dockerfile: Dockerfile.app
+
     ports:
       - "8080:8080"
 
@@ -18,5 +23,3 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.e2e
-    depends_on:
-      - app

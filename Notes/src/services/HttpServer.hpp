@@ -5,6 +5,7 @@
 
 #include "DefaultApi.h"
 #include "Config.hpp"
+#include "Exceptions.hpp"
 
 class HttpServer {
 public:
@@ -15,20 +16,26 @@ public:
     {
         int port = Config::getHttpPort();
 
-        Pistache::Address addr(
+        try
+        {
+            Pistache::Address addr(
             Pistache::Ipv4::any(),
             Pistache::Port(port));
+            endpoint = std::make_unique<Pistache::Http::Endpoint>(addr);
+            auto router = std::make_shared<Pistache::Rest::Router>();
+            auto opts = Pistache::Http::Endpoint::options().threads(1);
+            endpoint->init(opts);
+            auto api = std::make_shared<api::DefaultApi>(router, facade);
+            api->init();
 
-        endpoint = std::make_unique<Pistache::Http::Endpoint>(addr);
-        auto router = std::make_shared<Pistache::Rest::Router>();
-        auto opts = Pistache::Http::Endpoint::options().threads(1);
-        endpoint->init(opts);
-        auto api = std::make_shared<api::DefaultApi>(router, facade);
-        api->init();
-
-        endpoint->setHandler(router->handler());
-        endpoint->serveThreaded();
-        mylog->info("Server started on port {}", port);
+            endpoint->setHandler(router->handler());
+            endpoint->serveThreaded();
+            mylog->info("Server started on port {}", port);
+        }
+        catch(const std::exception& e)
+        {
+            throw HttpServerError(e.what());
+        }
     }
 
 private:

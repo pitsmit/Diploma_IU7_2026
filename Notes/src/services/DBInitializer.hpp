@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DBConnection.hpp"
+#include "Exceptions.hpp"
 #include <fstream>
 #include <sstream>
 
@@ -9,7 +10,7 @@ private:
     static std::string loadSQL(const std::string& path) {
         std::ifstream file(path);
         if (!file.is_open()) {
-            throw std::runtime_error("Cannot open schema file: " + path);
+            throw FileException(("Cannot open schema file: " + path).c_str());
         }
         std::stringstream buffer;
         buffer << file.rdbuf();

@@ -1,6 +1,8 @@
 #include "Facade.hpp"
 #include "DBInitializer.hpp"
+#ifdef BUILD_HTTP_SERVER
 #include "HttpServer.hpp"
+#endif
 #include "EventQueue.hpp"
 #include "Watcher.hpp"
 #include "EventLoop.hpp"
@@ -16,7 +18,9 @@ class App {
 private:
     DBConnection db;
     Facade facade;
+    #ifdef BUILD_HTTP_SERVER
     HttpServer http;
+    #endif
     LinuxMountSystem linms;
     UdevDeviceResolver resolver;
     MountRecoveryService rec;
@@ -25,7 +29,9 @@ public:
     App()
         : db(Config::getDBPath()),
           facade(db, linms, resolver),
+          #ifdef BUILD_HTTP_SERVER
           http(facade),
+          #endif
           rec(facade.registry(), resolver, facade.mounts())
     {
         DBInitializer::init(db);
@@ -54,9 +60,11 @@ public:
             loop.run();
         });
 
+        #ifdef BUILD_HTTP_SERVER
         std::jthread httpThread([&] {
             http.start();
         });
+        #endif
 
         while (true) {
             std::this_thread::sleep_for(

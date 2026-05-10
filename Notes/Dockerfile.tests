@@ -7,25 +7,34 @@ ENV DEBIAN_FRONTEND=noninteractive
 # =========================
 
 RUN apt-get update && apt-get install -y \
-    cmake \
     ninja-build \
     g++ \
     build-essential \
-    curl \
+    cmake \
+    sqlite3 \
+    libsqlite3-dev \
+    nlohmann-json3-dev \
+    libudev-dev \
+    libblkid-dev \
+    libmount-dev \
     libcurl4-openssl-dev \
-    nlohmann-json3-dev
+    lcov \
+    gcovr \
+    dosfstools \
+    util-linux \
+    e2fsprogs \
+    kmod
 
 # =========================
 # Project
 # =========================
 
-WORKDIR /tests
+WORKDIR /app
 
 COPY CMakeLists.txt ./
 COPY src ./src
 COPY tests ./tests
 COPY sql ./sql
-COPY api-stubs ./api-stubs
 COPY external ./external
 COPY config.txt ./
 
@@ -34,18 +43,22 @@ COPY config.txt ./
 # =========================
 
 RUN cmake -S . -B build -G Ninja \
-    -DCMAKE_BUILD_TYPE=Debug \
-    -DBUILD_HTTP_SERVER=ON \
-    -DBUILD_E2E_TESTS=ON
+    -DCMAKE_BUILD_TYPE=Coverage \
+    -DBUILD_HTTP_SERVER=OFF \
+    -DBUILD_E2E_TESTS=OFF
 
 # =========================
 # Build
 # =========================
 
-RUN cmake --build build --target e2e_tests
+RUN cmake --build build
 
 # =========================
-# Run e2e
+# Test runner
 # =========================
 
-CMD ["./build/tests/e2e_tests"]
+COPY scripts/run-tests.sh /run-tests.sh
+
+RUN chmod +x /run-tests.sh
+
+CMD ["/run-tests.sh"]
