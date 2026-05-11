@@ -143,7 +143,8 @@ public:
             sql += " AND di.serial IS NULL";
         }
 
-        sql += " AND d.validTo >= date('now')";
+        sql += " AND (d.validTo IS NULL "
+            "OR d.validTo >= date('now'))";
         sql += " LIMIT 1;";
 
         db.query(

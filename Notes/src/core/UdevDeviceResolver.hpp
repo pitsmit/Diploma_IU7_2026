@@ -76,6 +76,65 @@ public:
         return builder.build();
     }
 
+    bool isUsbDevice(struct udev_device* dev)
+    {
+        struct udev_device* parent =
+            udev_device_get_parent_with_subsystem_devtype(
+                dev, "usb", "usb_device");
+
+        return parent != nullptr;
+    }
+
+    std::vector<std::string> getUsbDevNodes()
+    {
+        std::vector<std::string> result;
+        struct udev* udev = udev_new();
+        if (!udev)
+            return result;
+        struct udev_enumerate* enumerate =
+            udev_enumerate_new(udev);
+        if (!enumerate) {
+            udev_unref(udev);
+            return result;
+        }
+        // block devices
+        udev_enumerate_add_match_subsystem(
+            enumerate,
+            "block");
+        // только разделы
+        udev_enumerate_add_match_property(
+            enumerate,
+            "DEVTYPE",
+            "partition");
+        udev_enumerate_scan_devices(enumerate);
+        struct udev_list_entry* devices =
+            udev_enumerate_get_list_entry(enumerate);
+        struct udev_list_entry* entry;
+
+        udev_list_entry_foreach(entry, devices) {
+            const char* path =
+                udev_list_entry_get_name(entry);
+            struct udev_device* dev =
+                udev_device_new_from_syspath(
+                    udev,
+                    path);
+            if (!dev)
+                continue;
+            if (!isUsbDevice(dev)) {
+                udev_device_unref(dev);
+                continue;
+            }
+            const char* devNode =
+                udev_device_get_devnode(dev);
+            if (devNode)
+                result.emplace_back(devNode);
+            udev_device_unref(dev);
+        }
+        udev_enumerate_unref(enumerate);
+        udev_unref(udev);
+        return result;
+    }
+
 
     std::optional<std::string> getMountPoint(const std::string& devNode)
     {

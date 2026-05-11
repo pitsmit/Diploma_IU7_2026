@@ -2,6 +2,8 @@
 
 #include <optional>
 #include <string>
+#include <vector>
+
 #include "IDeviceResolver.hpp"
 #include "DeviceInfo.hpp"
 #include "MountRecord.hpp"
@@ -41,5 +43,14 @@ public:
     {
         std::optional<MODE> a = MODE::RO;
         return a;
+    }
+
+    std::vector<std::string> getUsbDevNodes()
+    {
+        return {
+            "/dev/sdb1",
+            "/dev/sdc1",
+            "/dev/sdd1"
+        };
     }
 };
