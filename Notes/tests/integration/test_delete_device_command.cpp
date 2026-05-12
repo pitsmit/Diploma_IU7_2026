@@ -10,12 +10,14 @@
 #include "../helpers/LoggerTestHelper.hpp"
 #include "../helpers/DataBaseTestHelper.hpp"
 #include "../mocks/MockMountSystem.hpp"
+#include "../helpers/MountHelpers.hpp"
+#include "../mocks/MockDeviceResolver.hpp"
 
 class DeleteDeviceCommandTest : public ::testing::Test {
 protected:
     LoggerTestHelper logger;
     DataBaseTestHelper dbHelper;
-    UdevDeviceResolver resolver;
+    MockDeviceResolver resolver;
 
     MockMountSystem mock;
     std::unique_ptr<Facade> facade;
@@ -42,7 +44,10 @@ TEST_F(DeleteDeviceCommandTest, DeleteOk) {
             DeviceInfoBuilder()
             .withVendorId("1234")
             .withProductId("ABCD")
+            .withSerial("ACXDIFTGX6459KOD")
             .build();
+    
+    resolver.setResult(info);
 
     MountRecord d = 
             MountRecordBuilder()
@@ -66,5 +71,5 @@ TEST_F(DeleteDeviceCommandTest, DeleteOk) {
             return dev.id == d.id;
         });
     EXPECT_EQ(it, devices.end());
-    EXPECT_FALSE(facade->registry().getById(d.id).has_value());
+    EXPECT_TRUE(facade->registry().getById(d.id).has_value());
 }

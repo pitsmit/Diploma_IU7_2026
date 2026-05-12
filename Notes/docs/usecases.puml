@@ -1,7 +1,6 @@
 @startuml
 left to right direction
 
-' Отключаем серый фон
 skinparam backgroundColor White
 skinparam actor {
   BackgroundColor White

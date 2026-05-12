@@ -42,6 +42,7 @@ TEST_F(WhiteListDeviceCommandTest, ReturnsWhitelistFill) {
             DeviceInfoBuilder()
             .withProductId(productId)
             .withVendorId(vendorId)
+            .withSerial("ACXDIFTGX6459KOD")
             .build();
 
     const MountRecord d = 

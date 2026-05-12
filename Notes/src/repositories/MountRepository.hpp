@@ -4,6 +4,7 @@
 #include "Device.hpp"
 #include "DeviceInfo.hpp"
 #include "MountRecord.hpp"
+#include "DevLogger.hpp"
 
 #include <vector>
 #include <string>
@@ -35,16 +36,8 @@ private:
         std::string sql =
             "SELECT id FROM DeviceInfo WHERE "
             "vendorId = " + sqlValue(info.vendorId) + " AND "
-            "productId = " + sqlValue(info.productId);
-
-        if (info.serial) {
-            sql += " AND serial = " + sqlValue(info.serial);
-        }
-        else {
-            sql += " AND serial IS NULL";
-        }
-
-        sql += " LIMIT 1;";
+            "productId = " + sqlValue(info.productId) + " AND "
+            "serial = " + sqlValue(info.serial) + " LIMIT 1;";
 
         int id = 0;
 

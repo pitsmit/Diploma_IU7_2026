@@ -5,17 +5,17 @@
 #include "MountRegistry.hpp"
 #include "MountPointBuilder.hpp"
 #include "MountRecord.hpp"
-#include "MountManager.hpp"
+#include "MountService.hpp"
 
 class DeviceControlService {
 private:
     MountRegistry& mountRegistry_;
-    MountManager& mountManager_;
+    MountService& mountManager_;
 
 public:
     DeviceControlService(
         MountRegistry& mountRegistry,
-        MountManager& mountManager
+        MountService& mountManager
     ) :
         mountRegistry_(mountRegistry),
         mountManager_(mountManager)

@@ -15,53 +15,200 @@ left to right direction
 ' =========================
 ' СУЩНОСТИ
 ' =========================
-class Device {
-  - id: number
-  - name: String
-  - vendorId: String
-  - productId: String
-  - serial: String
-  - validTo: Date
+
+package "Enums" {
+  enum MODE {
+      RO
+      RW
+  }
+
+  enum EventType {
+      INSERT
+      REMOVE
+  }
 }
+
+package "Models" {
+  class DeviceInfo {
+    - vendorId: String
+    - productId: String
+    - serial: String
+    - vendorName: String
+    - productName: String
+  }
+
+  class Device {
+    - id: number
+    - info: DeviceInfo
+    - validTo: Date
+  }
+
+  class DeviceEvent {
+    - type: EventType
+    - devNode: String
+  }
+
+  class MountRecord {
+    - id: number
+    - devNode: String
+    - devNode: mountPoint
+    - info: DeviceInfo
+    - mode: MODE
+  }
+}
+
+DeviceEvent --> EventType
+MountRecord --> MODE
+
+Device *-- DeviceInfo
+MountRecord *-- DeviceInfo
+
+' =========================
+' СТРОИТЕЛИ
+' =========================
+
+package "Builders" {
+  class MountRecordBuilder {
+    - record_: MountRecord
+  }
+
+  class DeviceEventBuilder {
+    - event_: DeviceEvent
+  }
+
+  class DeviceInfoBuilder {
+    - info_: DeviceInfo
+  }
+}
+
+MountRecordBuilder *-- MountRecord
+DeviceEventBuilder *-- DeviceEvent
+DeviceInfoBuilder *-- DeviceInfo
 
 ' =========================
 ' РЕПОЗИТОРИИ
 ' =========================
-class DeviceRepository
 class DBConnection
-DeviceRepository --* DBConnection
+
+package "Repositories" {
+  class DeviceRepository {
+    - db: DBConnection
+  }
+  class MountRepository {
+    - db: DBConnection
+  }
+}
+
+DeviceRepository *-- DBConnection
+MountRepository *-- DBConnection
 
 ' =========================
 ' МЕНЕДЖЕРЫ
 ' =========================
 package "Managers" {
-  class DeviceManager
+  class DeviceManager {
+    - repo: DeviceRepository
+  }
   class PolicyManager {
-    +isDeviceAllowed(Device)
+    - repo: DeviceRepository
   }
 }
 
-DeviceManager --* DeviceRepository
+DeviceManager *-- DeviceRepository
+PolicyManager *-- DeviceRepository
 
-DeviceManager ..> Device
-PolicyManager ..> Device
+' =========================
+' CORE
+' =========================
+interface IDeviceResolver
+class UdevDeviceResolver
+
+interface IMountSystem
+class LinuxMountSystem
+
+class UdevWatcher {
+  queue_: EventQueue
+}
+
+class MountRegistry {
+  - repo: MountRepository
+}
+
+class MountUtils {
+  - sys: IMountSystem
+}
+
+class MountManager {
+    - policyManager_: PolicyManager
+    - resolver_: IDeviceResolver
+    - mountUtils_: MountUtils
+}
+
+MountManager *-- PolicyManager
+MountManager *-- IDeviceResolver
+MountManager *-- MountUtils
+
+class DeviceControlService {
+  - mountRegistry_: MountRegistry
+  - mountManager_: MountManager
+}
+
+class MountRecoveryService {
+  - registry: MountRegistry
+  - resolver: IDeviceResolver
+  - manager: MountManager
+}
+
+IDeviceResolver <|.. UdevDeviceResolver
+IMountSystem <|.. LinuxMountSystem
+
+UdevWatcher *-- EventQueue
+
+MountRegistry *-- MountRepository
+
+DeviceControlService *-- MountRegistry
+DeviceControlService *-- MountManager
+
+MountUtils *-- IMountSystem
+
+MountRecoveryService *-- MountRegistry
+MountRecoveryService *-- IDeviceResolver
+MountRecoveryService *-- MountManager
 
 ' =========================
 ' ФАСАД
 ' =========================
 class Facade {
-  +execute(command)
+  - deviceManager: DeviceManager
+  - policyManager: PolicyManager
+  - mountRegistry: MountRegistry
+  - mountUtils: MountUtils
+  - mountManager: MountManager
+  - ctx: CommandContext
 }
 
-Facade o-- DeviceManager
+Facade *-- DeviceManager
+Facade *-- PolicyManager
+Facade *-- MountRegistry
+Facade *-- MountUtils
+Facade *-- MountManager
+Facade *-- CommandContext
 
 ' =========================
 ' КОМАНДЫ
 ' =========================
+class CommandContext {
+  - deviceManager: DeviceManager
+  - mountRegistry: MountRegistry
+  - mountManager: MountManager
+}
+
+CommandContext *-- DeviceManager
+CommandContext *-- MountRegistry
+CommandContext *-- MountManager
+
 package "Commands" {
-  class Command {
-    +execute()
-  }
+  class Command
   class GetWhiteListDeviceCommand
   class AddDeviceToWhiteListCommand
   class DeleteDeviceFromWhiteListCommand
@@ -69,56 +216,55 @@ package "Commands" {
   class GetCurrentConnectedDevicesCommand
 }
 
-Facade ..> Command
-
 Command <|-- GetWhiteListDeviceCommand
 Command <|-- AddDeviceToWhiteListCommand
 Command <|-- DeleteDeviceFromWhiteListCommand
 Command <|-- PatchValidToDeivceCommand
 Command <|-- GetCurrentConnectedDevicesCommand
 
-GetCurrentConnectedDevicesCommand ..> Device
-PatchValidToDeivceCommand --> Device
-AddDeviceToWhiteListCommand --> Device
-GetWhiteListDeviceCommand ..> Device
-
-' =========================
-' WATCHERS
-' =========================
-package "Watchers" {
-interface Watcher {
-    +start()
-}
-
-class MountWatcher
-}
-
-Watcher <|-- MountWatcher
-
 ' =========================
 ' ОЧЕРЕДЬ
 ' =========================
-class EventQueue {
-    +push(event)
-    +pop(event)
-}
+class EventQueue
 
 class EventLoop {
-    +run()
+  - queue_: EventQueue
+  - service_: DeviceControlService
 }
 
-EventLoop --> EventQueue
+EventLoop *-- EventQueue
+EventLoop *-- DeviceControlService
 
 class DeviceControlService {
     +handleEvent(event)
 }
 
-EventLoop --> DeviceControlService
+' =========================
+' UTILS && HELPERS && SERVICES
+' =========================
+class Config
+class DBInitializer
+class DevLogger
+class MountPointBuilder
 
-DeviceControlService --> DeviceManager
-DeviceControlService --> PolicyManager
+package "Exceptions" {
+  class BaseException
 
-MountWatcher --> EventQueue
-FanotifyWatcher --> EventQueue
+  class FileException
+  class HttpServerError
+  class SqlDataBaseError
+  class ResolveInfoError
+  class UnknownFsError
+  class MountError
+  class UnMountError
+}
+
+BaseException <|-- FileException
+BaseException <|-- HttpServerError
+BaseException <|-- SqlDataBaseError
+BaseException <|-- ResolveInfoError
+BaseException <|-- UnknownFsError
+BaseException <|-- MountError
+BaseException <|-- UnMountError
 
 @enduml

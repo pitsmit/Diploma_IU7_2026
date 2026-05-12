@@ -4,7 +4,7 @@
 #include "DeviceManager.hpp"
 #include "CommandContext.hpp"
 #include "MountRegistry.hpp"
-#include "MountManager.hpp"
+#include "MountService.hpp"
 
 class Command {
 public:
@@ -34,7 +34,7 @@ public:
     void execute(CommandContext& ctx) override {
         ctx.deviceManager.addToWhitelist(record, validTo);
         record.mode = MODE::RW;
-        ctx.mountManager.remount(record);
+        ctx.mountService.remount(record);
     }
 };
 
@@ -50,7 +50,7 @@ public:
         std::optional<MountRecord> r = ctx.mountRegistry.getById(id);
         if (r) {
             r->mode = MODE::RO;
-            const std::optional<MountRecord> newrec = ctx.mountManager.remount(*r);
+            const std::optional<MountRecord> newrec = ctx.mountService.remount(*r);
             ctx.mountRegistry.refresh(*newrec);
         }
         ctx.deviceManager.removeFromWhitelist(id);

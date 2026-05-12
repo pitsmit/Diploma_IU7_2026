@@ -1,0 +1,35 @@
+@startuml
+
+skinparam monochrome true
+skinparam linetype ortho
+
+entity DeviceInfo {
+    * id : INTEGER <<PK>>
+    --
+    vendorId : TEXT
+    productId : TEXT
+    serial : TEXT
+    productName : TEXT
+    vendorName : TEXT
+}
+
+entity Device {
+    * id : INTEGER <<PK>>
+    --
+    deviceInfoId : INTEGER <<FK>>
+    validTo : DATE
+}
+
+entity MountRecord {
+    * id : INTEGER <<PK>>
+    --
+    deviceInfoId : INTEGER <<FK>>
+    devNode : TEXT
+    mountPoint : TEXT
+    mode : TEXT
+}
+
+DeviceInfo ||--o{ Device
+DeviceInfo ||--o{ MountRecord
+
+@enduml

@@ -8,7 +8,7 @@
 #include "MountUtils.hpp"
 #include "IMountSystem.hpp"
 #include "IDeviceResolver.hpp"
-#include "MountManager.hpp"
+#include "MountService.hpp"
 
 class Facade {
 private: 
@@ -16,7 +16,7 @@ private:
     PolicyManager policyManager;
     MountRegistry mountRegistry;
     MountUtils mountUtils;
-    MountManager mountManager;
+    MountService mountManager;
     CommandContext ctx;
 
 public:
@@ -35,7 +35,7 @@ public:
 
     DeviceManager& devices() { return deviceManager; }
     PolicyManager& policies() { return policyManager; }
-    MountManager& mounts() { return mountManager; }
+    MountService& mounts() { return mountManager; }
     MountRegistry& registry() { return mountRegistry; }
     MountUtils& utils() { return mountUtils; }
 };

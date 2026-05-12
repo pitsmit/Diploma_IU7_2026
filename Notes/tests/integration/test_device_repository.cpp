@@ -55,6 +55,7 @@ TEST_F(DeviceRepositoryTest, Exists_ReturnsTrue) {
             DeviceInfoBuilder()
             .withVendorId("1234")
             .withProductId("ABCD")
+            .withSerial("ACXDIFTGX6459KOD")
             .build();
 
     MountRecord r = 
@@ -78,6 +79,7 @@ TEST_F(DeviceRepositoryTest, Exists_Expired_ReturnsFalse) {
             DeviceInfoBuilder()
             .withVendorId("1234")
             .withProductId("ABCD")
+            .withSerial("ACXDIFTGX6459KOD")
             .build();
 
     MountRecord r = 

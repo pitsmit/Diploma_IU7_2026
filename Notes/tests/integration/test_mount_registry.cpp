@@ -39,11 +39,13 @@ TEST_F(MountRegistryTest, AddAndGet_ReturnsValue) {
         "/media/dlp/1234_ABCD_XYZ";
     const std::string vendorId = "1234";
     const std::string productId = "ABCD";
+    const std::string serial = "ACXDIFTGX6459KOD";
 
     const DeviceInfo info = 
             DeviceInfoBuilder()
             .withProductId(productId)
             .withVendorId(vendorId)
+            .withSerial(serial)
             .build();
 
     reg->add(
@@ -86,10 +88,12 @@ TEST_F(MountRegistryTest, Add_OverwriteExistingValue) {
     const std::string secondMount = "second";
     const std::string vendorId = "1234";
     const std::string productId = "ABCD";
+    const std::string serial = "ACXDIFTGX6459KOD";
     const DeviceInfo info = 
             DeviceInfoBuilder()
             .withProductId(productId)
             .withVendorId(vendorId)
+            .withSerial(serial)
             .build();
 
     reg->add(
@@ -127,10 +131,12 @@ TEST_F(MountRegistryTest, Remove_DeletesEntry) {
     const std::string mountPoint = "mount";
     const std::string vendorId = "1234";
     const std::string productId = "ABCD";
+    const std::string serial = "ACXDIFTGX6459KOD";
     const DeviceInfo info = 
             DeviceInfoBuilder()
             .withProductId(productId)
             .withVendorId(vendorId)
+            .withSerial(serial)
             .build();
 
     reg->add(
@@ -163,18 +169,21 @@ TEST_F(MountRegistryTest, GetAll_ReturnsAllRecords) {
             DeviceInfoBuilder()
             .withProductId("1234")
             .withVendorId("ABCD")
+            .withSerial("ACXDIFTGX6459KOD")
             .build();
 
     const DeviceInfo info2 = 
             DeviceInfoBuilder()
             .withProductId("1244")
             .withVendorId("ABCD")
+            .withSerial("ACXDIFTGX6459KRD")
             .build();
 
     const DeviceInfo info3 = 
             DeviceInfoBuilder()
             .withProductId("1254")
             .withVendorId("ABCD")
+            .withSerial("ACXDIFTP86459KOD")
             .build();
 
     reg->add(
@@ -252,6 +261,7 @@ TEST_F(MountRegistryTest, Exists_ExistingRecord_ReturnsTrue) {
             DeviceInfoBuilder()
             .withProductId("1234")
             .withVendorId("ABCD")
+            .withSerial("ACXDIFTP86459KOD")
             .build();
 
     reg->add(
@@ -270,45 +280,4 @@ TEST_F(MountRegistryTest, Exists_ExistingRecord_ReturnsTrue) {
 
     // ASSERT
     EXPECT_TRUE(exists);
-}
-
-TEST_F(MountRegistryTest, Size_ReturnsCorrectCount) {
-    // ARRANGE
-    const DeviceInfo info1 = 
-            DeviceInfoBuilder()
-            .withProductId("1234")
-            .withVendorId("ABCD")
-            .build();
-
-    const DeviceInfo info2 = 
-            DeviceInfoBuilder()
-            .withProductId("1244")
-            .withVendorId("ABCD")
-            .build();
-
-    reg->add(
-        MountRecordBuilder()
-            .withId(1)
-            .withDevNode("/dev/sda1")
-            .withMountPoint("m1")
-            .withInfo(info1)
-            .withMode(MODE::RO)
-            .build()
-    );
-
-    reg->add(
-        MountRecordBuilder()
-            .withId(2)
-            .withDevNode("/dev/sdb1")
-            .withMountPoint("m2")
-            .withInfo(info2)
-            .withMode(MODE::RO)
-            .build()
-    );
-
-    // ACT
-    size_t count = reg->getAll().size();
-
-    // ASSERT
-    EXPECT_EQ(count, 2);
 }

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS DeviceInfo (
         productId NOT GLOB '*[^0-9A-Fa-f]*'
     ),
 
-    serial TEXT,
+    serial TEXT NOT NULL,
 
     vendorName TEXT,
     productName TEXT,

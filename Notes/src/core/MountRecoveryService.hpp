@@ -7,20 +7,20 @@
 
 #include "MountRecord.hpp"
 #include "MountRegistry.hpp"
-#include "MountManager.hpp"
+#include "MountService.hpp"
 #include "IDeviceResolver.hpp"
 
 class MountRecoveryService {
 private:
     MountRegistry &registry;
     IDeviceResolver &resolver;
-    MountManager &manager;
+    MountService &manager;
 
 public:
     explicit MountRecoveryService(
         MountRegistry& mr, 
         IDeviceResolver &rs,
-        MountManager& man
+        MountService& man
     )
             : registry(mr),
               resolver(rs),

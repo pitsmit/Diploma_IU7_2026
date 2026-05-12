@@ -10,14 +10,14 @@
 #include "MountRecord.hpp"
 #include "Exceptions.hpp"
 
-class MountManager {
+class MountService {
 private:
     PolicyManager& policyManager_;
     MountUtils& mountUtils_;
     IDeviceResolver& resolver_;
 
 public:
-    MountManager(
+    MountService(
         PolicyManager& policyManager,
         MountUtils& mountUtils,
         IDeviceResolver& resolver

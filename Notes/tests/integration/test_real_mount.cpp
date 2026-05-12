@@ -14,7 +14,7 @@
 #include "MountUtils.hpp"
 #include "MountRecord.hpp"
 #include "UdevDeviceResolver.hpp"
-#include "MountManager.hpp"
+#include "MountService.hpp"
 
 #include "../helpers/DataBaseTestHelper.hpp"
 #include "../helpers/LoggerTestHelper.hpp"
@@ -32,7 +32,7 @@ protected:
     std::unique_ptr<MountUtils> utils;
     std::unique_ptr<PolicyManager> policy;
     std::unique_ptr<MockDeviceResolver> resolver;
-    std::unique_ptr<MountManager> mntman;
+    std::unique_ptr<MountService> mntser;
 
     std::unique_ptr<DeviceInfo> info;
     std::unique_ptr<DeviceEvent> event;
@@ -46,18 +46,19 @@ protected:
         utils = std::make_unique<MountUtils>(sys);
         policy = std::make_unique<PolicyManager>(dbHelper.get_db());
         resolver = std::make_unique<MockDeviceResolver>();
-        mntman = std::make_unique<MountManager>(*policy, *utils, *resolver);
+        mntser = std::make_unique<MountService>(*policy, *utils, *resolver);
         registry = std::make_unique<MountRegistry>(dbHelper.get_db());
 
         svc = std::make_unique<DeviceControlService>(
             *registry,
-            *mntman
+            *mntser
         );
 
         info = std::make_unique<DeviceInfo>(
             DeviceInfoBuilder()
                 .withVendorId("1234")
                 .withProductId("5678")
+                .withSerial("ACXDIFTGX6459KOD")
                 .build()
         );
 
@@ -89,7 +90,7 @@ protected:
         info.reset();
         svc.reset();
         registry.reset();
-        mntman.reset();
+        mntser.reset();
         resolver.reset();
         policy.reset();
         utils.reset();
