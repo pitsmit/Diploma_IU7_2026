@@ -155,9 +155,10 @@ public:
         std::string sql =
             "SELECT mr.id, mr.deviceInfoId, mr.devNode, mr.mountPoint, mr.mode, "
             "di.vendorId, di.productId, di.serial, di.vendorName, di.productName "
-            "FROM MountRecord mr "
+            "FROM Device d "
+            "JOIN MountRecord mr ON mr.deviceInfoId = d.deviceInfoId "
             "JOIN DeviceInfo di ON mr.deviceInfoId = di.id "
-            "WHERE mr.id = " + std::to_string(id) + " LIMIT 1;";
+            "WHERE d.id = " + std::to_string(id) + " LIMIT 1;";
 
         db.query(sql,
             [&](int, char** v, char**) {

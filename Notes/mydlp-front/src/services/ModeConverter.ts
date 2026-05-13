@@ -1,10 +1,9 @@
-import { MODE } from '@/models/Device'
-
-export const modeToText = (mode: MODE): string => {
+export const modeToText = (mode: string): string => {
   switch (mode) {
-    case MODE.RO:
+    case "RO":
       return 'Только чтение'
-    case MODE.RW:
+    case "RW":
       return 'Полный доступ'
   }
+  return "Неопределено"
 }

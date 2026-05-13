@@ -8,14 +8,28 @@
       :key="index"
       class="list-row__item"
     >
+      <template v-if="editableDate && index === values.length - 1">
+      <input
+        type="date"
+        class="date-input"
+        :min="minDate"
+        :value="value === 'Бессрочно' ? '' : value"
+        @change="emit('update-date', ($event.target as HTMLInputElement).value)"
+      />
+    </template>
+
+    <template v-else>
       {{ value }}
+    </template>
     </div>
 
-    <div class="list-row__action">
+    <div 
+    :title="tooltipText" 
+    @click="handleClick"
+    class="list-row__action">
       <img
         :src="icon"
         class="icon"
-        @click="handleClick"
       />
     </div>
   </div>
@@ -24,20 +38,26 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { MODE } from '@/models/Device'
 import type { TableColumn } from '@/models/TableColumn'
 
 const props = defineProps<{
   values: string[]
   columns: TableColumn[]
-  mode?: MODE
+  mode?: string
   variant: 'device' | 'whitelist'
+
+  editableDate?: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'add'): void
   (e: 'delete'): void
+  (e: 'update-date', value: string): void
 }>()
+
+const minDate = computed(() => {
+  return new Date().toISOString().split('T')[0]
+})
 
 const gridStyle = computed(() => ({
   gridTemplateColumns: `${props.columns.map(c => c.width).join(' ')} 60px`
@@ -48,7 +68,7 @@ const icon = computed(() => {
     return new URL('@/assets/icons/trash.png', import.meta.url).href
   }
 
-  return props.mode === MODE.RW
+  return props.mode === "RW"
     ? new URL('@/assets/icons/check.png', import.meta.url).href
     : new URL('@/assets/icons/plus.png', import.meta.url).href
 })
@@ -59,10 +79,20 @@ const handleClick = () => {
     return
   }
 
-  if (props.mode === MODE.RO) {
+  if (props.mode === "RO") {
     emit('add')
   }
 }
+
+const tooltipText = computed(() => {
+  if (props.variant === 'whitelist') {
+    return 'Удалить'
+  }
+
+  return props.mode === "RW"
+    ? 'Уже добавлено'
+    : 'Добавить'
+})
 </script>
 
 <style scoped lang="scss">
@@ -78,7 +108,11 @@ const handleClick = () => {
   align-items: center;
   justify-content: center;
 
-  padding: 12px;
+  padding: 10px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: center;
 
   background-color: $c-lst-background;
 
@@ -92,6 +126,7 @@ const handleClick = () => {
 
 .list-row__action {
   width: 60px;
+  min-width: 60px;
 
   display: flex;
   align-items: center;
@@ -101,12 +136,21 @@ const handleClick = () => {
 
   border-bottom: $s-stroke solid $c-border;
   border-right: $s-stroke solid $c-border;
+  cursor: pointer;
 }
 
 .icon {
   width: 18px;
   height: 18px;
   object-fit: contain;
-  cursor: pointer;
+}
+
+.date-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font: inherit;
+  outline: none;
 }
 </style>

@@ -48,13 +48,12 @@ const gridStyle = computed(() => ({
   align-items: center;
   justify-content: center;
 
-  padding: 12px;
+  padding: 10px;
 
   background-color: $c-accent;
 
   color: $c-text;
   font-size: $s-txt;
-  font-weight: 500;
 
   border-top: $s-stroke solid $c-border;
   border-bottom: $s-stroke solid $c-border;
@@ -71,7 +70,6 @@ const gridStyle = computed(() => ({
 
 .list-header__action {
   width: 60px;
-  min-width: 60px;
 
   background-color: $c-accent;
 

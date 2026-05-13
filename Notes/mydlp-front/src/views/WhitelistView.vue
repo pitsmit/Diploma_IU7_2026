@@ -22,15 +22,17 @@
       :key="row.id"
       :columns="columns"
       :values="[
-        row.info.manufacturer,
-        row.info.name,
+        row.info.vendorName,
+        row.info.productName,
         row.info.serial,
         row.info.vendorId,
         row.info.productId,
-        row.trustedUntil.toISOString().split('T')[0] ?? ''
+        row.validTo
       ]"
       variant="whitelist"
+      editable-date
       @delete="remove(row.id)"
+      @update-date="updateDate(row.id, $event)"
     />
   </div>
 </template>
@@ -50,14 +52,37 @@ import type { TableColumn } from '@/models/TableColumn'
 const store = useDeviceStore()
 const router = useRouter()
 
+const load = () => {
+  store.loadWhitelist()
+}
+
+const goToList = () => {
+  router.push('/list/')
+}
+
+const remove = (id: number) => {
+  store.removeDeviceFromWhitelist(id)
+}
+
+const updateDate = (
+  id: number,
+  value: string
+) => {
+  store.updateValid(id, value)
+}
+
+onMounted(() => {
+  load()
+})
+
 const columns: TableColumn[] = [
   {
-    key: 'manufacturer',
+    key: 'vendorName',
     title: 'Производитель',
     width: '2fr'
   },
   {
-    key: 'name',
+    key: 'productName',
     title: 'Имя устройства',
     width: '2fr'
   },
@@ -69,45 +94,17 @@ const columns: TableColumn[] = [
   {
     key: 'vendorId',
     title: 'Идентификатор производителя',
-    width: '1fr'
+    width: '2fr'
   },
   {
     key: 'productId',
     title: 'Идентификатор продукта',
-    width: '1fr'
+    width: '2fr'
   },
   {
-    key: 'trustedUntil',
+    key: 'validTo',
     title: 'Доверено до',
     width: '2fr'
   }
 ]
-
-/**
- * load whitelist
- */
-const load = () => {
-  store.loadWhitelist()
-}
-
-/**
- * navigate back to devices list
- */
-const goToList = () => {
-  router.push('/list/')
-}
-
-/**
- * remove device from whitelist
- */
-const remove = (id: number) => {
-  store.removeDeviceFromWhitelist(id)
-}
-
-/**
- * initial load
- */
-onMounted(() => {
-  store.loadWhitelist()
-})
 </script>

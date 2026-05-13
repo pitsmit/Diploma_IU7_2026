@@ -20,7 +20,7 @@ public:
             dev.c_str(),
             target.c_str(),
             fs.c_str(),
-            readOnly ? MS_RDONLY | MS_NOEXEC : 0,
+            readOnly ? (MS_RDONLY | MS_NOEXEC) : 0,
             opts.empty() ? nullptr : opts.c_str()
         );
     }

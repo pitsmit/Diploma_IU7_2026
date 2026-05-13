@@ -1,6 +1,6 @@
 export type DeviceInfo = {
-  manufacturer: string
-  name: string
+  vendorName: string
+  productName: string
   serial: string
   vendorId: string
   productId: string

@@ -15,10 +15,10 @@
       :key="row.info.serial"
       :columns="columns"
       :values="[
-        row.mountpath,
+        row.mountPoint,
         modeToText(row.mode),
-        row.info.manufacturer,
-        row.info.name,
+        row.info.vendorName,
+        row.info.productName,
         row.info.serial,
         row.info.vendorId,
         row.info.productId
@@ -46,37 +46,25 @@ import { modeToText } from '@/services/ModeConverter'
 const store = useDeviceStore()
 const router = useRouter()
 
-/**
- * load devices
- */
 const load = () => {
   store.loadDevices()
 }
 
-/**
- * navigate to whitelist page
- */
 const goToWhitelist = () => {
   router.push('/whitelist/')
 }
 
-/**
- * add device to whitelist
- */
 const add = (device: Device) => {
   store.addDeviceToWhitelist(device)
 }
 
-/**
- * initial load
- */
 onMounted(() => {
-  store.loadDevices()
+  load()
 })
 
 const columns = [
   {
-    key: 'mountpath',
+    key: 'mountPoint',
     title: 'Путь монтирования',
     width: '2fr'
   },
@@ -86,12 +74,12 @@ const columns = [
     width: '1fr'
   },
   {
-    key: 'manufacturer',
+    key: 'vendorName',
     title: 'Производитель',
     width: '2fr'
   },
   {
-    key: 'name',
+    key: 'productName',
     title: 'Имя устройства',
     width: '2fr'
   },
@@ -102,13 +90,13 @@ const columns = [
   },
   {
     key: 'vendorId',
-    title: 'Vendor ID',
-    width: '1fr'
+    title: 'Идентификатор производителя',
+    width: '2fr'
   },
   {
     key: 'productId',
-    title: 'Product ID',
-    width: '1fr'
+    title: 'Идентификатор продукта',
+    width: '2fr'
   }
 ]
 </script>

@@ -74,3 +74,16 @@ install:
 	@sudo udevadm trigger
 
 	@echo "Done. USB automount disabled for block devices."
+
+front-setup:
+	sudo apt update
+	sudo apt install nginx
+	npm ci
+	npm run build
+	sudo mkdir -p /var/www/usb-ui
+	sudo cp -r dist/* /var/www/usb-ui/
+	sudo nano /etc/nginx/sites-available/usb-ui
+	sudo ln -s /etc/nginx/sites-available/usb-ui \
+           /etc/nginx/sites-enabled/
+	sudo nginx -t
+    sudo systemctl restart nginx

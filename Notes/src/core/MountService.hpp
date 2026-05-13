@@ -69,4 +69,9 @@ public:
         unmount(record.mountPoint);
         return mount(record.devNode);
     }
+
+    void remountSimple(MountRecord &record)
+    {
+        mountUtils_.remount(record);
+    }
 };

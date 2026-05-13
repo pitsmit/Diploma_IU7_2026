@@ -28,13 +28,16 @@ private:
     std::optional<std::string> validTo;
 
 public:
+    int id;
+
     AddDeviceToWhiteListCommand(MountRecord& d, std::optional<std::string> vld)
         : record(d), validTo(vld) {}
 
     void execute(CommandContext& ctx) override {
-        ctx.deviceManager.addToWhitelist(record, validTo);
+        id = ctx.deviceManager.addToWhitelist(record, validTo);
         record.mode = MODE::RW;
         ctx.mountService.remount(record);
+        ctx.mountRegistry.refresh(record);
     }
 };
 
@@ -50,8 +53,8 @@ public:
         std::optional<MountRecord> r = ctx.mountRegistry.getById(id);
         if (r) {
             r->mode = MODE::RO;
-            const std::optional<MountRecord> newrec = ctx.mountService.remount(*r);
-            ctx.mountRegistry.refresh(*newrec);
+            ctx.mountService.remountSimple(*r);
+            ctx.mountRegistry.refresh(*r);
         }
         ctx.deviceManager.removeFromWhitelist(id);
     }
@@ -69,7 +72,8 @@ public:
         : id(id), validTo(validTo) {}
 
     void execute(CommandContext& ctx) override {
-        ctx.deviceManager.patchValidTo(id, validTo);
+        mylog->info("validto: {}", *validTo);
+        ctx.deviceManager.patchValidTo(id, *validTo == "" ? std::nullopt : validTo);
     }
 };
 

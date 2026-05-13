@@ -32,7 +32,7 @@ public:
         if (readOnly) {
             opts = "ro,umask=0000";
         } else {
-            opts = "rw,umask=0000";
+            opts = "rw,uid=1000,gid=1000,umask=0000";
         }
 
         int res = sys.mount(

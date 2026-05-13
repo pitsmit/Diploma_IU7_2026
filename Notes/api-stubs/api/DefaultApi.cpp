@@ -5,6 +5,8 @@
 
 #include <nlohmann/json.hpp>
 
+#define CLIENT "http://localhost:5173"
+
 using json = nlohmann::json;
 
 namespace api
@@ -41,10 +43,39 @@ void DefaultApi::setupRoutes()
     Routes::Get(*router, "/api/v1/list",
         Routes::bind(&DefaultApi::get_current_connected_devices_list_handler, this));
 
+    Routes::Options(*router, "/api/v1/whitelist", 
+            Routes::bind(&DefaultApi::options_handler, this));
+    Routes::Options(*router, "/api/v1/whitelist/:id",
+        Routes::bind(&DefaultApi::options_handler, this));
+
     #ifdef ENABLE_TEST_API
     Routes::Post(*router, "/api/test/seed/whitelist",
         Routes::bind(&DefaultApi::seed_whitelist_handler, this));
     #endif
+}
+
+void addCorsHeaders(Pistache::Http::ResponseWriter& response)
+{
+    response.headers()
+        .add<Pistache::Http::Header::AccessControlAllowOrigin>(
+            "http://localhost:5173");
+
+    response.headers()
+        .add<Pistache::Http::Header::AccessControlAllowMethods>(
+            "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+
+    response.headers()
+        .add<Pistache::Http::Header::AccessControlAllowHeaders>(
+            "Content-Type");
+}
+
+void DefaultApi::options_handler(
+    const Pistache::Rest::Request& request,
+    Pistache::Http::ResponseWriter response)
+{
+    addCorsHeaders(response);
+
+    response.send(Pistache::Http::Code::No_Content);
 }
 
 void DefaultApi::add_device_to_white_list_handler(
@@ -52,6 +83,7 @@ void DefaultApi::add_device_to_white_list_handler(
     Pistache::Http::ResponseWriter response)
 {
     try {
+        addCorsHeaders(response);
         json body = json::parse(request.body());
 
         MountRecord record = body.get<MountRecord>();
@@ -65,7 +97,15 @@ void DefaultApi::add_device_to_white_list_handler(
 
         facade.execute(command);
 
-        response.send(Pistache::Http::Code::Created, "OK");
+        json result = {
+            { "id", command.id }
+        };
+
+        response.send(
+            Pistache::Http::Code::Created,
+            result.dump(),
+            MIME(Application, Json)
+        );
     }
     catch (const std::exception& e) {
         response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
@@ -77,6 +117,7 @@ void DefaultApi::delete_device_from_white_list_handler(
     Pistache::Http::ResponseWriter response)
 {
     try {
+        addCorsHeaders(response);
         size_t id = std::stoul(request.param(":id").as<std::string>());
 
         DeleteDeviceFromWhiteListCommand command(id);
@@ -95,6 +136,7 @@ void DefaultApi::patch_valid_to_device_handler(
     Pistache::Http::ResponseWriter response)
 {
     try {
+        addCorsHeaders(response);
         size_t id = std::stoul(request.param(":id").as<std::string>());
 
         json body = json::parse(request.body());
@@ -121,6 +163,7 @@ void DefaultApi::get_usb_white_list_handler(
     Pistache::Http::ResponseWriter response)
 {
     try {
+        addCorsHeaders(response);
         GetWhiteListDeviceCommand command;
 
         facade.execute(command);
@@ -139,11 +182,14 @@ void DefaultApi::get_current_connected_devices_list_handler(
     Pistache::Http::ResponseWriter response)
 {
     try {
+        addCorsHeaders(response);
+
         GetCurrentConnectedDevicesCommand command;
 
         facade.execute(command);
 
         json j = command.records;
+
 
         response.send(Pistache::Http::Code::Ok, j.dump());
     }

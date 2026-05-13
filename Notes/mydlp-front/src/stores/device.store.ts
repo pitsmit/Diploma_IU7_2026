@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 import type { Device } from '@/models/Device'
-import { MODE } from '@/models/Device'
 import type { WhitelistDevice } from '@/models/WhitelistDevice'
 
 import {
   fetchDevices,
   fetchWhitelist,
   addToWhitelist,
-  removeFromWhitelist
+  removeFromWhitelist,
+  updateValidTo
 } from '@/api/api'
 
 export const useDeviceStore = defineStore('device', () => {
@@ -20,17 +20,11 @@ export const useDeviceStore = defineStore('device', () => {
   const whitelist = ref<WhitelistDevice[]>([])
   const loading = ref(false)
 
-  /**
-   * load devices
-   */
   const loadDevices = async () => {
     loading.value = true
 
     const data = await fetchDevices()
 
-    /**
-     * нормализация гарантирует реактивность + безопасные объекты
-     */
     devices.value = data.map((d) => ({
       ...d,
       info: { ...d.info }
@@ -39,9 +33,6 @@ export const useDeviceStore = defineStore('device', () => {
     loading.value = false
   }
 
-  /**
-   * load whitelist
-   */
   const loadWhitelist = async () => {
     loading.value = true
 
@@ -50,17 +41,14 @@ export const useDeviceStore = defineStore('device', () => {
     whitelist.value = data.map((w) => ({
       ...w,
       info: { ...w.info },
-      trustedUntil: new Date(w.trustedUntil)
+      validTo: w.validTo ? w.validTo : 'Бессрочно'
     }))
 
     loading.value = false
   }
 
-  /**
-   * add device → whitelist
-   */
   const addDeviceToWhitelist = async (device: Device) => {
-    await addToWhitelist(device)
+    const id = await addToWhitelist(device)
 
     const exists = whitelist.value.some(
       (w) => w.info.serial === device.info.serial
@@ -68,33 +56,39 @@ export const useDeviceStore = defineStore('device', () => {
 
     if (!exists) {
       whitelist.value.push({
-        id: Date.now(),
+        id: id,
         info: { ...device.info },
-        trustedUntil: new Date('2026-12-31')
+        validTo: 'Бессрочно'
       })
     }
 
-    /**
-     * обновляем mode локально (RO → RW)
-     */
     const target = devices.value.find(
       (d) => d.info.serial === device.info.serial
     )
 
     if (target) {
-      target.mode = MODE.RW
+      target.mode = "RW"
     }
   }
 
-  /**
-   * remove from whitelist
-   */
   const removeDeviceFromWhitelist = async (id: number) => {
     await removeFromWhitelist(id)
 
     whitelist.value = whitelist.value.filter(
       (w) => w.id !== id
     )
+  }
+
+  const updateValid = async (id: number, validTo: string) => {
+    await updateValidTo(id, validTo)
+
+    const target = whitelist.value.find(
+      (w) => w.id === id
+    )
+
+    if (target) {
+      target.validTo = validTo
+    }
   }
 
   return {
@@ -106,6 +100,7 @@ export const useDeviceStore = defineStore('device', () => {
     loadWhitelist,
 
     addDeviceToWhitelist,
-    removeDeviceFromWhitelist
+    removeDeviceFromWhitelist,
+    updateValid
   }
 })
