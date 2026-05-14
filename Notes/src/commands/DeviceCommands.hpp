@@ -34,9 +34,9 @@ public:
         : record(d), validTo(vld) {}
 
     void execute(CommandContext& ctx) override {
-        id = ctx.deviceManager.addToWhitelist(record, validTo);
+        id = ctx.deviceManager.addToWhitelist(record.info, validTo);
         record.mode = MODE::RW;
-        ctx.mountService.remount(record);
+        ctx.mountService.remountSimple(record);
         ctx.mountRegistry.refresh(record);
     }
 };
@@ -72,7 +72,6 @@ public:
         : id(id), validTo(validTo) {}
 
     void execute(CommandContext& ctx) override {
-        mylog->info("validto: {}", *validTo);
         ctx.deviceManager.patchValidTo(id, *validTo == "" ? std::nullopt : validTo);
     }
 };

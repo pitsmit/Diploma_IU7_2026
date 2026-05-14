@@ -13,8 +13,6 @@ protected:
     LoggerTestHelper logger;
     std::unique_ptr<MountRegistry> reg;
     DataBaseTestHelper dbHelper;
-    MountRecordBuilder mount_builder;
-    DeviceInfoBuilder info_builder;
 
     void SetUp() override
     {
@@ -59,13 +57,11 @@ TEST_F(MountRegistryTest, AddAndGet_ReturnsValue) {
     );
 
     // ACT
-    auto record = reg->getByDevNode(devNode);
+    auto mntpt = reg->getMountPointByDevNode(devNode);
 
     // ASSERT
-    ASSERT_TRUE(record.has_value());
-    EXPECT_EQ(record->id, id);
-    EXPECT_EQ(record->devNode, devNode);
-    EXPECT_EQ(record->mountPoint, mountPoint);
+    ASSERT_TRUE(mntpt.has_value());
+    EXPECT_EQ(*mntpt, mountPoint);
 }
 
 TEST_F(MountRegistryTest, Get_NonExisting_ReturnsNullopt) {
@@ -74,11 +70,10 @@ TEST_F(MountRegistryTest, Get_NonExisting_ReturnsNullopt) {
         "/dev/does_not_exist";
 
     // ACT
-    auto record =
-        reg->getByDevNode(devNode);
+    auto mntpt = reg->getMountPointByDevNode(devNode);
 
     // ASSERT
-    EXPECT_FALSE(record.has_value());
+    EXPECT_FALSE(mntpt.has_value());
 }
 
 TEST_F(MountRegistryTest, Add_OverwriteExistingValue) {
@@ -117,12 +112,12 @@ TEST_F(MountRegistryTest, Add_OverwriteExistingValue) {
     );
 
     // ACT
-    auto record =
-        reg->getByDevNode(devNode);
+    auto mntpt =
+        reg->getMountPointByDevNode(devNode);
 
     // ASSERT
-    ASSERT_TRUE(record.has_value());
-    EXPECT_EQ(record->mountPoint, secondMount);
+    ASSERT_TRUE(mntpt.has_value());
+    EXPECT_EQ(*mntpt, secondMount);
 }
 
 TEST_F(MountRegistryTest, Remove_DeletesEntry) {
@@ -152,11 +147,11 @@ TEST_F(MountRegistryTest, Remove_DeletesEntry) {
     reg->removeByDevNode(devNode);
 
     // ACT
-    auto record =
-        reg->getByDevNode(devNode);
+    auto mntpt =
+        reg->getMountPointByDevNode(devNode);
 
     // ASSERT
-    EXPECT_FALSE(record.has_value());
+    EXPECT_FALSE(mntpt.has_value());
 }
 
 TEST_F(MountRegistryTest, GetAll_ReturnsAllRecords) {
@@ -251,33 +246,4 @@ TEST_F(MountRegistryTest, GetAll_ReturnsAllRecords) {
             }
         )
     );
-}
-
-TEST_F(MountRegistryTest, Exists_ExistingRecord_ReturnsTrue) {
-    // ARRANGE
-    const std::string devNode = "/dev/sda1";
-
-    const DeviceInfo info = 
-            DeviceInfoBuilder()
-            .withProductId("1234")
-            .withVendorId("ABCD")
-            .withSerial("ACXDIFTP86459KOD")
-            .build();
-
-    reg->add(
-        MountRecordBuilder()
-            .withId(1)
-            .withDevNode(devNode)
-            .withMountPoint("mount")
-            .withInfo(info)
-            .withMode(MODE::RO)
-            .build()
-    );
-
-    // ACT
-    auto exists =
-        reg->getByDevNode(devNode);
-
-    // ASSERT
-    EXPECT_TRUE(exists);
 }

@@ -57,7 +57,7 @@ TEST_F(DeleteDeviceCommandTest, DeleteOk) {
             .build();
         
     std::string validTo = "2099-01-01";
-    d.id = facade->devices().addToWhitelist(d, validTo);
+    d.id = facade->devices().addToWhitelist(info, validTo);
     facade->registry().add(d);
     DeleteDeviceFromWhiteListCommand cmd(d.id);
 
@@ -71,5 +71,5 @@ TEST_F(DeleteDeviceCommandTest, DeleteOk) {
             return dev.id == d.id;
         });
     EXPECT_EQ(it, devices.end());
-    EXPECT_TRUE(facade->registry().getById(d.id).has_value());
+    EXPECT_FALSE(facade->registry().getById(d.id).has_value());
 }

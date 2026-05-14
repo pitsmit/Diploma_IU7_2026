@@ -3,7 +3,6 @@
 #include "DeviceCommands.hpp"
 #include "CommandContext.hpp"
 #include "DeviceManager.hpp"
-#include "PolicyManager.hpp"
 #include "MountRegistry.hpp"
 #include "MountUtils.hpp"
 #include "IMountSystem.hpp"
@@ -13,7 +12,6 @@
 class Facade {
 private: 
     DeviceManager deviceManager;
-    PolicyManager policyManager;
     MountRegistry mountRegistry;
     MountUtils mountUtils;
     MountService mountManager;
@@ -22,10 +20,9 @@ private:
 public:
     Facade(DBConnection &db, IMountSystem &sys, IDeviceResolver &res)
         : deviceManager(db),
-          policyManager(db),
           mountRegistry(db),
           mountUtils(sys),
-          mountManager(policyManager, mountUtils, res),
+          mountManager(deviceManager, mountUtils, res),
           ctx {deviceManager, mountRegistry, mountManager}
     {}
 
@@ -34,7 +31,6 @@ public:
     }
 
     DeviceManager& devices() { return deviceManager; }
-    PolicyManager& policies() { return policyManager; }
     MountService& mounts() { return mountManager; }
     MountRegistry& registry() { return mountRegistry; }
     MountUtils& utils() { return mountUtils; }

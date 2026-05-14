@@ -6,13 +6,11 @@
 
 #include "DeviceControlService.hpp"
 #include "LinuxMountSystem.hpp"
-#include "PolicyManager.hpp"
 #include "DeviceInfo.hpp"
 #include "DeviceManager.hpp"
 #include "DeviceEvent.hpp"
 #include "MountRegistry.hpp"
 #include "MountUtils.hpp"
-#include "MountRecord.hpp"
 #include "UdevDeviceResolver.hpp"
 #include "MountService.hpp"
 
@@ -20,6 +18,7 @@
 #include "../helpers/LoggerTestHelper.hpp"
 #include "../helpers/MountHelpers.hpp"
 #include "../mocks/MockDeviceResolver.hpp"
+#include "../mocks/MockWebSocketServer.hpp"
 
 class RealMountTest : public ::testing::Test {
 protected:
@@ -30,13 +29,13 @@ protected:
     std::unique_ptr<MountRegistry> registry;
     std::unique_ptr<DeviceControlService> svc;
     std::unique_ptr<MountUtils> utils;
-    std::unique_ptr<PolicyManager> policy;
+    std::unique_ptr<DeviceManager> devicemanager;
     std::unique_ptr<MockDeviceResolver> resolver;
     std::unique_ptr<MountService> mntser;
+    std::unique_ptr<MockWebSocketServer> sct_server;
 
     std::unique_ptr<DeviceInfo> info;
     std::unique_ptr<DeviceEvent> event;
-    std::unique_ptr<MountRecord> mount_rec;
 
     void SetUp() override {
         logger.disable();
@@ -44,14 +43,17 @@ protected:
         devNode = createLoopFs();
 
         utils = std::make_unique<MountUtils>(sys);
-        policy = std::make_unique<PolicyManager>(dbHelper.get_db());
+        devicemanager = std::make_unique<DeviceManager>(dbHelper.get_db());
         resolver = std::make_unique<MockDeviceResolver>();
-        mntser = std::make_unique<MountService>(*policy, *utils, *resolver);
+        mntser = std::make_unique<MountService>(*devicemanager, *utils, *resolver);
         registry = std::make_unique<MountRegistry>(dbHelper.get_db());
+        sct_server = std::make_unique<MockWebSocketServer>(1);
+
 
         svc = std::make_unique<DeviceControlService>(
             *registry,
-            *mntser
+            *mntser,
+            *sct_server
         );
 
         info = std::make_unique<DeviceInfo>(
@@ -70,29 +72,19 @@ protected:
                 .withDevNode(devNode.c_str())
                 .build()
         );
-
-        mount_rec = std::make_unique<MountRecord>(
-            MountRecordBuilder()
-                .withInfo(*info)
-                .withDevNode(devNode)
-                .withMountPoint("/dev/test")
-                .build()
-        );
-
-
     }
 
     void TearDown() override {
         svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
 
-        mount_rec.reset();
         event.reset();
         info.reset();
         svc.reset();
+        sct_server.reset();
         registry.reset();
         mntser.reset();
         resolver.reset();
-        policy.reset();
+        devicemanager.reset();
         utils.reset();
         dbHelper.reset();
         logger.restore();
@@ -105,25 +97,23 @@ TEST_F(RealMountTest, MountLoopDeviceReadOnly)
     svc->handleEvent(*event);
 
     // ASSERT
-    auto mount_rec = registry->getByDevNode(devNode);
+    auto mount_path = registry->getMountPointByDevNode(devNode);
 
-    ASSERT_TRUE(mount_rec.has_value());
-    ASSERT_TRUE(isMounted(mount_rec->mountPoint));
-    ASSERT_TRUE(isMountedAs(mount_rec->mountPoint, "ro"));
+    ASSERT_TRUE(isMounted(*mount_path));
+    ASSERT_TRUE(isMountedAs(*mount_path, "ro"));
 }
 
 TEST_F(RealMountTest, MountLoopDeviceReadWrite)
 {
     // ARRANGE
     std::string validTo = "2099-01-01";
-    dbHelper.get_repo().add(*mount_rec, validTo);
+    dbHelper.get_repo().add(*info, validTo);
 
     // ACT
     svc->handleEvent(*event);
 
     // ASSERT
-    auto mnt_r = registry->getByDevNode(devNode);
-    ASSERT_TRUE(mnt_r.has_value());
-    ASSERT_TRUE(isMounted(mnt_r->mountPoint));
-    ASSERT_TRUE(isMountedAs(mnt_r->mountPoint, "rw"));
+    auto mount_path = registry->getMountPointByDevNode(devNode);
+    ASSERT_TRUE(isMounted(*mount_path));
+    ASSERT_TRUE(isMountedAs(*mount_path, "rw"));
 }

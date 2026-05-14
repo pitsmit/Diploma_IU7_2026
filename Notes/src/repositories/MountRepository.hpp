@@ -20,14 +20,11 @@ private:
             : "NULL";
     }
 
-    static std::string modeToStr(MODE m)
-    {
+    static std::string modeToStr(MODE m) {
         return m == MODE::RW ? "RW" : "RO";
     }
 
-    static MODE parseMode(const char* v)
-    {
-        if (!v) return MODE::RO;
+    static MODE parseMode(const char* v) {
         return std::string(v) == "RW" ? MODE::RW : MODE::RO;
     }
 
@@ -111,38 +108,24 @@ public:
         db.execute(sql);
     }
 
-    std::optional<MountRecord> getByDevNode(const std::string& devNode)
+    std::optional<std::string> getMountPointByDevNode(
+    const std::string& devNode)
     {
-        std::optional<MountRecord> result;
+        std::optional<std::string> result;
 
         std::string sql =
-            "SELECT mr.id, mr.deviceInfoId, mr.devNode, mr.mountPoint, mr.mode, "
-            "di.vendorId, di.productId, di.serial, di.vendorName, di.productName "
-            "FROM MountRecord mr "
-            "JOIN DeviceInfo di ON mr.deviceInfoId = di.id "
-            "WHERE mr.devNode = " + sqlValue(devNode) + " LIMIT 1;";
+            "SELECT mountPoint "
+            "FROM MountRecord "
+            "WHERE devNode = " + sqlValue(devNode) + " "
+            "LIMIT 1;";
 
         db.query(sql,
             [&](int, char** v, char**) {
-                if (!v || !v[0]) return;
+                if (!v || !v[0]) {
+                    return;
+                }
 
-                DeviceInfoBuilder infoBuilder;
-
-                if (v[5]) infoBuilder.withVendorId(v[5]);
-                if (v[6]) infoBuilder.withProductId(v[6]);
-                if (v[7]) infoBuilder.withSerial(v[7]);
-                if (v[8]) infoBuilder.withVendorName(v[8]);
-                if (v[9]) infoBuilder.withProductName(v[9]);
-
-                MountRecord record = MountRecordBuilder()
-                    .withId(std::stoull(v[0]))
-                    .withDevNode(v[2] ? v[2] : "")
-                    .withMountPoint(v[3] ? v[3] : "")
-                    .withMode(parseMode(v[4]))
-                    .withInfo(infoBuilder.build())
-                    .build();
-
-                result = record;
+                result = std::string(v[0]);
             });
 
         return result;

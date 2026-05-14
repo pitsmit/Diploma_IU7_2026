@@ -4,3 +4,6 @@
 [submodule "Notes/external/spdlog"]
 	path = Notes/external/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "Notes/external/IXWebSocket"]
+	path = Notes/external/IXWebSocket
+	url = https://github.com/machinezone/IXWebSocket.git

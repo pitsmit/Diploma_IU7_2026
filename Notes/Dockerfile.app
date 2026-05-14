@@ -24,7 +24,9 @@ RUN apt-get update && apt-get install -y \
     libblkid-dev \
     curl \
     libcurl4-openssl-dev \
-    libmount-dev
+    libmount-dev \
+    libssl-dev \
+    zlib1g-dev
 
 # =========================
 # Pistache
@@ -35,6 +37,13 @@ RUN git clone https://github.com/pistacheio/pistache.git && \
     meson setup build && \
     ninja -C build && \
     ninja -C build install
+
+RUN git clone https://github.com/machinezone/IXWebSocket.git /tmp/IXWebSocket && \
+    cd /tmp/IXWebSocket && \
+    cmake -B build -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build build -j$(nproc) && \
+    cmake --install build && \
+    rm -rf /tmp/IXWebSocket
 
 # =========================
 # Project

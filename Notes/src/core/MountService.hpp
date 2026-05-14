@@ -3,7 +3,7 @@
 #include <optional>
 #include <string>
 
-#include "PolicyManager.hpp"
+#include "DeviceManager.hpp"
 #include "MountUtils.hpp"
 #include "IDeviceResolver.hpp"
 #include "MountPointBuilder.hpp"
@@ -12,17 +12,17 @@
 
 class MountService {
 private:
-    PolicyManager& policyManager_;
+    DeviceManager& deviceManager_;
     MountUtils& mountUtils_;
     IDeviceResolver& resolver_;
 
 public:
     MountService(
-        PolicyManager& policyManager,
+        DeviceManager& deviceManager,
         MountUtils& mountUtils,
         IDeviceResolver& resolver
     ) :
-        policyManager_(policyManager),
+        deviceManager_(deviceManager),
         mountUtils_(mountUtils),
         resolver_(resolver)
     {}
@@ -39,7 +39,7 @@ public:
         std::string mountPoint =
             MountPointBuilder::build(*info);
         MountPointBuilder::ensureExists(mountPoint);
-        int id = policyManager_.isAllowed(*info);
+        int id = deviceManager_.isAllowed(*info);
 
         mountUtils_.mountDevice(
             devNode,

@@ -10,6 +10,7 @@
 #include "LinuxMountSystem.hpp"
 #include "UdevDeviceResolver.hpp"
 #include "MountRecoveryService.hpp"
+#include "WebSocketServer.hpp"
 
 #include <thread>
 #include <iostream>
@@ -40,15 +41,10 @@ public:
 
     void run()
     {
-        #ifdef BUILD_HTTP_SERVER
-        mylog->info("BUILD_HTTP_SERVER");
-        #endif
-
-        #ifdef ENABLE_TEST_API
-        mylog->info("ENABLE_TEST_API");
-        #endif
-
         rec.run();
+
+        WebSocketServer ws(9000);
+        ws.start();
         
         EventQueue<DeviceEvent> queue;
 
@@ -56,7 +52,8 @@ public:
 
         DeviceControlService service(
             facade.registry(),
-            facade.mounts()
+            facade.mounts(),
+            ws
         );
 
         EventLoop loop(queue, service);

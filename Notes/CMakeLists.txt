@@ -86,6 +86,7 @@ target_link_libraries(app
     udev
     blkid
     mount
+    ixwebsocket
 )
 
 # HTTP link
@@ -113,6 +114,7 @@ file(COPY ${CMAKE_SOURCE_DIR}/config.txt
 
 enable_testing()
 add_subdirectory(tests)
+add_subdirectory(external/IXWebSocket)
 
 # =========================
 # Warnings

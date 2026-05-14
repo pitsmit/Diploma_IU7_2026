@@ -1,37 +1,10 @@
 import type { Device } from '@/models/Device'
 import type { WhitelistDevice } from '@/models/WhitelistDevice'
 
-/*const mockDevices: Device[] = [
-  {
-    mountPoint: '/dev/sda1',
-    mode: MODE.RO,
-    info: {
-      vendorName: 'Samsввввввввввввввукаааааааааааааааааааааааааааааааung',
-      productName: 'SSD 870',
-      serial: 'SN123456',
-      vendorId: '0x1A2B',
-      productId: '0x3C4D'
-    }
-  },
-  {
-    mountPoint: '/dev/sdb1',
-    mode: MODE.RO,
-    info: {
-      vendorName: 'Kingston',
-      productName: 'USB Drive',
-      serial: 'SN987654',
-      vendorId: '0x5E6F',
-      productId: '0x7A8B'
-    }
-  }
-]
-let mockWhitelist: WhitelistDevice[] = []*/
+const base: string = '/api/v1'
 
-/**
- * GET DEVICES
- */
 export const fetchDevices = async (): Promise<Device[]> => {
-  const response = await fetch('http://localhost:8080/api/v1/list')
+  const response = await fetch(`${base}/list`)
 
   if (!response.ok) {
     throw new Error('Failed to fetch devices')
@@ -40,11 +13,8 @@ export const fetchDevices = async (): Promise<Device[]> => {
   return response.json()
 }
 
-/**
- * GET WHITELIST
- */
 export const fetchWhitelist = async (): Promise<WhitelistDevice[]> => {
-  const response = await fetch('http://localhost:8080/api/v1/whitelist')
+  const response = await fetch(`${base}/whitelist`)
 
   if (!response.ok) {
     throw new Error('Failed to fetch whitelist')
@@ -53,14 +23,11 @@ export const fetchWhitelist = async (): Promise<WhitelistDevice[]> => {
   return response.json()
 }
 
-/**
- * ADD TO WHITELIST
- */
 export const addToWhitelist = async (
   device: Device
 ): Promise<number> => {
   const response = await fetch(
-    'http://localhost:8080/api/v1/whitelist',
+    `${base}/whitelist`,
     {
       method: 'POST',
       headers: {
@@ -79,14 +46,11 @@ export const addToWhitelist = async (
   return data.id
 }
 
-/**
- * REMOVE FROM WHITELIST
- */
 export const removeFromWhitelist = async (
   id: number
 ): Promise<void> => {
   const response = await fetch(
-    `http://localhost:8080/api/v1/whitelist/${id}`,
+    `${base}/whitelist/${id}`,
     {
       method: 'DELETE'
     }
@@ -102,7 +66,7 @@ export const updateValidTo = async (
   validTo: string
 ): Promise<void> => {
   const response = await fetch(
-    `http://localhost:8080/api/v1/whitelist/${id}`,
+    `${base}/whitelist/${id}`,
     {
       method: 'PATCH',
       headers: {

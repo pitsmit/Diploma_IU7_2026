@@ -23,14 +23,8 @@ private:
         std::string sql =
             "SELECT id FROM DeviceInfo WHERE "
             "vendorId = " + sqlValue(info.vendorId) + " AND "
-            "productId = " + sqlValue(info.productId);
-
-        if (info.serial) {
-            sql += " AND serial = " + sqlValue(info.serial);
-        }
-        else {
-            sql += " AND serial IS NULL";
-        }
+            "productId = " + sqlValue(info.productId) + " AND "
+            "serial = " + sqlValue(info.serial);
 
         sql += " LIMIT 1;";
 
@@ -64,8 +58,8 @@ public:
     explicit DeviceRepository(DBConnection& connection)
         : db(connection) {}
 
-    int add(const MountRecord& d, std::optional<std::string> vld) {
-        int deviceInfoId = ensureDeviceInfo(d.info);
+    int add(const DeviceInfo& i, std::optional<std::string> vld) {
+        int deviceInfoId = ensureDeviceInfo(i);
         std::string sql =
             "INSERT INTO Device "
             "(deviceInfoId, validTo) VALUES (" +
@@ -124,24 +118,14 @@ public:
 
     int findActiveId(const DeviceInfo& info)
     {
-        if (!info.vendorId || !info.productId) {
-            return 0;
-        }
-
         int id = 0;
 
         std::string sql =
             "SELECT d.id FROM Device d "
             "JOIN DeviceInfo di ON d.deviceInfoId = di.id "
             "WHERE di.vendorId = " + sqlValue(info.vendorId) + " AND "
-            "di.productId = " + sqlValue(info.productId);
-
-        if (info.serial) {
-            sql += " AND di.serial = " + sqlValue(info.serial);
-        }
-        else {
-            sql += " AND di.serial IS NULL";
-        }
+            "di.productId = " + sqlValue(info.productId) + " AND "
+            "di.serial = " + sqlValue(info.serial);
 
         sql += " AND (d.validTo IS NULL "
             "OR d.validTo >= date('now'))";

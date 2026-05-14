@@ -36,7 +36,7 @@ TEST_F(MountUtilsTest, Mount_ReadWrite_Success) {
     EXPECT_EQ(mock.lastDev, devNode);
     EXPECT_EQ(mock.lastTarget, mountPath);
     EXPECT_EQ(mock.lastFs, "ext4");
-    EXPECT_EQ(mock.lastOpts, "rw,umask=0000");
+    EXPECT_EQ(mock.lastOpts, "rw,uid=1000,gid=1000,umask=0000");
 }
 
 TEST_F(MountUtilsTest, Mount_ReadOnly_Success) {

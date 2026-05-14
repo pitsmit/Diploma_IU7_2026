@@ -2,7 +2,6 @@
 
 #include "Facade.hpp"
 #include "DeviceCommands.hpp"
-#include "MountRecord.hpp"
 #include "UdevDeviceResolver.hpp"
 
 #include "../helpers/LoggerTestHelper.hpp"
@@ -44,14 +43,9 @@ TEST_F(WhiteListDeviceCommandTest, ReturnsWhitelistFill) {
             .withVendorId(vendorId)
             .withSerial("ACXDIFTGX6459KOD")
             .build();
-
-    const MountRecord d = 
-            MountRecordBuilder()
-            .withInfo(info)
-            .build();
             
     std::string validTo = "2099-01-01";
-    facade->devices().addToWhitelist(d, validTo);
+    facade->devices().addToWhitelist(info, validTo);
     GetWhiteListDeviceCommand cmd;
 
     // ACT

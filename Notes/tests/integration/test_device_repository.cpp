@@ -2,7 +2,6 @@
 
 #include "Device.hpp"
 #include "DeviceInfo.hpp"
-#include "MountRecord.hpp"
 
 #include "../helpers/LoggerTestHelper.hpp"
 #include "../helpers/DataBaseTestHelper.hpp"
@@ -33,13 +32,8 @@ TEST_F(DeviceRepositoryTest, AddAndGetAll) {
             .withSerial("ABCDEF123456")
             .build();
 
-    MountRecord r = 
-            MountRecordBuilder()
-            .withInfo(info)
-            .build();
-
     std::string validTo = "2099-01-01";
-    dbHelper.get_repo().add(r, validTo);
+    dbHelper.get_repo().add(info, validTo);
 
     // ACT
     auto all = dbHelper.get_repo().getAll();
@@ -57,17 +51,12 @@ TEST_F(DeviceRepositoryTest, Exists_ReturnsTrue) {
             .withProductId("ABCD")
             .withSerial("ACXDIFTGX6459KOD")
             .build();
-
-    MountRecord r = 
-            MountRecordBuilder()
-            .withInfo(info)
-            .build();
             
     std::string validTo = "2099-01-01";
-    dbHelper.get_repo().add(r, validTo);
+    dbHelper.get_repo().add(info, validTo);
 
     // ACT
-    auto id = dbHelper.get_repo().findActiveId(r.info);
+    auto id = dbHelper.get_repo().findActiveId(info);
 
     // ASSERT
     EXPECT_TRUE(id);
@@ -81,17 +70,12 @@ TEST_F(DeviceRepositoryTest, Exists_Expired_ReturnsFalse) {
             .withProductId("ABCD")
             .withSerial("ACXDIFTGX6459KOD")
             .build();
-
-    MountRecord r = 
-            MountRecordBuilder()
-            .withInfo(info)
-            .build();
             
     std::string validTo = "2005-01-01";
-    dbHelper.get_repo().add(r, validTo);
+    dbHelper.get_repo().add(info, validTo);
 
     // ACT
-    auto id = dbHelper.get_repo().findActiveId(r.info);
+    auto id = dbHelper.get_repo().findActiveId(info);
 
     // ASSERT
     EXPECT_FALSE(id);

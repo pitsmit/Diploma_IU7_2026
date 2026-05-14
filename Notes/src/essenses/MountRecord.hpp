@@ -10,7 +10,7 @@ enum MODE {
 };
 
 struct MountRecord {
-    size_t id;
+    size_t id; /// id таблицы Device
     std::string devNode;
     std::string mountPoint;
     DeviceInfo info;

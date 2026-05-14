@@ -13,21 +13,11 @@ TEST(GetWhiteListE2E, ReturnsWhiteList)
     const std::string productId = "ABCD";
 
     json body = {
-        {"id", 1},
-        {"devNode", "/dev/sdb1"},
-        {"mountPoint", "/mnt/usb"},
-        {
-            "info",
-            {
-                {"vendorId", vendorId},
-                {"productId", productId},
-                {"serial", "123456"},
-                {"vendorName", "SanDisk"},
-                {"productName", "Ultra"}
-            }
-        },
-        {"mode", "RW"},
-        {"validTo", "2027-01-01"}
+        {"vendorId", vendorId},
+        {"productId", productId},
+        {"serial", "123456"},
+        {"vendorName", "SanDisk"},
+        {"productName", "Ultra"}
     };
 
     long postCode = 0;

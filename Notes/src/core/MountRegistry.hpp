@@ -21,10 +21,10 @@ public:
         repo.add(record);
     }
 
-    std::optional<MountRecord> getByDevNode(
+    std::optional<std::string> getMountPointByDevNode(
         const std::string& devNode)
     {
-        return repo.getByDevNode(devNode);
+        return repo.getMountPointByDevNode(devNode);
     }
 
     std::optional<MountRecord> getById(

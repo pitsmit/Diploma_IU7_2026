@@ -11,11 +11,9 @@ import {
   removeFromWhitelist,
   updateValidTo
 } from '@/api/api'
+import { ws } from '@/api/websocket'
 
 export const useDeviceStore = defineStore('device', () => {
-  /**
-   * state
-   */
   const devices = ref<Device[]>([])
   const whitelist = ref<WhitelistDevice[]>([])
   const loading = ref(false)
@@ -91,6 +89,24 @@ export const useDeviceStore = defineStore('device', () => {
     }
   }
 
+  const initWebSocket = () => {
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data)
+
+      if (message.type === 'insert') {
+        devices.value.push(message.data)
+      }
+
+      if (message.type === 'remove') {
+        devices.value = devices.value.filter(
+          (d) =>
+            d.mountPoint !==
+            message.data.mountPoint
+        )
+      }
+    }
+  }
+
   return {
     devices,
     whitelist,
@@ -101,6 +117,7 @@ export const useDeviceStore = defineStore('device', () => {
 
     addDeviceToWhitelist,
     removeDeviceFromWhitelist,
-    updateValid
+    updateValid,
+    initWebSocket
   }
 })
