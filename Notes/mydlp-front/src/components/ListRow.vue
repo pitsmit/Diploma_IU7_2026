@@ -113,6 +113,7 @@ const tooltipText = computed(() => {
   overflow-wrap: anywhere;
   word-break: break-word;
   text-align: center;
+  min-width: 0;
 
   background-color: $c-lst-background;
 
@@ -125,9 +126,6 @@ const tooltipText = computed(() => {
 }
 
 .list-row__action {
-  width: 60px;
-  min-width: 60px;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,6 +134,7 @@ const tooltipText = computed(() => {
 
   border-bottom: $s-stroke solid $c-border;
   border-right: $s-stroke solid $c-border;
+
   cursor: pointer;
 }
 

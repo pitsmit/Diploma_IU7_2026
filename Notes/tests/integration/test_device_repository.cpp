@@ -31,9 +31,7 @@ TEST_F(DeviceRepositoryTest, AddAndGetAll) {
             .withProductId("ABCD")
             .withSerial("ABCDEF123456")
             .build();
-
-    std::string validTo = "2099-01-01";
-    dbHelper.get_repo().add(info, validTo);
+    dbHelper.get_repo().add(info);
 
     // ACT
     auto all = dbHelper.get_repo().getAll();
@@ -50,10 +48,8 @@ TEST_F(DeviceRepositoryTest, Exists_ReturnsTrue) {
             .withVendorId("1234")
             .withProductId("ABCD")
             .withSerial("ACXDIFTGX6459KOD")
-            .build();
-            
-    std::string validTo = "2099-01-01";
-    dbHelper.get_repo().add(info, validTo);
+            .build();            
+    dbHelper.get_repo().add(info);
 
     // ACT
     auto id = dbHelper.get_repo().findActiveId(info);
@@ -70,9 +66,7 @@ TEST_F(DeviceRepositoryTest, Exists_Expired_ReturnsFalse) {
             .withProductId("ABCD")
             .withSerial("ACXDIFTGX6459KOD")
             .build();
-            
-    std::string validTo = "2005-01-01";
-    dbHelper.get_repo().add(info, validTo);
+    dbHelper.get_repo().add(info);
 
     // ACT
     auto id = dbHelper.get_repo().findActiveId(info);

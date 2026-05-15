@@ -13,6 +13,7 @@
 #include "MountUtils.hpp"
 #include "UdevDeviceResolver.hpp"
 #include "MountService.hpp"
+#include "DeviceEventNotifier.hpp"
 
 #include "../helpers/DataBaseTestHelper.hpp"
 #include "../helpers/LoggerTestHelper.hpp"
@@ -26,13 +27,14 @@ protected:
     DataBaseTestHelper dbHelper;
     std::string devNode;
     LinuxMountSystem sys;
-    std::unique_ptr<MountRegistry> registry;
+    std::unique_ptr<MountRegistryManager> registry;
     std::unique_ptr<DeviceControlService> svc;
     std::unique_ptr<MountUtils> utils;
     std::unique_ptr<DeviceManager> devicemanager;
     std::unique_ptr<MockDeviceResolver> resolver;
     std::unique_ptr<MountService> mntser;
     std::unique_ptr<MockWebSocketServer> sct_server;
+    std::unique_ptr<DeviceEventNotifier> notifier;
 
     std::unique_ptr<DeviceInfo> info;
     std::unique_ptr<DeviceEvent> event;
@@ -46,14 +48,14 @@ protected:
         devicemanager = std::make_unique<DeviceManager>(dbHelper.get_db());
         resolver = std::make_unique<MockDeviceResolver>();
         mntser = std::make_unique<MountService>(*devicemanager, *utils, *resolver);
-        registry = std::make_unique<MountRegistry>(dbHelper.get_db());
+        registry = std::make_unique<MountRegistryManager>(dbHelper.get_db());
         sct_server = std::make_unique<MockWebSocketServer>(1);
-
+        notifier = std::make_unique<DeviceEventNotifier>(*sct_server);
 
         svc = std::make_unique<DeviceControlService>(
             *registry,
             *mntser,
-            *sct_server
+            *notifier
         );
 
         info = std::make_unique<DeviceInfo>(
@@ -80,6 +82,7 @@ protected:
         event.reset();
         info.reset();
         svc.reset();
+        notifier.reset();
         sct_server.reset();
         registry.reset();
         mntser.reset();
@@ -106,8 +109,7 @@ TEST_F(RealMountTest, MountLoopDeviceReadOnly)
 TEST_F(RealMountTest, MountLoopDeviceReadWrite)
 {
     // ARRANGE
-    std::string validTo = "2099-01-01";
-    dbHelper.get_repo().add(*info, validTo);
+    dbHelper.get_repo().add(*info);
 
     // ACT
     svc->handleEvent(*event);

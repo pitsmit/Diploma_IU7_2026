@@ -56,13 +56,8 @@ void DefaultApi::add_device_to_white_list_handler(
         json body = json::parse(request.body());
 
         MountRecord record = body.get<MountRecord>();
-        std::optional<std::string> validTo;
 
-        if (body.contains("validTo") && !body["validTo"].is_null()) {
-            validTo = body["validTo"].get<std::string>();
-        }
-
-        AddDeviceToWhiteListCommand command(record, validTo);
+        AddDeviceToWhiteListCommand command(record);
 
         facade.execute(command);
 
@@ -177,7 +172,13 @@ void DefaultApi::seed_whitelist_handler(
             validTo = body["validTo"].get<std::string>();
         }
 
-        facade.devices().addToWhitelist(info, validTo);
+        facade.devices()
+              .addToWhitelist(
+                DeviceBuilder()
+                .withInfo(info)
+                .withValidTo(*validTo)
+                .build()
+            );
 
         response.send(Pistache::Http::Code::Created, "seeded");
     }

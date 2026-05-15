@@ -3,8 +3,8 @@
 #include <optional>
 #include <string>
 
-#include "DeviceInfo.hpp"
-#include "MountRecord.hpp"
+class DeviceInfo;
+enum MODE;
 
 class IDeviceResolver {
 public:

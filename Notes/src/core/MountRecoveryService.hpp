@@ -12,13 +12,13 @@
 
 class MountRecoveryService {
 private:
-    MountRegistry &registry;
+    MountRegistryManager &registry;
     IDeviceResolver &resolver;
     MountService &manager;
 
 public:
     explicit MountRecoveryService(
-        MountRegistry& mr, 
+        MountRegistryManager& mr, 
         IDeviceResolver &rs,
         MountService& man
     )

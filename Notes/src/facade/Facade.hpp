@@ -12,7 +12,7 @@
 class Facade {
 private: 
     DeviceManager deviceManager;
-    MountRegistry mountRegistry;
+    MountRegistryManager mountRegistry;
     MountUtils mountUtils;
     MountService mountManager;
     CommandContext ctx;
@@ -32,6 +32,6 @@ public:
 
     DeviceManager& devices() { return deviceManager; }
     MountService& mounts() { return mountManager; }
-    MountRegistry& registry() { return mountRegistry; }
+    MountRegistryManager& registry() { return mountRegistry; }
     MountUtils& utils() { return mountUtils; }
 };

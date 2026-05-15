@@ -55,7 +55,5 @@ public:
         return *this;
     }
 
-    DeviceInfo build() {
-        return info_;
-    }
+    DeviceInfo build() { return info_; }
 };

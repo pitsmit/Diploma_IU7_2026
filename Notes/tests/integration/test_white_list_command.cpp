@@ -42,10 +42,8 @@ TEST_F(WhiteListDeviceCommandTest, ReturnsWhitelistFill) {
             .withProductId(productId)
             .withVendorId(vendorId)
             .withSerial("ACXDIFTGX6459KOD")
-            .build();
-            
-    std::string validTo = "2099-01-01";
-    facade->devices().addToWhitelist(info, validTo);
+            .build();            
+    facade->devices().addToWhitelist(info);
     GetWhiteListDeviceCommand cmd;
 
     // ACT

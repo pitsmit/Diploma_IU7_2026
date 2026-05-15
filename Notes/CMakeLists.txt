@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(MyProject)
+project(PrivateDLP)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,9 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Options
 # =========================
 
-option(ENABLE_COVERAGE "Enable coverage" ON)
 option(BUILD_HTTP_SERVER "Build HTTP server" ON)
-option(ENABLE_TEST_API "Enable test-only HTTP endpoints" ON)
+option(ENABLE_TESTS "Enable test build" ON)
+option(ENABLE_TEST_API "Enable test-only HTTP endpoints" OFF)
 
 # =========================
 # Sources
@@ -20,7 +20,6 @@ set(APP_SOURCES
     src/main.cpp
 )
 
-# HTTP sources
 if(BUILD_HTTP_SERVER)
     list(APPEND APP_SOURCES
         api-stubs/api/ApiBase.cpp
@@ -33,14 +32,6 @@ endif()
 # =========================
 
 add_executable(app ${APP_SOURCES})
-
-# =========================
-# Coverage
-# =========================
-
-if(ENABLE_COVERAGE)
-    message(STATUS "Coverage ENABLED")
-endif()
 
 # =========================
 # Includes
@@ -57,7 +48,6 @@ target_include_directories(app PUBLIC
     ${PROJECT_SOURCE_DIR}/external/spdlog/include
 )
 
-# HTTP includes
 if(BUILD_HTTP_SERVER)
     target_include_directories(app PUBLIC
         ${PROJECT_SOURCE_DIR}/api-stubs/api
@@ -89,32 +79,34 @@ target_link_libraries(app
     ixwebsocket
 )
 
-# HTTP link
 if(BUILD_HTTP_SERVER)
     target_link_libraries(app
         pistache
     )
 endif()
 
+add_subdirectory(external/IXWebSocket)
+
 # =========================
 # Testing
 # =========================
 
-file(COPY ${CMAKE_SOURCE_DIR}/sql
-     DESTINATION ${CMAKE_BINARY_DIR}/tests)
+if(ENABLE_TESTS)
+    file(COPY ${CMAKE_SOURCE_DIR}/sql
+        DESTINATION ${CMAKE_BINARY_DIR}/tests)
 
-file(COPY ${CMAKE_SOURCE_DIR}/config.txt
-     DESTINATION ${CMAKE_BINARY_DIR}/tests)
-file(RENAME
-     ${CMAKE_BINARY_DIR}/tests/config.txt
-     ${CMAKE_BINARY_DIR}/tests/config.base.txt)
-     
-file(COPY ${CMAKE_SOURCE_DIR}/config.txt
-     DESTINATION ${CMAKE_BINARY_DIR}/tests)
+    file(COPY ${CMAKE_SOURCE_DIR}/config.txt
+        DESTINATION ${CMAKE_BINARY_DIR}/tests)
+    file(RENAME
+        ${CMAKE_BINARY_DIR}/tests/config.txt
+        ${CMAKE_BINARY_DIR}/tests/config.base.txt)
+        
+    file(COPY ${CMAKE_SOURCE_DIR}/config.txt
+        DESTINATION ${CMAKE_BINARY_DIR}/tests)
 
-enable_testing()
-add_subdirectory(tests)
-add_subdirectory(external/IXWebSocket)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
 # =========================
 # Warnings
@@ -137,6 +129,3 @@ if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
     add_compile_options(-fno-default-inline)
     add_link_options(--coverage)
 endif()
-
-set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -fsanitize=address -g")

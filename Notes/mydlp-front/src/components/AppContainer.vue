@@ -6,6 +6,7 @@
 
 <style scoped>
 .container {
+  padding: 15px;
   width: 100%;
 }
 </style>

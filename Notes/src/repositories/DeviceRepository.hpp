@@ -58,13 +58,13 @@ public:
     explicit DeviceRepository(DBConnection& connection)
         : db(connection) {}
 
-    int add(const DeviceInfo& i, std::optional<std::string> vld) {
-        int deviceInfoId = ensureDeviceInfo(i);
+    int add(const DeviceInfo& dev) {
+        int deviceInfoId = ensureDeviceInfo(dev);
         std::string sql =
             "INSERT INTO Device "
             "(deviceInfoId, validTo) VALUES (" +
             std::to_string(deviceInfoId) + "," +
-            sqlValue(vld) + ");";
+            "NULL);";
 
         db.execute(sql);
         return db.lastInsertId();

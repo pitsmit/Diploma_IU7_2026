@@ -56,8 +56,5 @@ public:
         return *this;
     }
 
-    MountRecord build()
-    {
-        return record_;
-    }
+    MountRecord build() { return record_; }
 };

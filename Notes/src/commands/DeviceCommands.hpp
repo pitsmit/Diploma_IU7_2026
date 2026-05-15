@@ -25,16 +25,15 @@ public:
 class AddDeviceToWhiteListCommand : public Command {
 private:
     MountRecord record;
-    std::optional<std::string> validTo;
 
 public:
     int id;
 
-    AddDeviceToWhiteListCommand(MountRecord& d, std::optional<std::string> vld)
-        : record(d), validTo(vld) {}
+    AddDeviceToWhiteListCommand(MountRecord& d)
+        : record(d) {}
 
     void execute(CommandContext& ctx) override {
-        id = ctx.deviceManager.addToWhitelist(record.info, validTo);
+        id = ctx.deviceManager.addToWhitelist(record.info);
         record.mode = MODE::RW;
         ctx.mountService.remountSimple(record);
         ctx.mountRegistry.refresh(record);

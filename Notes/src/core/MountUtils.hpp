@@ -4,7 +4,6 @@
 
 #include "DevLogger.hpp"
 #include "IMountSystem.hpp"
-#include "MountRecord.hpp"
 #include "Exceptions.hpp"
 
 class MountUtils {
@@ -52,6 +51,8 @@ public:
                 + strerror(errno);
             throw MountError(msg.c_str());
         }
+
+        mylog->info("Mounted: {}", mountPoint);
     }
 
     void handleUnmount(const std::string& mountPoint)
@@ -67,15 +68,5 @@ public:
         }
 
         mylog->info("Unmounted: {}", mountPoint);
-    }
-
-    void remount(const MountRecord &record)
-    {
-        handleUnmount(record.mountPoint);
-        mountDevice(
-            record.devNode,
-            record.mountPoint,
-            record.mode == MODE::RO ? true : false
-        );
     }
 };

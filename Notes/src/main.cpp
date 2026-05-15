@@ -11,6 +11,7 @@
 #include "UdevDeviceResolver.hpp"
 #include "MountRecoveryService.hpp"
 #include "WebSocketServer.hpp"
+#include "DeviceEventNotifier.hpp"
 
 #include <thread>
 #include <iostream>
@@ -43,8 +44,9 @@ public:
     {
         rec.run();
 
-        WebSocketServer ws(9000);
+        WebSocketServer ws(Config::getWebSocketPort());
         ws.start();
+        DeviceEventNotifier notifier(ws);
         
         EventQueue<DeviceEvent> queue;
 
@@ -53,7 +55,7 @@ public:
         DeviceControlService service(
             facade.registry(),
             facade.mounts(),
-            ws
+            notifier
         );
 
         EventLoop loop(queue, service);

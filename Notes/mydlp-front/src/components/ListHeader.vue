@@ -49,6 +49,7 @@ const gridStyle = computed(() => ({
   justify-content: center;
 
   padding: 10px;
+  min-width: 0;
 
   background-color: $c-accent;
 
@@ -62,6 +63,10 @@ const gridStyle = computed(() => ({
   overflow: hidden;
   text-align: center;
 
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
   &:first-child {
     border-left: $s-stroke solid $c-border;
     border-top-left-radius: $s-round;
@@ -69,7 +74,9 @@ const gridStyle = computed(() => ({
 }
 
 .list-header__action {
-  width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   background-color: $c-accent;
 

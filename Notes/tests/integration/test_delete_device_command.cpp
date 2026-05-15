@@ -56,8 +56,7 @@ TEST_F(DeleteDeviceCommandTest, DeleteOk) {
             .withInfo(info)
             .build();
         
-    std::string validTo = "2099-01-01";
-    d.id = facade->devices().addToWhitelist(info, validTo);
+    d.id = facade->devices().addToWhitelist(info);
     facade->registry().add(d);
     DeleteDeviceFromWhiteListCommand cmd(d.id);
 

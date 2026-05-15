@@ -5,6 +5,8 @@
       <BaseButton text="Доверенные устройства" @click="goToWhitelist" />
     </div>
 
+    <PageTitle text="Подключённые устройства" />
+
     <ListHeader
       :columns="columns"
       :has-action="true"
@@ -37,6 +39,7 @@ import { useRouter } from 'vue-router'
 import BaseButton from '@/components/BaseButton.vue'
 import ListHeader from '@/components/ListHeader.vue'
 import ListRow from '@/components/ListRow.vue'
+import PageTitle from '@/components/PageTitle.vue'
 
 import { useDeviceStore } from '@/stores/device.store'
 import type { Device } from '@/models/Device'

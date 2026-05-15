@@ -11,14 +11,14 @@
 class MountRegistryTest : public ::testing::Test {
 protected:
     LoggerTestHelper logger;
-    std::unique_ptr<MountRegistry> reg;
+    std::unique_ptr<MountRegistryManager> reg;
     DataBaseTestHelper dbHelper;
 
     void SetUp() override
     {
         logger.disable();
         dbHelper.create();
-        reg = std::make_unique<MountRegistry>(dbHelper.get_db());
+        reg = std::make_unique<MountRegistryManager>(dbHelper.get_db());
     }
 
     void TearDown() override

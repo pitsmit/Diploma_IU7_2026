@@ -2,10 +2,10 @@
 
 class DeviceManager;
 class MountService;
-class MountRegistry;
+class MountRegistryManager;
 
 struct CommandContext {
     DeviceManager& deviceManager;
-    MountRegistry& mountRegistry;
+    MountRegistryManager& mountRegistry;
     MountService& mountService;
 };

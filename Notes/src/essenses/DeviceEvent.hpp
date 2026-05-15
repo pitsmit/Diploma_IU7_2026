@@ -28,7 +28,5 @@ public:
         return *this;
     }
 
-    DeviceEvent build() {
-        return event_;
-    }
+    DeviceEvent build() { return event_; }
 };

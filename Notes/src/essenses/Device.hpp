@@ -31,7 +31,5 @@ public:
         return *this;
     }
 
-    Device build() {
-        return device_;
-    }
+    Device build() { return device_; }
 };

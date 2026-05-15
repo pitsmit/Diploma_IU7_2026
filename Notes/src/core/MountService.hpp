@@ -72,6 +72,11 @@ public:
 
     void remountSimple(MountRecord &record)
     {
-        mountUtils_.remount(record);
+        mountUtils_.handleUnmount(record.mountPoint);
+        mountUtils_.mountDevice(
+            record.devNode,
+            record.mountPoint,
+            record.mode == MODE::RO ? true : false
+        );
     }
 };

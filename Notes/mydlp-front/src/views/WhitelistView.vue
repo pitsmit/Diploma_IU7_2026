@@ -1,16 +1,11 @@
 <template>
   <div class="page">
     <div class="actions">
-      <BaseButton
-        text="Подключённые устройства"
-        @click="goToList"
-      />
-
-      <BaseButton
-        text="Доверенные устройства"
-        @click="load"
-      />
+      <BaseButton text="Подключённые устройства" @click="goToList" />
+      <BaseButton text="Доверенные устройства" @click="load" />
     </div>
+
+    <PageTitle text="Доверенные устройства" />
 
     <ListHeader
       :columns="columns"
@@ -44,6 +39,7 @@ import { useRouter } from 'vue-router'
 import BaseButton from '@/components/BaseButton.vue'
 import ListHeader from '@/components/ListHeader.vue'
 import ListRow from '@/components/ListRow.vue'
+import PageTitle from '@/components/PageTitle.vue'
 
 import { useDeviceStore } from '@/stores/device.store'
 

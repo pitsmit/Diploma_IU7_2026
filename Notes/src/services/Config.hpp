@@ -50,11 +50,6 @@ private:
     }
 
 public:
-    static int getHttpPort()
-    {
-        return std::stoi(get("http.port"));
-    }
-
     static std::vector<std::string> getSchemaPaths()
     {
         std::string v = get("db.schema");
@@ -74,4 +69,6 @@ public:
     static std::string getDBPath()  { return get("db.path"); }
     static std::string getLogFile() { return get("log.file"); }
     static std::string getLogLevel(){ return get("log.level"); }
+    static int getHttpPort() { return std::stoi(get("http.port")); }
+    static int getWebSocketPort() { return std::stoi(get("websocket.port")); }
 };
