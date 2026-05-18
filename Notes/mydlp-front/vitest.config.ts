@@ -9,6 +9,11 @@ export default mergeConfig(
       environment: 'jsdom',
       exclude: [...configDefaults.exclude, 'e2e/**'],
       root: fileURLToPath(new URL('./', import.meta.url)),
+      coverage: {
+        provider: 'v8', // или 'istanbul'
+        include: ['src/**/*.{ts,js,vue}'], // какие файлы включать в покрытие
+        exclude: ['**/*.test.ts', '**/*.spec.ts', 'e2e/**', "src/App.vue", "src/main.ts", "src/api/websocket.ts", "src/api/api.ts", "src/components/AppContainer.vue", "src/router/index.ts"],
+      },
     },
   }),
 )
