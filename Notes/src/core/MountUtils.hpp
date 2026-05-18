@@ -61,7 +61,7 @@ public:
 
         if (sys.umount(mountPoint) < 0) {
             std::string msg = 
-                std::string("mount failed for mountPoint: ") 
+                std::string("unmount failed for mountPoint: ") 
                 + mountPoint 
                 + strerror(errno);
             throw UnMountError(msg.c_str());
