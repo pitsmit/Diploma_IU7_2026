@@ -25,6 +25,21 @@ public:
         );
     }
 
+    int remount(
+        const std::string& dev,
+        const std::string& target,
+        const std::string& fs,
+        bool readOnly) override
+    {
+        return ::mount(
+            dev.c_str(),
+            target.c_str(),
+            fs.c_str(),
+            readOnly ? (MS_REMOUNT | MS_RDONLY | MS_NOEXEC) : MS_REMOUNT,
+            nullptr
+        );
+    }
+
     int umount(const std::string& target) override {
         return ::umount2(target.c_str(), MNT_DETACH);
     }

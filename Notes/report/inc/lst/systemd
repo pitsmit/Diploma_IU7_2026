@@ -1,0 +1,9 @@
+[Unit]
+Description=USBMan
+
+[Service]
+ExecStart=/usr/local/bin/usbman
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

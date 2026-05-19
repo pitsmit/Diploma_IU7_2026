@@ -24,7 +24,7 @@ services:
     volumes:
       - ./logs.txt:/app/logs.txt
 
-  e2e:
-    build:
-      context: .
-      dockerfile: Dockerfile.e2e
+#  e2e:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.e2e

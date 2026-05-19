@@ -46,6 +46,20 @@ public:
         return mountResult;
     }
 
+    int remount(
+        const std::string& dev,
+        const std::string& target,
+        const std::string& fs,
+        bool flags) override
+    {
+        mountCalled = true;
+        lastDev = dev;
+        lastTarget = target;
+        lastFs = fs;
+        lastFlags = flags;
+        return mountResult;
+    }
+
     int umount(const std::string& target) override {
         umountCalled = true;
         lastTarget = target;

@@ -4,28 +4,47 @@
 #include <filesystem>
 #include <cstdlib>
 
-static std::string createLoopFs() {
+static std::string createLoopFs(const std::string& fsType)
+{
     std::string img = "/tmp/usb.img";
 
     system("losetup -D");
 
+    std::string mkfsCmd;
+
+    if (fsType == "vfat") {
+        mkfsCmd = "mkfs.vfat " + img;
+    }
+    else if (fsType == "ext4") {
+        mkfsCmd = "mkfs.ext4 " + img;
+    }
+    else if (fsType == "ntfs") {
+        mkfsCmd = "mkfs.ntfs " + img;
+    }
+    else {
+        throw std::runtime_error("unsupported filesystem: " + fsType);
+    }
+
     std::string cmd1 = "dd if=/dev/zero of=" + img + " bs=1M count=32";
-    std::string cmd2 = "mkfs.vfat " + img;
-    std::string cmd3 = "losetup -fP " + img;
 
     if (system(cmd1.c_str()) != 0 ||
-        system(cmd2.c_str()) != 0 ||
-        system(cmd3.c_str()) != 0) {
+        system(mkfsCmd.c_str()) != 0 ||
+        system(("losetup -fP " + img).c_str())) {
         throw std::runtime_error("failed to create loop fs");
     }
 
     FILE* pipe = popen("losetup -a | grep usb.img | cut -d: -f1", "r");
+
+    if (!pipe) {
+        throw std::runtime_error("popen failed");
+    }
+
     char buffer[128];
     std::string devNode;
 
     if (fgets(buffer, sizeof(buffer), pipe)) {
         devNode = buffer;
-        devNode.erase(devNode.find_last_not_of(" \n\r\t")+1);
+        devNode.erase(devNode.find_last_not_of(" \n\r\t") + 1);
     }
 
     pclose(pipe);

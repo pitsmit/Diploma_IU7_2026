@@ -173,12 +173,7 @@ void DefaultApi::seed_whitelist_handler(
         }
 
         facade.devices()
-              .addToWhitelist(
-                DeviceBuilder()
-                .withInfo(info)
-                .withValidTo(*validTo)
-                .build()
-            );
+              .addToWhitelist(info);
 
         response.send(Pistache::Http::Code::Created, "seeded");
     }

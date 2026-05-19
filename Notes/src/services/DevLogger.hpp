@@ -50,4 +50,5 @@ public:
     }
 };
 
+
 #define mylog DevLogger::instance().get()

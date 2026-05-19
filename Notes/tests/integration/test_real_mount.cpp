@@ -3,6 +3,9 @@
 #include <cstdlib>
 #include <filesystem>
 #include <string>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "DeviceControlService.hpp"
 #include "LinuxMountSystem.hpp"
@@ -25,7 +28,6 @@ class RealMountTest : public ::testing::Test {
 protected:
     LoggerTestHelper logger;
     DataBaseTestHelper dbHelper;
-    std::string devNode;
     LinuxMountSystem sys;
     std::unique_ptr<MountRegistryManager> registry;
     std::unique_ptr<DeviceControlService> svc;
@@ -37,12 +39,10 @@ protected:
     std::unique_ptr<DeviceEventNotifier> notifier;
 
     std::unique_ptr<DeviceInfo> info;
-    std::unique_ptr<DeviceEvent> event;
 
     void SetUp() override {
         logger.disable();
         dbHelper.create();
-        devNode = createLoopFs();
 
         utils = std::make_unique<MountUtils>(sys);
         devicemanager = std::make_unique<DeviceManager>(dbHelper.get_db());
@@ -67,19 +67,9 @@ protected:
         );
 
         resolver->setResult(*info);
-
-        event = std::make_unique<DeviceEvent>(
-            DeviceEventBuilder()
-                .withType(EventType::INSERT)
-                .withDevNode(devNode.c_str())
-                .build()
-        );
     }
 
     void TearDown() override {
-        svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
-
-        event.reset();
         info.reset();
         svc.reset();
         notifier.reset();
@@ -94,8 +84,16 @@ protected:
     }
 };
 
-TEST_F(RealMountTest, MountLoopDeviceReadOnly)
+TEST_F(RealMountTest, MountLoopDeviceReadOnlyVFAT)
 {
+    // ARRANGE
+    std::string devNode = createLoopFs("vfat");
+    std::unique_ptr<DeviceEvent> event = std::make_unique<DeviceEvent>(
+            DeviceEventBuilder()
+                .withType(EventType::INSERT)
+                .withDevNode(devNode.c_str())
+                .build());
+
     // ACT
     svc->handleEvent(*event);
 
@@ -104,12 +102,19 @@ TEST_F(RealMountTest, MountLoopDeviceReadOnly)
 
     ASSERT_TRUE(isMounted(*mount_path));
     ASSERT_TRUE(isMountedAs(*mount_path, "ro"));
+    svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
 }
 
-TEST_F(RealMountTest, MountLoopDeviceReadWrite)
+TEST_F(RealMountTest, MountLoopDeviceReadWriteVFAT)
 {
     // ARRANGE
     dbHelper.get_repo().add(*info);
+    std::string devNode = createLoopFs("vfat");
+    std::unique_ptr<DeviceEvent> event = std::make_unique<DeviceEvent>(
+            DeviceEventBuilder()
+                .withType(EventType::INSERT)
+                .withDevNode(devNode.c_str())
+                .build());
 
     // ACT
     svc->handleEvent(*event);
@@ -118,4 +123,109 @@ TEST_F(RealMountTest, MountLoopDeviceReadWrite)
     auto mount_path = registry->getMountPointByDevNode(devNode);
     ASSERT_TRUE(isMounted(*mount_path));
     ASSERT_TRUE(isMountedAs(*mount_path, "rw"));
+
+    // ===============================
+    // simulate normal user write
+    // ===============================
+
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        // drop privileges (simulate normal user)
+        seteuid(1000);
+        setegid(1000);
+
+        std::string testFile = *mount_path + "/test_write.txt";
+
+        int fd = open(testFile.c_str(), O_CREAT | O_WRONLY, 0644);
+        if (fd < 0) {
+            _exit(1);
+        }
+
+        const char* msg = "hello";
+        write(fd, msg, 5);
+        close(fd);
+
+        _exit(0);
+    }
+
+    int status;
+    waitpid(pid, &status, 0);
+
+    ASSERT_TRUE(WIFEXITED(status));
+    ASSERT_EQ(WEXITSTATUS(status), 0);
+    svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
+}
+
+TEST_F(RealMountTest, MountLoopDeviceReadOnlyEXT4)
+{
+    // ARRANGE
+    std::string devNode = createLoopFs("ext4");
+    std::unique_ptr<DeviceEvent> event = std::make_unique<DeviceEvent>(
+            DeviceEventBuilder()
+                .withType(EventType::INSERT)
+                .withDevNode(devNode.c_str())
+                .build());
+
+    // ACT
+    svc->handleEvent(*event);
+
+    // ASSERT
+    auto mount_path = registry->getMountPointByDevNode(devNode);
+
+    ASSERT_TRUE(isMounted(*mount_path));
+    ASSERT_TRUE(isMountedAs(*mount_path, "ro"));
+    svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
+}
+
+TEST_F(RealMountTest, MountLoopDeviceReadWriteEXT4)
+{
+    // ARRANGE
+    dbHelper.get_repo().add(*info);
+    std::string devNode = createLoopFs("ext4");
+    std::unique_ptr<DeviceEvent> event = std::make_unique<DeviceEvent>(
+            DeviceEventBuilder()
+                .withType(EventType::INSERT)
+                .withDevNode(devNode.c_str())
+                .build());
+
+    // ACT
+    svc->handleEvent(*event);
+
+    // ASSERT
+    auto mount_path = registry->getMountPointByDevNode(devNode);
+    ASSERT_TRUE(isMounted(*mount_path));
+    ASSERT_TRUE(isMountedAs(*mount_path, "rw"));
+
+        // ===============================
+    // simulate normal user write
+    // ===============================
+
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        // drop privileges (simulate normal user)
+        seteuid(1000);
+        setegid(1000);
+
+        std::string testFile = *mount_path + "/test_write.txt";
+
+        int fd = open(testFile.c_str(), O_CREAT | O_WRONLY, 0644);
+        if (fd < 0) {
+            _exit(1);
+        }
+
+        const char* msg = "hello";
+        write(fd, msg, 5);
+        close(fd);
+
+        _exit(0);
+    }
+
+    int status;
+    waitpid(pid, &status, 0);
+
+    ASSERT_TRUE(WIFEXITED(status));
+    ASSERT_EQ(WEXITSTATUS(status), 0);
+    svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
 }

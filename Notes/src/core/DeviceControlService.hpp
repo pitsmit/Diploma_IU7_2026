@@ -36,9 +36,7 @@ public:
             if (std::optional<std::string> mountPoint = 
                     mountRegistry_.getMountPointByDevNode(event.devNode)) {
                 mountManager_.unmount(*mountPoint);
-
                 notifier_.notifyRemove(*mountPoint);
-
                 mountRegistry_.removeByDevNode(event.devNode);
             }
             else {
