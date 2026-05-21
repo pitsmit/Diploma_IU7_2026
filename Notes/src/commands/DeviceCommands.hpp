@@ -35,7 +35,7 @@ public:
     void execute(CommandContext& ctx) override {
         id = ctx.deviceManager.addToWhitelist(record.info);
         record.mode = MODE::RW;
-        ctx.mountService.remountSimple(record);
+        ctx.mountService.remount(record);
         ctx.mountRegistry.refresh(record);
     }
 };
@@ -52,7 +52,7 @@ public:
         std::optional<MountRecord> r = ctx.mountRegistry.getById(id);
         if (r) {
             r->mode = MODE::RO;
-            ctx.mountService.remountSimple(*r);
+            ctx.mountService.remount(*r);
             ctx.mountRegistry.refresh(*r);
         }
         ctx.deviceManager.removeFromWhitelist(id);

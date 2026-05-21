@@ -142,4 +142,29 @@ public:
 
         return id;
     }
+
+    bool exists(const DeviceInfo& info)
+    {
+        int id = 0;
+
+        std::string sql =
+            "SELECT d.id FROM Device d "
+            "JOIN DeviceInfo di ON d.deviceInfoId = di.id "
+            "WHERE di.vendorId = " + sqlValue(info.vendorId) + " AND "
+            "di.productId = " + sqlValue(info.productId) + " AND "
+            "di.serial = " + sqlValue(info.serial);
+
+        sql += " LIMIT 1;";
+
+        db.query(
+            sql,
+            [&](int /*cols*/, char** values, char** /*names*/)
+            {
+                if (values && values[0]) {
+                    id = std::stoi(values[0]);
+                }
+            });
+
+        return id != 0 ? true : false;
+    }
 };

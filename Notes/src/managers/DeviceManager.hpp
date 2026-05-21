@@ -23,4 +23,5 @@ public:
     }
 
     int isAllowed(const DeviceInfo& dev) { return repo.findActiveId(dev); }
+    bool exists(const DeviceInfo& dev) { return repo.exists(dev); }
 };

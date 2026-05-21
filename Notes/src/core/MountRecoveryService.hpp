@@ -9,30 +9,30 @@
 #include "MountRegistry.hpp"
 #include "MountService.hpp"
 #include "IDeviceResolver.hpp"
+#include "DeviceManager.hpp"
 
 class MountRecoveryService {
 private:
     MountRegistryManager &registry;
     IDeviceResolver &resolver;
     MountService &manager;
+    DeviceManager &devman;
 
 public:
     explicit MountRecoveryService(
         MountRegistryManager& mr, 
         IDeviceResolver &rs,
-        MountService& man
+        MountService& man,
+        DeviceManager& devman_
     )
             : registry(mr),
               resolver(rs),
-              manager(man)
+              manager(man),
+              devman(devman_)
             {}
 
     void actualize(MountRecord &rec) {
         const auto& devNode = rec.devNode;
-        auto info = resolver.resolve(devNode.c_str());
-
-        if (!info) return;
-
         const auto mountPoint = 
             resolver.getMountPoint(devNode);
 
@@ -43,17 +43,37 @@ public:
         }
 
         auto md = resolver.getMountMode(*mountPoint);
-        bool modeChanged = md != rec.mode;
-        bool infoChanged = *info != rec.info;
+        auto info = resolver.resolve(devNode.c_str());
 
-        if (modeChanged || infoChanged) {
-            auto newrec = manager.remount(rec);
-            if (newrec) registry.recreate(*newrec);
-            return;
+        bool some_changes = false;
+
+        if (!info) return;
+
+        if (*info != rec.info) {
+            rec.info = *info;
+            some_changes = true;
+        }
+
+        MODE desired =
+            devman.isAllowed(*info)
+                ? MODE::RW
+                : MODE::RO;
+
+        if (rec.mode != desired) {
+            rec.mode = desired;
+            some_changes = true;
+        }
+
+        if (*md != desired) {
+            manager.remount(rec);
         }
 
         if (*mountPoint != rec.mountPoint) {
             rec.mountPoint = *mountPoint;
+            some_changes = true;
+        }
+
+        if (some_changes) {
             registry.refresh(rec);
         }
     }

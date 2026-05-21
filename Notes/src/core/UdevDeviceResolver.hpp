@@ -165,38 +165,48 @@ public:
     }
 
 
-    std::optional<MODE> getMountMode(const std::string& mountpoint)
+    std::optional<MODE>
+    getMountMode(const std::string& mountpoint)
     {
-        struct libmnt_table* tb =
+        libmnt_table* tb =
             mnt_new_table_from_file("/proc/self/mountinfo");
         if (!tb)
             return std::nullopt;
-        struct libmnt_iter* itr = mnt_new_iter(MNT_ITER_FORWARD);
-        struct libmnt_fs* fs = nullptr;
-        if (!itr) {
+        libmnt_fs* fs =
+            mnt_table_find_target(
+                tb,
+                mountpoint.c_str(),
+                MNT_ITER_FORWARD);
+        if (!fs) {
             mnt_free_table(tb);
             return std::nullopt;
         }
-        while (mnt_table_next_fs(tb, itr, &fs) == 0) {
-            const char* target = mnt_fs_get_target(fs);
-            if (!target)
-                continue;
-            if (mountpoint == target) {
-                const char* opts = mnt_fs_get_options(fs);
-                if (!opts)
-                    break;
-                std::string options(opts);
-                mnt_free_iter(itr);
-                mnt_free_table(tb);
-                if (options.find("ro") != std::string::npos)
-                    return MODE::RO;
-                if (options.find("rw") != std::string::npos)
-                    return MODE::RW;
-                return std::nullopt;
-            }
+        const char* opts =
+            mnt_fs_get_options(fs);
+        if (!opts) {
+            mnt_free_table(tb);
+            return std::nullopt;
         }
-        mnt_free_iter(itr);
+        char* value = nullptr;
+        size_t size = 0;
+        std::optional<MODE> result;
+        if (mnt_optstr_get_option(
+                opts,
+                "rw",
+                &value,
+                &size) == 0)
+        {
+            result = MODE::RW;
+        }
+        else if (mnt_optstr_get_option(
+                    opts,
+                    "ro",
+                    &value,
+                    &size) == 0)
+        {
+            result = MODE::RO;
+        }
         mnt_free_table(tb);
-        return std::nullopt;
+        return result;
     }
 };

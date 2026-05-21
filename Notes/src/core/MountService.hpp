@@ -47,16 +47,13 @@ public:
             !id
         );
 
-        auto record =
-            MountRecordBuilder()
+        return MountRecordBuilder()
                 .withDevNode(devNode)
                 .withId(id)
                 .withInfo(*info)
                 .withMountPoint(mountPoint)
                 .withMode(id ? MODE::RW : MODE::RO)
                 .build();
-
-        return record;
     }
 
     void unmount(const std::string& mountPoint)
@@ -64,13 +61,7 @@ public:
         mountUtils_.handleUnmount(mountPoint);
     }
 
-    std::optional<MountRecord> remount(MountRecord &record)
-    {
-        unmount(record.mountPoint);
-        return mount(record.devNode);
-    }
-
-    void remountSimple(MountRecord &record)
+    void remount(MountRecord &record)
     {
         mountUtils_.remountDevice(
             record.devNode,
