@@ -1,10 +1,13 @@
 \documentclass{bmstu-LOCAL}
 \input{preamble}
 
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+
 \begin{document}
-	%\include{parts/00-title}
-	%\includepdf[]{parts/00-task}
-	\setcounter{page}{3}
+	\includepdf[pages=-]{parts/title.pdf}
+	\setcounter{page}{4}
+	\include{parts/00-referat}
 	\maketableofcontents
 	\include{parts/01-introd}
 	\include{parts/02-analysis}

@@ -64,7 +64,6 @@ public:
     void remount(MountRecord &record)
     {
         mountUtils_.remountDevice(
-            record.devNode,
             record.mountPoint,
             record.mode == MODE::RO ? true : false
         );

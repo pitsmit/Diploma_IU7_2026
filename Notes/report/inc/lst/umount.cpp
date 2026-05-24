@@ -1,0 +1,1 @@
+int umount(const char *target);

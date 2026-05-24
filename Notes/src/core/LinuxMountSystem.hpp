@@ -26,15 +26,13 @@ public:
     }
 
     int remount(
-        const std::string& dev,
         const std::string& target,
-        const std::string& fs,
         bool readOnly) override
     {
         return ::mount(
-            dev.c_str(),
+            nullptr,
             target.c_str(),
-            fs.c_str(),
+            nullptr,
             readOnly ? (MS_REMOUNT | MS_RDONLY | MS_NOEXEC) : MS_REMOUNT,
             nullptr
         );
@@ -57,21 +55,5 @@ public:
         std::string result = type ? type : "";
         blkid_put_cache(cache);
         return result;
-        /*struct udev* udev = udev_new();
-        struct udev_device* dev =
-            udev_device_new_from_subsystem_sysname(
-                udev,
-                "block",
-                devnode.substr(devnode.find_last_of('/') + 1).c_str());
-        if (!dev) {
-            udev_unref(udev);
-            return "";
-        }
-        const char* fs =
-            udev_device_get_property_value(dev, "ID_FS_TYPE");
-        std::string result = fs ? fs : "";
-        udev_device_unref(dev);
-        udev_unref(udev);
-        return result;*/
     }
 };

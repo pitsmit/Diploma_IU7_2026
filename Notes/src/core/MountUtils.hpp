@@ -108,30 +108,17 @@ public:
     }
 
     void remountDevice(
-        const std::string& devnode,
         const std::string& mountPoint,
         bool readOnly)
     {
-        sys.sync();
-
-        std::string fsType = sys.getFsType(devnode);
-
-        if (fsType.empty()) {
-            throw UnknownFsError(("Unknown filesystem for devnode: " + devnode).c_str());
-        }
-
         int res = sys.remount(
-            devnode,
             mountPoint,
-            fsType,
             readOnly
         );
 
         if (res < 0) {
             std::string msg = 
-                std::string("remount failed for devnode: ") 
-                + devnode 
-                + std::string(" and mountPoint: ") 
+                std::string("remount failed for mountPoint: ") 
                 + mountPoint 
                 + strerror(errno);
             throw MountError(msg.c_str());
