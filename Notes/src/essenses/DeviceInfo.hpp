@@ -23,6 +23,18 @@ struct DeviceInfo {
     {
         return !(*this == other);
     }
+
+    explicit operator bool() const
+    {
+        return vendorId.has_value() &&
+               productId.has_value() &&
+               serial.has_value();
+    }
+
+    bool operator!() const
+    {
+        return !static_cast<bool>(*this);
+    }
 };
 
 class DeviceInfoBuilder {

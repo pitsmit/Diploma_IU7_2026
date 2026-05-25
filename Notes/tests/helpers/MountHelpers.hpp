@@ -21,6 +21,12 @@ static std::string createLoopFs(const std::string& fsType)
     else if (fsType == "ntfs") {
         mkfsCmd = "mkfs.ntfs " + img;
     }
+    else if (fsType == "exfat") {
+        mkfsCmd = "mkfs.exfat " + img;
+    }
+    else if (fsType == "fat32") {
+        mkfsCmd = "mkfs.fat32 " + img;
+    }
     else {
         throw std::runtime_error("unsupported filesystem: " + fsType);
     }
@@ -86,4 +92,44 @@ static bool isMountedAs(const std::string& mountPoint, const std::string& mode) 
         }
     }
     return false;
+}
+
+static int simulate_write(std::string mount_path)
+{
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        seteuid(1000);
+        setegid(1000);
+
+        std::string testFile = mount_path + "/test_write.txt";
+
+        int fd = open(testFile.c_str(), O_CREAT | O_WRONLY, 0644);
+        if (fd < 0) {
+            _exit(1);
+        }
+
+        const char* msg = "hello";
+        write(fd, msg, 5);
+        close(fd);
+
+        std::string folderPath = mount_path + "/mydir";
+        if (mkdir(folderPath.c_str(), 0755) != 0) {
+            _exit(1);
+        }
+
+        testFile = folderPath + "/test_write.txt";
+
+        fd = open(testFile.c_str(), O_CREAT | O_WRONLY, 0644);
+        if (fd < 0) {
+            _exit(1);
+        }
+
+        _exit(0);
+    }
+
+    int status;
+    waitpid(pid, &status, 0);
+
+    return status;
 }

@@ -102,6 +102,11 @@ TEST_F(RealMountTest, MountLoopDeviceReadOnlyVFAT)
 
     ASSERT_TRUE(isMounted(*mount_path));
     ASSERT_TRUE(isMountedAs(*mount_path, "ro"));
+
+    int status = simulate_write(*mount_path);
+    ASSERT_TRUE(WIFEXITED(status));
+    ASSERT_NE(WEXITSTATUS(status), 0);
+
     svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
 }
 
@@ -124,36 +129,10 @@ TEST_F(RealMountTest, MountLoopDeviceReadWriteVFAT)
     ASSERT_TRUE(isMounted(*mount_path));
     ASSERT_TRUE(isMountedAs(*mount_path, "rw"));
 
-    // ===============================
-    // simulate normal user write
-    // ===============================
-
-    pid_t pid = fork();
-
-    if (pid == 0) {
-        // drop privileges (simulate normal user)
-        seteuid(1000);
-        setegid(1000);
-
-        std::string testFile = *mount_path + "/test_write.txt";
-
-        int fd = open(testFile.c_str(), O_CREAT | O_WRONLY, 0644);
-        if (fd < 0) {
-            _exit(1);
-        }
-
-        const char* msg = "hello";
-        write(fd, msg, 5);
-        close(fd);
-
-        _exit(0);
-    }
-
-    int status;
-    waitpid(pid, &status, 0);
-
+    int status = simulate_write(*mount_path);
     ASSERT_TRUE(WIFEXITED(status));
     ASSERT_EQ(WEXITSTATUS(status), 0);
+
     svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
 }
 
@@ -175,6 +154,11 @@ TEST_F(RealMountTest, MountLoopDeviceReadOnlyEXT4)
 
     ASSERT_TRUE(isMounted(*mount_path));
     ASSERT_TRUE(isMountedAs(*mount_path, "ro"));
+
+    int status = simulate_write(*mount_path);
+    ASSERT_TRUE(WIFEXITED(status));
+    ASSERT_NE(WEXITSTATUS(status), 0);
+
     svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
 }
 
@@ -197,35 +181,9 @@ TEST_F(RealMountTest, MountLoopDeviceReadWriteEXT4)
     ASSERT_TRUE(isMounted(*mount_path));
     ASSERT_TRUE(isMountedAs(*mount_path, "rw"));
 
-        // ===============================
-    // simulate normal user write
-    // ===============================
-
-    pid_t pid = fork();
-
-    if (pid == 0) {
-        // drop privileges (simulate normal user)
-        seteuid(1000);
-        setegid(1000);
-
-        std::string testFile = *mount_path + "/test_write.txt";
-
-        int fd = open(testFile.c_str(), O_CREAT | O_WRONLY, 0644);
-        if (fd < 0) {
-            _exit(1);
-        }
-
-        const char* msg = "hello";
-        write(fd, msg, 5);
-        close(fd);
-
-        _exit(0);
-    }
-
-    int status;
-    waitpid(pid, &status, 0);
-
+    int status = simulate_write(*mount_path);
     ASSERT_TRUE(WIFEXITED(status));
     ASSERT_EQ(WEXITSTATUS(status), 0);
+
     svc->handleEvent(DeviceEvent{EventType::REMOVE, devNode.c_str()});
 }

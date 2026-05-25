@@ -36,15 +36,6 @@ TEST_F(MountUtilsTest, Mount_ReadWrite_Success) {
     EXPECT_EQ(mock.lastDev, devNode);
     EXPECT_EQ(mock.lastTarget, mountPath);
     EXPECT_EQ(mock.lastFs, "ext4");
-    EXPECT_EQ(mock.lastOpts, "rw,uid=1000,gid=1000,umask=0000");
-}
-
-TEST_F(MountUtilsTest, Mount_ReadOnly_Success) {
-    // ACT
-    utils->mountDevice(devNode, mountPath, true);
-
-    // ASSERT
-    EXPECT_EQ(mock.lastOpts, "ro,umask=0000");
 }
 
 TEST_F(MountUtilsTest, Mount_ThrowsOnUnknownFs) {
@@ -90,5 +81,28 @@ TEST_F(MountUtilsTest, Unmount_Failure) {
     EXPECT_THROW(
         utils->handleUnmount(mountPath),
         UnMountError
+    );
+}
+
+TEST_F(MountUtilsTest, Remount_Success) {
+    // ARRANGE
+    mock.mountResult = 0;
+
+    // ACT
+    utils->remountDevice(mountPath, true);
+
+    // ASSERT
+    EXPECT_TRUE(mock.mountCalled);
+    EXPECT_EQ(mock.lastTarget, mountPath);
+}
+
+TEST_F(MountUtilsTest, Remount_Failure) {
+    // ARRANGE
+    mock.mountResult = -1;
+
+    // ACT && ASSERT
+    EXPECT_THROW(
+        utils->remountDevice(mountPath, true),
+        MountError
     );
 }

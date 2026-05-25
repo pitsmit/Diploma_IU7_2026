@@ -19,7 +19,15 @@ public:
     void run()
     {
         while (auto event = queue_.pop()) {
-            service_.handleEvent(*event);
+            try {
+                service_.handleEvent(*event);
+            } catch (const std::exception& ex) {
+                mylog->error(
+                    "Failed to handle event for {}: {}",
+                    event->devNode,
+                    ex.what()
+                );
+            }
         }
     }
 };

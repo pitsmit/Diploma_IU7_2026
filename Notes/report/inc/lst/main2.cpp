@@ -1,3 +1,5 @@
+    HttpServer http;
+    #endif
     LinuxMountSystem linms;
     UdevDeviceResolver resolver;
     MountRecoveryService rec;

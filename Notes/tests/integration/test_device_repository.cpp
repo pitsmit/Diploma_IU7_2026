@@ -66,11 +66,14 @@ TEST_F(DeviceRepositoryTest, Exists_Expired_ReturnsFalse) {
             .withProductId("ABCD")
             .withSerial("ACXDIFTGX6459KOD")
             .build();
-    dbHelper.get_repo().add(info);
+    const int id = dbHelper.get_repo().add(info);
+
+    std::optional<std::string> validTo = "2005-12-18";
+    dbHelper.get_repo().updateValidTo(id, validTo);
 
     // ACT
-    auto id = dbHelper.get_repo().findActiveId(info);
+    auto active_id = dbHelper.get_repo().findActiveId(info);
 
     // ASSERT
-    EXPECT_FALSE(id);
+    EXPECT_FALSE(active_id);
 }

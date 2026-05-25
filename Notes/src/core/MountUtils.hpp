@@ -1,26 +1,30 @@
 #pragma once
 
 #include <string>
+#include <unordered_set>
 
 #include "DevLogger.hpp"
 #include "IMountSystem.hpp"
 #include "Exceptions.hpp"
 
-enum class FsType {
-    VFAT,
-    EXFAT,
-    NTFS,
-    EXT4,
-    UNKNOWN
+enum class FsPermModel {
+    NativePosix,
+    Emulated
 };
 
-static FsType classifyFs(const std::string& fs)
+static FsPermModel classifyPermModel(const std::string& fs)
 {
-    if (fs == "vfat") return FsType::VFAT;
-    if (fs == "exfat") return FsType::EXFAT;
-    if (fs == "ntfs") return FsType::NTFS;
-    if (fs == "ext4") return FsType::EXT4;
-    return FsType::UNKNOWN;
+    static const std::unordered_set<std::string> nativePosix = {
+        "ext2",
+        "ext3",
+        "ext4",
+        "xfs",
+        "btrfs"
+    };
+
+    return nativePosix.contains(fs)
+        ? FsPermModel::NativePosix
+        : FsPermModel::Emulated;
 }
 
 class MountUtils {
@@ -33,45 +37,33 @@ public:
     void mountDevice(
         const std::string& devnode,
         const std::string& mountPoint,
-        bool readOnly)
-    {
+        bool readOnly) {
         sys.sync();
 
-        std::string fs = sys.getFsType(devnode);
-
+        const std::string fs = sys.getFsType(devnode);
         if (fs.empty()) {
             throw UnknownFsError(("Unknown filesystem for devnode: " + devnode).c_str());
         }
 
-        FsType type = classifyFs(fs);
+        const FsPermModel permModel = classifyPermModel(fs);
+        const int uid = 1000;
+        const int gid = 1000;
+        std::string opts = "";
 
-        std::string opts;
+        if (permModel == FsPermModel::Emulated) {
+            opts =
+                std::string(readOnly ? "ro" : "rw") +
+                ",uid=" + std::to_string(uid) +
+                ",gid=" + std::to_string(gid) +
+                ",umask=0000";
 
-        switch (type) {
-
-            case FsType::VFAT:
-            case FsType::EXFAT:
-                opts = readOnly
-                    ? "ro,uid=1000,gid=1000,umask=0000"
-                    : "rw,uid=1000,gid=1000,umask=0000";
-                break;
-
-            case FsType::NTFS:
-                opts = readOnly
-                    ? "ro,uid=1000,gid=1000,windows_names"
-                    : "rw,uid=1000,gid=1000,windows_names";
-                break;
-
-            case FsType::EXT4:
-                opts = readOnly ? "ro" : "rw";
-                break;
-
-            default:
-                opts = readOnly ? "ro" : "rw";
-                break;
+            if (fs == "ntfs" || fs == "ntfs3"
+            ) {
+                opts += ",windows_names";
+            }
         }
 
-        int res = sys.mount(
+        const int res = sys.mount(
             devnode,
             mountPoint,
             fs,
@@ -80,13 +72,27 @@ public:
         );
 
         if (res < 0) {
-            std::string msg = 
-                std::string("mount failed for devnode: ") 
-                + devnode 
-                + std::string(" and mountPoint: ") 
-                + mountPoint 
-                + strerror(errno);
+            const std::string msg =
+                "mount failed for devnode: " + devnode +
+                " mountPoint: " + mountPoint +
+                " error: " + strerror(errno) +
+                " opts: " + opts;
             throw MountError(msg.c_str());
+        }
+
+        if (!readOnly && permModel == FsPermModel::NativePosix) {
+            if (chown(mountPoint.c_str(), uid, gid) < 0) {
+                mylog->warn("chown failed for {}: {}",
+                    mountPoint,
+                    strerror(errno)
+                );
+            }
+            if (chmod(mountPoint.c_str(), 0775) < 0) {
+                mylog->warn("chmod failed for {}: {}",
+                    mountPoint,
+                    strerror(errno)
+                );
+            }
         }
 
         mylog->info("Mounted: {}", mountPoint);

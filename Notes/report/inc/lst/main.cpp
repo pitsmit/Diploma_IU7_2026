@@ -20,5 +20,3 @@ private:
     DBConnection db;
     Facade facade;
     #ifdef BUILD_HTTP_SERVER
-    HttpServer http;
-    #endif

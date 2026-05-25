@@ -33,7 +33,7 @@ public:
         std::optional<DeviceInfo> info =
             resolver_.resolve(devNode.c_str());
         
-        if (!info)
+        if (!info || !*info)
             throw ResolveInfoError(("Coud not extract deviceInfo from devnode: " + devNode).c_str());
 
         std::string mountPoint =
