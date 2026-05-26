@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # =========================
 
 option(BUILD_HTTP_SERVER "Build HTTP server" ON)
-option(ENABLE_TESTS "Enable test build" ON)
+option(ENABLE_TESTS "Enable test build" OFF)
 option(ENABLE_TEST_API "Enable test-only HTTP endpoints" OFF)
 
 # =========================

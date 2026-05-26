@@ -55,7 +55,8 @@ protected:
         svc = std::make_unique<DeviceControlService>(
             *registry,
             *mntser,
-            *notifier
+            *notifier,
+            *resolver
         );
 
         info = std::make_unique<DeviceInfo>(

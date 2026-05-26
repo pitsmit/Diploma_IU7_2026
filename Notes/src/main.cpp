@@ -39,7 +39,7 @@ public:
         : db(Config::getDBPath()),
           ws(Config::getWebSocketPort()),
           notifier(ws),
-          service(facade.registry(), facade.mounts(), notifier),
+          service(facade.registry(), facade.mounts(), notifier, resolver),
           loop(queue, service),
           watcher(queue),
           facade(db, linms, resolver),

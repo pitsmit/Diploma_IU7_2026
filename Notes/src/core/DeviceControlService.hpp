@@ -4,6 +4,7 @@
 #include "DevLogger.hpp"
 #include "MountRegistry.hpp"
 #include "MountService.hpp"
+#include "IDeviceResolver.hpp"
 #include "DeviceEventNotifier.hpp"
 
 class DeviceControlService {
@@ -11,16 +12,19 @@ private:
     MountRegistryManager& mountRegistry_;
     MountService& mountManager_;
     DeviceEventNotifier& notifier_;
+    IDeviceResolver& resolver_;
 
 public:
     DeviceControlService(
         MountRegistryManager& mountRegistry,
         MountService& mountManager,
-        DeviceEventNotifier& notifier
+        DeviceEventNotifier& notifier,
+        IDeviceResolver& resolver
     ) :
         mountRegistry_(mountRegistry),
         mountManager_(mountManager),
-        notifier_(notifier)
+        notifier_(notifier),
+        resolver_(resolver)
     {}
 
     void handleEvent(const DeviceEvent& event)
@@ -34,7 +38,7 @@ public:
                 notifier_.notifyInsert(*record);
             }
             else if (event.type == EventType::REMOVE) {
-                if (auto mountPoint = mountRegistry_.getMountPointByDevNode(event.devNode)) {
+                if (auto mountPoint = resolver_.getMountPoint(event.devNode)) {
                     mountManager_.unmount(*mountPoint);
                     notifier_.notifyRemove(*mountPoint);
                     mountRegistry_.removeByDevNode(event.devNode);
@@ -44,11 +48,6 @@ public:
                 }
             }
         } catch (const std::exception& ex) {
-            mountRegistry_.removeByDevNode(event.devNode);
-            
-            if (auto mountPoint = mountRegistry_.getMountPointByDevNode(event.devNode))
-                mountManager_.unmount(*mountPoint);
-
             mylog->error(
                 "Failed to handle event for {}: {}",
                 event.devNode,

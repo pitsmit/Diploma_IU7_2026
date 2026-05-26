@@ -97,11 +97,9 @@ public:
             udev_unref(udev);
             return result;
         }
-        // block devices
         udev_enumerate_add_match_subsystem(
             enumerate,
             "block");
-        // только разделы
         udev_enumerate_add_match_property(
             enumerate,
             "DEVTYPE",
@@ -190,19 +188,11 @@ public:
         char* value = nullptr;
         size_t size = 0;
         std::optional<MODE> result;
-        if (mnt_optstr_get_option(
-                opts,
-                "rw",
-                &value,
-                &size) == 0)
+        if (mnt_optstr_get_option(opts, "rw", &value, &size) == 0)
         {
             result = MODE::RW;
         }
-        else if (mnt_optstr_get_option(
-                    opts,
-                    "ro",
-                    &value,
-                    &size) == 0)
+        else if (mnt_optstr_get_option(opts, "ro", &value, &size) == 0)
         {
             result = MODE::RO;
         }

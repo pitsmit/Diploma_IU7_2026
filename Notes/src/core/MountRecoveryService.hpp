@@ -37,8 +37,13 @@ public:
             resolver.getMountPoint(devNode);
 
         if (!mountPoint) {
-            auto newrec = manager.mount(devNode);
-            if (newrec) registry.recreate(*newrec);
+            try {
+                if (auto newrec = manager.mount(devNode))
+                    registry.recreate(*newrec);
+            }
+            catch(const MountError& e) {
+                mylog->error("Failed mount for {}", devNode);
+            }
             return;
         }
 
@@ -47,7 +52,7 @@ public:
 
         bool some_changes = false;
 
-        if (!info) return;
+        if (!info || !md) return;
 
         if (*info != rec.info) {
             rec.info = *info;
@@ -64,13 +69,18 @@ public:
             some_changes = true;
         }
 
-        if (*md != desired) {
-            manager.remount(rec);
-        }
-
         if (*mountPoint != rec.mountPoint) {
             rec.mountPoint = *mountPoint;
             some_changes = true;
+        }
+
+        if (*md != desired) {
+            try {
+                manager.remount(rec);
+            }
+            catch(const MountError& e) {
+                mylog->error("Failed remount for {}", rec.devNode);
+            }
         }
 
         if (some_changes) {
@@ -90,25 +100,33 @@ public:
             devNodes.begin(),
             devNodes.end());
 
-        // удаляем отсутствующие устройства
+        // удаление отсутствующих устройств
         for (const auto& reg : regs) {
             if (!devSet.contains(reg.devNode)) {
-                registry.removeByDevNode(reg.devNode);
-                manager.unmount(reg.mountPoint);
+                try {
+                    registry.removeByDevNode(reg.devNode);
+                    manager.unmount(reg.mountPoint);
+                }
+                catch(const UnMountError& e) {
+                    mylog->error("Failed unmount for {}", reg.mountPoint);
+                }
             }
         }
 
-        // актуализируем существующие
-        // или создаём новые
+        // актуализизация существующих и создание новых
         for (const auto& node : devNodes) {
             auto it = regMap.find(node);
             if (it != regMap.end()) {
                 actualize(it->second);
             }
             else {
-                auto rec = manager.mount(node);
-                if (rec)
-                    registry.add(*rec);
+                try {
+                    if (auto rec = manager.mount(node))
+                        registry.add(*rec);
+                }
+                catch(const MountError& e) {
+                    mylog->error("Failed mount for {}", node);
+                }
             }
         }
     }

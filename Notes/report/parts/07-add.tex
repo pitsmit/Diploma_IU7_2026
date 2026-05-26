@@ -1,6 +1,37 @@
 \chapter*{ПРИЛОЖЕНИЕ А}
 \addcontentsline{toc}{chapter}{ПРИЛОЖЕНИЕ А}
 
+Диск с рабочими материалами со следующей структурой папок:
+
+\begin{itemize}[label=---]
+    \item \texttt{report} --- каталог с РПЗ ВКР;
+    \item \texttt{app/} --- каталог с исходными кодами сервера:
+    \begin{itemize}[label=---]
+        \item \texttt{api-stubs} --- обработчики \texttt{HTTP} запросов;
+        \item \texttt{external} --- сторонние библиотеки;
+        \item \texttt{sql/schema} --- скрипты для создания таблиц базы данных;
+        \item \texttt{src} --- исходный код приложения;
+        \item \texttt{tests} --- тесты;
+        \item \texttt{CMakeLists.txt} --- сценарий сборки приложения;
+        \item \texttt{docker-compose.yml} --- конфигурационный файл Docker;
+        \item \texttt{Dockerfile.app} --- инструкции для создания образа контейнера приложения;
+        \item \texttt{Dockerfile.e2e} --- инструкции для создания образа контейнера для \texttt{e2e} тестов;
+        \item \texttt{Dockerfile.tests} --- инструкции для создания образа контейнера для \texttt{unit}- и интеграционных тестов.
+    \end{itemize}
+    \item \texttt{front/} --- каталог с исходными кодами клиента:
+    \begin{itemize}[label=---]
+        \item \texttt{src} --- исходный код клиента;
+        \item \texttt{index.html} --- основная вёрстка приложения;
+        \item \texttt{package.json} --- файл зависимостей;
+        \item \texttt{tsconfig.json} --- конфигурация \texttt{TypeScript};
+        \item \texttt{vite.confg.ts} --- конфигурация сборщика \texttt{Vite};
+        \item \texttt{vitest.config.ts} --- конфигурация тестов.
+    \end{itemize}
+\end{itemize}
+
+\chapter*{ПРИЛОЖЕНИЕ Б}
+\addcontentsline{toc}{chapter}{ПРИЛОЖЕНИЕ Б}
+
 Презентация к выпускной квалификационной работе на тему 
 <<Программно-алгоритмический комплекс управления доступом ко внешним запоминающим устройствам>>
 состоит из 15 слайдов.
