@@ -12,12 +12,18 @@ class MockDeviceResolver : public IDeviceResolver {
 private:
     DeviceInfo info_;
     bool shouldReturn_ = true;
+    std::string mountpoint_;
 
 public:
     void setResult(const DeviceInfo& info)
     {
         info_ = info;
         shouldReturn_ = true;
+    }
+
+    void setmountpoint(std::string mt)
+    {
+        mountpoint_ = mt;
     }
 
     void setEmpty()
@@ -36,7 +42,7 @@ public:
 
     std::optional<std::string> getMountPoint(const std::string& devNode)
     {
-        return nullptr;
+        return mountpoint_;
     }
 
     std::optional<MODE> getMountMode(const std::string& mountpoint)

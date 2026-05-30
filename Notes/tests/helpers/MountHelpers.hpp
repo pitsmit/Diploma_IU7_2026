@@ -3,63 +3,133 @@
 #include <string>
 #include <filesystem>
 #include <cstdlib>
+#include <unistd.h>
 
-static std::string createLoopFs(const std::string& fsType)
+struct LoopFs
 {
-    std::string img = "/tmp/usb.img";
+    std::string image;
+    std::string device;
 
-    system("losetup -D");
+    LoopFs() = default;
+
+    LoopFs(const LoopFs&) = delete;
+    LoopFs& operator=(const LoopFs&) = delete;
+
+    LoopFs(LoopFs&& other) noexcept
+        : image(std::move(other.image)),
+          device(std::move(other.device))
+    {
+        other.image.clear();
+        other.device.clear();
+    }
+
+    ~LoopFs()
+    {
+        cleanup();
+    }
+
+    void cleanup()
+    {
+        if (!device.empty())
+        {
+            std::string cmd = "losetup -d " + device + " >/dev/null 2>&1";
+            std::system(cmd.c_str());
+            device.clear();
+        }
+
+        if (!image.empty())
+        {
+            std::error_code ec;
+            std::filesystem::remove(image, ec);
+            image.clear();
+        }
+    }
+};
+
+inline LoopFs createLoopFs(const std::string& fsType)
+{
+    LoopFs result;
+
+    result.image =
+        "/tmp/usb_" +
+        std::to_string(::getpid()) +
+        "_" +
+        std::to_string(std::rand()) +
+        ".img";
 
     std::string mkfsCmd;
 
-    if (fsType == "vfat") {
-        mkfsCmd = "mkfs.vfat " + img;
+    if (fsType == "vfat")
+    {
+        mkfsCmd = "mkfs.vfat " + result.image;
     }
-    else if (fsType == "ext4") {
-        mkfsCmd = "mkfs.ext4 " + img;
+    else if (fsType == "ext4")
+    {
+        mkfsCmd = "mkfs.ext4 -F " + result.image;
     }
-    else if (fsType == "ntfs") {
-        mkfsCmd = "mkfs.ntfs " + img;
+    else if (fsType == "ntfs")
+    {
+        mkfsCmd = "mkfs.ntfs -F " + result.image;
     }
-    else if (fsType == "exfat") {
-        mkfsCmd = "mkfs.exfat " + img;
+    else if (fsType == "exfat")
+    {
+        mkfsCmd = "mkfs.exfat " + result.image;
     }
-    else if (fsType == "fat32") {
-        mkfsCmd = "mkfs.fat32 " + img;
-    }
-    else {
-        throw std::runtime_error("unsupported filesystem: " + fsType);
-    }
-
-    std::string cmd1 = "dd if=/dev/zero of=" + img + " bs=1M count=32";
-
-    if (system(cmd1.c_str()) != 0 ||
-        system(mkfsCmd.c_str()) != 0 ||
-        system(("losetup -fP " + img).c_str())) {
-        throw std::runtime_error("failed to create loop fs");
+    else
+    {
+        throw std::runtime_error(
+            "unsupported filesystem: " + fsType);
     }
 
-    FILE* pipe = popen("losetup -a | grep usb.img | cut -d: -f1", "r");
+    std::string createImage =
+        "dd if=/dev/zero of=" + result.image +
+        " bs=1M count=32 status=none";
 
-    if (!pipe) {
-        throw std::runtime_error("popen failed");
+    if (std::system(createImage.c_str()) != 0)
+    {
+        throw std::runtime_error("failed to create image");
     }
 
-    char buffer[128];
-    std::string devNode;
+    if (std::system(mkfsCmd.c_str()) != 0)
+    {
+        throw std::runtime_error("failed to create filesystem");
+    }
 
-    if (fgets(buffer, sizeof(buffer), pipe)) {
-        devNode = buffer;
-        devNode.erase(devNode.find_last_not_of(" \n\r\t") + 1);
+    FILE* pipe = popen(
+        ("losetup --find --show -P " + result.image).c_str(),
+        "r");
+
+    if (!pipe)
+    {
+        throw std::runtime_error("losetup failed");
+    }
+
+    char buffer[256]{};
+
+    if (!fgets(buffer, sizeof(buffer), pipe))
+    {
+        pclose(pipe);
+        throw std::runtime_error("cannot obtain loop device");
     }
 
     pclose(pipe);
 
-    if (devNode.empty()) {
-        throw std::runtime_error("loop device not found");
+    result.device = buffer;
+
+    while (!result.device.empty() &&
+           (result.device.back() == '\n' ||
+            result.device.back() == '\r' ||
+            result.device.back() == ' '))
+    {
+        result.device.pop_back();
     }
 
-    return devNode;
+    if (result.device.empty())
+    {
+        throw std::runtime_error("empty loop device");
+    }
+
+    return result;
 }
 
 static bool isMounted(const std::string& path) {

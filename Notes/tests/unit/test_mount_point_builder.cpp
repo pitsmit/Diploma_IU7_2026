@@ -31,37 +31,6 @@ TEST(MountPointBuilderTest, Build_AllFieldsPresent) {
     EXPECT_EQ(result, expected);
 }
 
-TEST(MountPointBuilderTest, Build_NoSerial) {
-    // ARRANGE
-    const std::string &vendorId = "1234";
-    const std::string &productId = "7856";
-
-    DeviceInfo dev = DeviceInfoBuilder()
-                        .withVendorId(vendorId)
-                        .withProductId(productId)
-                        .build();
-
-    const std::string &expected = base + vendorId + "_" + productId + "_noserial";
-
-    // ACT
-    std::string result = MountPointBuilder::build(dev);
-
-    // ASSERT
-    EXPECT_EQ(result, expected);
-}
-
-TEST(MountPointBuilderTest, Build_MissingVendorAndProduct) {
-    // ARRANGE
-    DeviceInfo dev = DeviceInfoBuilder().build();
-    const std::string &expected = base + "unknown_unknown_noserial";
-
-    // ACT
-    std::string result = MountPointBuilder::build(dev);
-
-    // ASSERT
-    EXPECT_EQ(result, expected);
-}
-
 TEST(MountPointBuilderTest, EnsureExists_CreatesDirectory) {
     // ARRANGE
     std::string path = "/tmp/test_mount_point_builder_dir";

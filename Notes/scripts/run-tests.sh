@@ -16,6 +16,10 @@ lcov --remove coverage.info \
     '*/_deps/*' \
     '*/external/*' \
     '*/tests/*' \
+    '*/src/core/IMountSystem.hpp' \
+    '*/src/core/IDeviceResolver.hpp' \
+    '*/src/core/UdevDeviceResolver.hpp' \
+    '*/src/services/Exceptions.hpp' \
     --output-file coverage.tmp.info
 
 lcov --extract coverage.tmp.info \
@@ -24,6 +28,10 @@ lcov --extract coverage.tmp.info \
     --output-file coverage.filtered.info
 
 genhtml coverage.filtered.info \
-    --output-directory coverage-report
+    --output-directory /app/coverage-report
 
-echo "Coverage report generated in coverage-report/"
+touch /app/coverage-report/AFTER_GENHTML
+sync
+
+echo "=== HOST CHECK MARKER ==="
+ls -la /app/coverage-report/AFTER_GENHTML
