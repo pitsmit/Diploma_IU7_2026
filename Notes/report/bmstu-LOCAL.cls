@@ -31,7 +31,7 @@
 % Настройка полей
 \RequirePackage[
 	left=30mm,
-	right=10mm, % Является требованием МГТУ, не соответствует ГОСТ 7.32-2017
+	right=10mm,
 	top=20mm,
 	bottom=20mm,
 ]{geometry}
