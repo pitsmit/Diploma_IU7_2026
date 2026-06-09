@@ -21,15 +21,51 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build services (cached)
+      # =========================
+      # BUILD TEST IMAGE
+      # =========================
+      - name: Build tests image (cached)
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile.tests
           push: false
           load: true
+          tags: tests-image:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # =========================
+      # BUILD APP IMAGE
+      # =========================
+      - name: Build app image (cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.app
+          push: false
+          load: true
+          tags: app-image:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # =========================
+      # BUILD E2E IMAGE
+      # =========================
+      - name: Build e2e image (cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.e2e
+          push: false
+          load: true
+          tags: e2e-image:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # =========================
+      # RUN TESTS
+      # =========================
       - name: Run unit tests
         run: docker compose run --rm tests
 
@@ -43,6 +79,9 @@ jobs:
         if: always()
         run: docker compose down
 
+      # =========================
+      # PAGES
+      # =========================
       - name: Upload coverage artifact
         uses: actions/upload-pages-artifact@v3
         with:
