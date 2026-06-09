@@ -1,9 +1,7 @@
 services:
 
   tests:
-    build:
-      context: .
-      dockerfile: Dockerfile.tests
+    image: tests-image:latest
 
     privileged: true
 
@@ -11,9 +9,7 @@ services:
       - ./coverage-report:/app/coverage-report
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile.app
+    image: app-image:latest
 
     ports:
       - "8080:8080"
@@ -24,6 +20,4 @@ services:
       - ./logs.txt:/app/logs.txt
 
   e2e:
-    build:
-      context: .
-      dockerfile: Dockerfile.e2e
+    image: e2e-image:latest
