@@ -1,0 +1,29 @@
+services:
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.tests
+
+    privileged: true
+
+    volumes:
+      - ./coverage-report:/app/coverage-report
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+
+    ports:
+      - "8080:8080"
+    
+    privileged: true
+
+    volumes:
+      - ./logs.txt:/app/logs.txt
+
+  e2e:
+    build:
+      context: .
+      dockerfile: Dockerfile.e2e

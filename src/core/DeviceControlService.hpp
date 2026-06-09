@@ -1,0 +1,58 @@
+#pragma once
+
+#include "DeviceEvent.hpp"
+#include "DevLogger.hpp"
+#include "MountRegistry.hpp"
+#include "MountService.hpp"
+#include "IDeviceResolver.hpp"
+#include "DeviceEventNotifier.hpp"
+
+class DeviceControlService {
+private:
+    MountRegistryManager& mountRegistry_;
+    MountService& mountManager_;
+    DeviceEventNotifier& notifier_;
+    IDeviceResolver& resolver_;
+
+public:
+    DeviceControlService(
+        MountRegistryManager& mountRegistry,
+        MountService& mountManager,
+        DeviceEventNotifier& notifier,
+        IDeviceResolver& resolver
+    ) :
+        mountRegistry_(mountRegistry),
+        mountManager_(mountManager),
+        notifier_(notifier),
+        resolver_(resolver)
+    {}
+
+    void handleEvent(const DeviceEvent& event)
+    {
+        try {
+            mylog->info("Start handle {} event with devnode {}", event.type == EventType::INSERT ? "INSERT" : "REMOVE", event.devNode);
+
+            if (event.type == EventType::INSERT) {
+                auto record = mountManager_.mount(event.devNode);
+                mountRegistry_.add(*record);
+                notifier_.notifyInsert(*record);
+            }
+            else if (event.type == EventType::REMOVE) {
+                if (auto mountPoint = resolver_.getMountPoint(event.devNode)) {
+                    mountManager_.unmount(*mountPoint);
+                    notifier_.notifyRemove(*mountPoint);
+                    mountRegistry_.removeByDevNode(event.devNode);
+                }
+                else {
+                    mylog->warn("No mount point for {}", event.devNode);
+                }
+            }
+        } catch (const std::exception& ex) {
+            mylog->error(
+                "Failed to handle event for {}: {}",
+                event.devNode,
+                ex.what()
+            );
+        }
+    }
+};

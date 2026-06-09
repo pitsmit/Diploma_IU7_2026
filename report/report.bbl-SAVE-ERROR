@@ -1,0 +1,257 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{WhyUSB}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{title}{Баев Алексей Владимирович, Гаценко Олег Юрьевич, Самонов Александр Валерьянович Программный комплекс управления доступом USB-устройств к автоматизированным рабочим местам // Вопросы кибербезопасности. 2020. №1 (35)}
+    \endentry
+    \entry{InfoWatchAnalytics}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://www.infowatch.ru/analytics} (дата обращения: 01.03.2026)}
+      \field{title}{InfoWatch --- Аналитика информационной безопасности; [Электронный ресурс]}
+    \endentry
+    \entry{USBGuard}{misc}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://usbguard.github.io/} (дата обращения: 01.03.2026)}
+      \field{title}{USBGuard; [Электронный ресурс]}
+    \endentry
+    \entry{USBFilter}{misc}{}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://davejingtian.org/2016/08/04/making-usb-great-again-with-usbfilter-a-usb-layer-firewall-in-the-linux-kernel/} (дата обращения: 01.03.2026)}
+      \field{title}{Making USB Great Again with USBFILTER --- a USB layer firewall in the Linux kernel; [Электронный ресурс]}
+    \endentry
+    \entry{USBWall}{misc}{}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://github.com/usbwall/usbwall?ysclid=mndivt3urh835120502} (дата обращения: 01.03.2026)}
+      \field{title}{USBWall Source Code; [Электронный ресурс]}
+    \endentry
+    \entry{USBShield}{misc}{}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://github.com/USBShield/USBShield?ysclid=mndiyaq4ah326619085} (дата обращения: 01.03.2026)}
+      \field{title}{USBShield Source Code; [Электронный ресурс]}
+    \endentry
+    \entry{Ratool}{misc}{}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://www.sordum.org/8104/ratool-v1-4-removable-access-tool/} (дата обращения: 01.03.2026)}
+      \field{title}{Sordum --- Ratool v1.4 (Removable Access tool); [Электронный ресурс]}
+    \endentry
+    \entry{GilisoftUSBLock}{misc}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://www.gilisoft.com/product-usb-lock.htm} (дата обращения: 01.03.2026)}
+      \field{title}{Gilisoft USB Lock --- Control USB ports, removable devices, and trusted-device access to reduce data leakage on Windows; [Электронный ресурс]}
+    \endentry
+    \entry{USBBlock}{misc}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://www.newsoftwares.net/usb-block/} (дата обращения: 01.03.2026)}
+      \field{title}{NewSoftwares --- USBBlock. Restrict Access of Portable Drives; [Электронный ресурс]}
+    \endentry
+    \entry{DBTypes}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{title}{Модели баз данных: учебное пособие / О.Е. Аврунев, В.М. Стасышин. --- Новосибирск: Изд-во НГТУ, 2018. --- 124 c.}
+    \endentry
+    \entry{SUDBTypes}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{title}{Создание базы данных для разработки облачной платформы хранения и редактирования 3D моделей конфет / В. Г. Благовещенский, А. Е. Краснов, И. Г. Благовещенский [и др.] // Интеллектуальные автоматизированные управляющие системы в биотехнологических процессах : сборник докладов всероссийской научно-практической конференции, Москва, 29 марта 2023 года. – Москва: РОССИЙСКИЙ БИОТЕХНОЛОГИЧЕСКИЙ УНИВЕРСИТЕТ; ЗАО «Университетская книга», 2023. – С. 85-96. – EDN NAJYYS.}
+    \endentry
+    \entry{OpenAPI}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://www.openapis.org/} (дата обращения: 01.03.2026)}
+      \field{title}{OpenAPI Initiative --- The OpenAPI Initiative; [Электронный ресурс]}
+    \endentry
+    \entry{Cpp}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://isocpp.org/} (дата обращения: 01.03.2026)}
+      \field{title}{Standard C++; [Электронный ресурс]}
+    \endentry
+    \entry{TypeScript}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://www.typescriptlang.org/} (дата обращения: 01.03.2026)}
+      \field{title}{TypeScript --- JavaScript With Syntax For Types; [Электронный ресурс]}
+    \endentry
+    \entry{VueJS}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://vuejs.org/} (дата обращения: 01.03.2026)}
+      \field{title}{Vue.js --- The Progressive JavaScript Framework | Vue.js; [Электронный ресурс]}
+    \endentry
+    \entry{VSCode}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://code.visualstudio.com/} (дата обращения: 01.03.2026)}
+      \field{title}{Visual Studio Code --- The open source AI code editor; [Электронный ресурс]}
+    \endentry
+    \entry{GoogleTests}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://google.github.io/googletest/} (дата обращения: 01.03.2026)}
+      \field{title}{GoogleTest User’s Guide; [Электронный ресурс]}
+    \endentry
+    \entry{Mocks}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{title}{Тюменцев, Е. А. Автоматизированное тестирование сложности алгоритмов с помощью Mock-объектов / Е. А. Тюменцев // Математические структуры и моделирование. --- 2013. --- № 1(27). --- С. 82-88. --- EDN QLJADF.}
+    \endentry
+    \entry{Docker}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://www.docker.com/} (дата обращения: 01.03.2026)}
+      \field{title}{Docker --- Accelerated Container Application Development; [Электронный ресурс]}
+    \endentry
+    \entry{ViTest}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://vitest.dev/} (дата обращения: 01.03.2026)}
+      \field{title}{Vitest --- Next Generation testing framework; [Электронный ресурс]}
+    \endentry
+    \entry{HTTP}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{title}{Борисов П. Е. HTTP-протокол прикладного уровня (обзор) //Научный аспект. --- 2024. --- Т. 22. --- №. 5. --- С. 2937-2943.}
+    \endentry
+    \entry{WebSocket}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{title}{Хабаров, С. П. Взаимодействия узлов сети по протоколу WebSocket / С. П. Хабаров // Информационные системы и технологии: теория и практика : Сборник научных трудов научно-технической конференции института леса и природопользования, Санкт-Перербург, 01 февраля 2017 года. Том Выпуск 9. --- Санкт-Перербург: Санкт-Петербургский государственный лесотехнический университет им. С.М. Кирова, 2017. --- С. 104-115. --- EDN YRLWFS.}
+    \endentry
+    \entry{libudev}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://man7.org/linux/man-pages/man3/libudev.3.html} (дата обращения: 01.03.2026)}
+      \field{title}{libudev(3) --- Linux manual page; [Электронный ресурс]}
+    \endentry
+    \entry{libmount}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://www.kernel.org/pub/linux/utils/util-linux/v2.36/libmount-docs/index.html} (дата обращения: 01.03.2026)}
+      \field{title}{The Linux Kernel documentation --- libmount Reference Manual; [Электронный ресурс]}
+    \endentry
+    \entry{libblkid}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://man7.org/linux/man-pages/man3/libblkid.3.html} (дата обращения: 01.03.2026)}
+      \field{title}{libblkid(3) --- Linux manual page; [Электронный ресурс]}
+    \endentry
+    \entry{Sqlite}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://www.sqlite.org/} (дата обращения: 01.03.2026)}
+      \field{title}{SQLite Home Page; [Электронный ресурс]}
+    \endentry
+    \entry{DuckDB}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://duckdb.org/} (дата обращения: 01.03.2026)}
+      \field{title}{DuckDB --- An in-process SQL OLAP database management system; [Электронный ресурс]}
+    \endentry
+    \entry{H2Database}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://h2database.com/html/main.html} (дата обращения: 01.03.2026)}
+      \field{title}{H2 Database Engine --- Welcome to H2, the Java SQL database; [Электронный ресурс]}
+    \endentry
+    \entry{ApacheDerby}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://db.apache.org/derby/} (дата обращения: 01.03.2026)}
+      \field{title}{Apache Derby; [Электронный ресурс]}
+    \endentry
+    \entry{Systemd}{misc}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://systemd.io/} (дата обращения: 01.03.2026)}
+      \field{title}{Systemd --- System and Service Manager; [Электронный ресурс]}
+    \endentry
+    \entry{Nginx}{misc}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://nginx.org/ru/} (дата обращения: 01.03.2026)}
+      \field{title}{nginx; [Электронный ресурс]}
+    \endentry
+    \entry{KVM}{misc}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://linux-kvm.org/page/Main_Page} (дата обращения: 01.03.2026)}
+      \field{title}{KVM --- Main Page; [Электронный ресурс]}
+    \endentry
+    \entry{Intel}{misc}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://www.techpowerup.com/cpu-specs/core-i7-11370h.c2833} (дата обращения: 01.03.2026)}
+      \field{title}{Intel Core i7-11370H Specs --- TechPowerUp CPU Database; [Электронный ресурс]}
+    \endentry
+    \entry{Dummy}{misc}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://elixir.bootlin.com/linux/v6.7-rc3/source/drivers/usb/gadget/udc/dummy\_hcd.c\#L82} (дата обращения: 01.03.2026)}
+      \field{title}{Linux source code (v7.0.8) --- Bootlin Elixir Cross Referencer; [Электронный ресурс]}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

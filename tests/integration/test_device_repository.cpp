@@ -1,0 +1,79 @@
+#include <gtest/gtest.h>
+
+#include "Device.hpp"
+#include "DeviceInfo.hpp"
+
+#include "../helpers/LoggerTestHelper.hpp"
+#include "../helpers/DataBaseTestHelper.hpp"
+
+class DeviceRepositoryTest : public ::testing::Test {
+protected:
+    LoggerTestHelper logger;
+    DataBaseTestHelper dbHelper;
+
+    void SetUp() override {
+        logger.disable();
+        dbHelper.create();
+    }
+
+    void TearDown() override {
+        logger.restore();
+        dbHelper.reset();
+    }
+};
+
+
+TEST_F(DeviceRepositoryTest, AddAndGetAll) {
+    // ARRANGE
+    DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withVendorId("1234")
+            .withProductId("ABCD")
+            .withSerial("ABCDEF123456")
+            .build();
+    dbHelper.get_repo().add(info);
+
+    // ACT
+    auto all = dbHelper.get_repo().getAll();
+
+    // ASSERT
+    ASSERT_EQ(all.size(), 1);
+    EXPECT_EQ(*all[0].info.vendorId, "1234");
+}
+
+TEST_F(DeviceRepositoryTest, Exists_ReturnsTrue) {
+    // ARRANGE
+    DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withVendorId("1234")
+            .withProductId("ABCD")
+            .withSerial("ACXDIFTGX6459KOD")
+            .build();            
+    dbHelper.get_repo().add(info);
+
+    // ACT
+    auto id = dbHelper.get_repo().findActiveId(info);
+
+    // ASSERT
+    EXPECT_TRUE(id);
+}
+
+TEST_F(DeviceRepositoryTest, Exists_Expired_ReturnsFalse) {
+    // ARRANGE
+    DeviceInfo info = 
+            DeviceInfoBuilder()
+            .withVendorId("1234")
+            .withProductId("ABCD")
+            .withSerial("ACXDIFTGX6459KOD")
+            .build();
+    const int id = dbHelper.get_repo().add(info);
+
+    std::optional<std::string> validTo = "2005-12-18";
+    dbHelper.get_repo().updateValidTo(id, validTo);
+
+    // ACT
+    auto active_id = dbHelper.get_repo().findActiveId(info);
+
+    // ASSERT
+    EXPECT_FALSE(active_id);
+}

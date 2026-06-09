@@ -1,0 +1,1 @@
+int umount2(const char *target, int flags);

@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build services
+        run: docker compose build
+
+      - name: Run unit tests
+        run: docker compose run --rm tests
+
+      - name: Start app
+        run: docker compose up -d app
+
+      - name: Run E2E tests
+        run: docker compose run --rm e2e
+
+      - name: Stop services
+        if: always()
+        run: docker compose down
+
+      - name: Upload coverage artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: coverage-report
+
+  deploy-pages:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

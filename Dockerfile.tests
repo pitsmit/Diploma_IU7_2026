@@ -1,0 +1,77 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# =========================
+# Dependencies
+# =========================
+
+RUN apt-get update && apt-get install -y \
+    git \
+    ninja-build \
+    g++ \
+    build-essential \
+    cmake \
+    sqlite3 \
+    libsqlite3-dev \
+    nlohmann-json3-dev \
+    libudev-dev \
+    libblkid-dev \
+    libmount-dev \
+    libcurl4-openssl-dev \
+    lcov \
+    gcovr \
+    dosfstools \
+    util-linux \
+    e2fsprogs \
+    kmod \
+    libssl-dev \
+    zlib1g-dev \
+    ntfs-3g
+
+RUN git clone https://github.com/machinezone/IXWebSocket.git /tmp/IXWebSocket && \
+    cd /tmp/IXWebSocket && \
+    cmake -B build -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build build -j$(nproc) && \
+    cmake --install build && \
+    rm -rf /tmp/IXWebSocket
+
+# =========================
+# Project
+# =========================
+
+WORKDIR /app
+
+COPY CMakeLists.txt ./
+COPY src ./src
+COPY tests ./tests
+COPY sql ./sql
+COPY external ./external
+COPY config.txt ./
+RUN cp config.txt config.base.txt
+
+# =========================
+# Configure
+# =========================
+
+RUN cmake -S . -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Coverage \
+    -DBUILD_HTTP_SERVER=OFF \
+    -DBUILD_E2E_TESTS=OFF \
+    -DENABLE_TEST_API=OFF
+
+# =========================
+# Build
+# =========================
+
+RUN cmake --build build
+
+# =========================
+# Test runner
+# =========================
+
+COPY scripts/run-tests.sh /run-tests.sh
+
+RUN chmod +x /run-tests.sh
+
+CMD ["/run-tests.sh"]

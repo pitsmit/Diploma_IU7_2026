@@ -1,0 +1,201 @@
+\chapter{Конструкторский раздел}
+
+В данном разделе представлена архитектура программно-алгоритмического комплекса,
+описаны его компоненты, их взаимодействие и ключевые структуры данных, приведены 
+схемы спроектированных алгоритмов, описаны сущности и ограничения целостности проектируемой базы данных.
+
+\section{Архитектура разрабатываемого программно-алгоритмического комплекса}
+
+Архитектура комплекса будет представлена моделью клиент-сервер, где клиент ---
+приложение, позволяющее пользователю управлять списком доверенных устройств, а сервер
+--- приложение, отвечающее непосредственно за монтирование устройств и работе с базой 
+данных. Схематично данная модель представлена на рисунке~\ref{img:client_server.drawio}.
+
+\includeimage
+    {client_server.drawio}
+    {f}
+    {H}
+    {0.80\textwidth}
+    {Модель клиент-сервер}
+
+\section{Взаимодействие компонентов программно-алгоритмического комплекса}
+
+Взаимодействие клиента и сервера описывается с помощью спецификации \texttt{OpenAPI}~\cite{OpenAPI}. 
+Использование \texttt{OpenAPI} позволяет формализовать структуру запросов и ответов, определить 
+параметры запросов и форматы передаваемых данных. 
+
+На рисунке~\ref{img:api} представлена спецификация \texttt{OpenAPI}, 
+описывающая маршруты взаимодействия между клиентской частью и сервером.
+
+\includeimage
+    {api}
+    {f}
+    {H}
+    {1\textwidth}
+    {Маршруты взаимодействия}
+
+\section{Ключевые структуры данных}
+
+Серверная часть использует несколько структур данных для отправки ответов клиенту и 
+использования во внутренних методах.
+
+\begin{itemize}[label=---]
+    \item \texttt{DeviceInfo} --- структура формального описания \texttt{USB}-устройства:
+        \begin{enumerate}
+        \item \texttt{vendorId} --- идентификатор производителя;
+        \item \texttt{productId} --- идентификатор устройства;
+        \item \texttt{serial} --- серийный номер;
+        \item \texttt{vendorName} --- название производителя;
+        \item \texttt{productName} --- название продукта.
+        \end{enumerate}
+    \item \texttt{Device} --- структура описания доверенного устройства, используется для передачи на клиент при запросе списка
+    доверенных устройств:
+        \begin{enumerate}
+        \item \texttt{id} --- первичный ключ из базы данных;
+        \item \texttt{info} --- формальное описание \texttt{DeviceInfo};
+        \item \texttt{validTo} --- дата истечения доверия.
+        \end{enumerate}
+    \item \texttt{EventType} --- перечисляемый тип, используемый для обозначения физического манипулирования
+    с накопителем, где \texttt{INSERT(0)} --- подключение устройства, \texttt{REMOVE(1)} --- извлечение устройства;
+    \item \texttt{DeviceEvent} --- структура, описывающая физическое событие с накопителем. Имеет поля \texttt{type} 
+    типа \texttt{EventType}, и \texttt{devNode} --- специальный файл устройства;
+    \item \texttt{MODE} --- перечисляемый тип, используемый для обозначения режима монтирования, где 
+    \texttt{RO(0)} --- режим только для чтения, а \texttt{RW(1)} --- режим полного доступа;
+    \item \texttt{MountRecord} --- структура описания события монтирования, используется для передачи на клиент при запросе подключённых
+    в данный момент устройств:
+        \begin{enumerate}
+        \item \texttt{id} --- первичный ключ устройства из базы данных(при наличии);
+        \item \texttt{devNode} --- специальный файл устройства;
+        \item \texttt{mountPoint} --- путь монтирования;
+        \item \texttt{info} --- формальное описание \texttt{DeviceInfo};
+        \item \texttt{mode} --- режим монтирования \texttt{MODE}.
+        \end{enumerate}
+\end{itemize}
+
+\section{Схема алгоритма монтирования устройства}
+
+На рисунке~\ref{img:mount_algo.drawio} представлена схема алгоритма монтирования устройства
+при его подключении к компьютеру.
+
+\includeimage
+    {mount_algo.drawio}
+    {f}
+    {H}
+    {0.70\textwidth}
+    {Схема алгоритма монтирования}
+
+\section{Схема алгоритма удаления устройства из списка доверенных устройств}
+
+На рисунке~\ref{img:delete_from_white_list_algo.drawio} представлена схема алгоритма 
+удаления устройства из списка доверенных устройств.
+
+\includeimage
+    {delete_from_white_list_algo.drawio}
+    {f}
+    {H}
+    {0.60\textwidth}
+    {Схема алгоритма удаления устройства}
+
+\section{Схема алгоритма обработки специальных файлов устройств и записей о точках монтирования при инициализации приложения}
+
+На рисунке~\ref{img:bypass_devNodes.drawio} представлена схема алгоритма 
+обработки специальных файлов устройств и записей о точках монтирования при инициализации приложения.
+
+\includeimage
+    {bypass_devNodes.drawio}
+    {f}
+    {H}
+    {0.50\textwidth}
+    {Схема алгоритма обработки специальных файлов устройств и записей о точках монтирования при инициализации приложения}
+
+\section{Схема алгоритма проверки записи о монтировании на предмет актуальности}
+
+На рисунках~\ref{img:refresh_mount_after_reboot_daemon_algo.drawio}-\ref{img:refresh_mount_after_reboot_daemon_algo_3.drawio} представлена схема алгоритма 
+проверки записи о монтировании на предмет актуальности.
+
+\includeimage
+    {refresh_mount_after_reboot_daemon_algo.drawio}
+    {f}
+    {H}
+    {0.90\textwidth}
+    {Схема алгоритма проверки записи о монтировании на предмет актуальности}
+
+\includeimage
+    {refresh_mount_after_reboot_daemon_algo_2.drawio}
+    {f}
+    {H}
+    {0.65\textwidth}
+    {Продолжение схемы алгоритма~\ref{img:refresh_mount_after_reboot_daemon_algo.drawio}}
+
+\includeimage
+    {refresh_mount_after_reboot_daemon_algo_3.drawio}
+    {f}
+    {H}
+    {0.70\textwidth}
+    {Продолжение схемы алгоритма~\ref{img:refresh_mount_after_reboot_daemon_algo_2.drawio}}
+
+\section{Описание сущностей проектируемой базы данных}
+
+База данных содержит следующие таблицы:
+
+\begin{itemize}[label=---]
+    \item \texttt{DeviceInfo} --- описание устройства:
+    \begin{enumerate}
+        \item \texttt{id} --- первичный ключ;
+        \item \texttt{vendorId} --- идентификатор производителя;
+        \item \texttt{productId} --- идентификатор продукта;
+        \item \texttt{serial} --- серийный номер;
+        \item \texttt{productName} --- название производителя;
+        \item \texttt{vendorName} --- название устройства.
+    \end{enumerate}
+    \item \texttt{Device} --- описание записи в списке доверенных устройств:
+    \begin{enumerate}
+        \item \texttt{id} --- первичный ключ;
+        \item \texttt{deviceInfoId} --- идентификатор описания устройства;
+        \item \texttt{validTo} --- дата окончания периода доверия.
+    \end{enumerate}
+    \item \texttt{MountRecord} --- описание события монтирования:
+    \begin{enumerate}
+        \item \texttt{id} --- первичный ключ;
+        \item \texttt{deviceInfoId} --- идентификатор описания устройства;
+        \item \texttt{devNode} --- специальный файл устройства;
+        \item \texttt{mountPoint} --- точка монтирования;
+        \item \texttt{mode} --- режим монтирования.
+    \end{enumerate}
+\end{itemize}
+
+\section{Диаграмма проектируемой базы данных}
+
+На рисунке~\ref{img:database} представлена диаграмма проектируемой базы данных.
+
+\includeimage
+    {database}
+    {f}
+    {H}
+    {0.60\textwidth}
+    {Диаграмма базы данных}
+
+Между таблицами базы данных образуется связь один к одному.
+
+\section{Описание проектируемых ограничений целостности базы данных}
+
+На значения полей базы данных накладываются следующие ограничения целостности:
+
+\begin{itemize}[label=---]
+    \item \texttt{DeviceInfo}:
+    \begin{enumerate}
+        \item поля \texttt{vendorId} и \texttt{productId} должны содержать только цифры или строчные или 
+        заглавные латинские буквы, их длина должна равняться 4-ём символам~\cite{USBstandart}, они не могут быть пустыми;
+        \item поле \texttt{serial} не может быть пустым;
+        \item комбинация полей \texttt{vendorId}, \texttt{productId}, \texttt{serial} должна быть уникальной.
+    \end{enumerate}
+    \item \texttt{MountRecord}:
+    \begin{enumerate}
+        \item поле \texttt{deviceInfoId} является внешним ключом, ссылающимся на таблицу \texttt{DeviceInfo}, должно быть непустым и уникальным;
+        \item \texttt{devNode} должно быть непустым и уникальным;
+        \item \texttt{mountPoint} должно быть непустым и уникальным;
+        \item \texttt{mode} должно быть непустым и принимать только значения <<RO>> и <<RW>>.
+    \end{enumerate}
+    \item \texttt{Device}: поле \texttt{deviceInfoId} является внешним ключом, ссылающимся на таблицу \texttt{DeviceInfo}, должно быть непустым и 
+    уникальным, а \texttt{validTo} должно содержать дату в формате <<ГГГГ-ММ-ДД>>.
+\end{itemize}

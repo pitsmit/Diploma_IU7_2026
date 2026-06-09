@@ -1,0 +1,54 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# =========================
+# Dependencies
+# =========================
+
+RUN apt-get update && apt-get install -y \
+    cmake \
+    ninja-build \
+    g++ \
+    build-essential \
+    curl \
+    libcurl4-openssl-dev \
+    nlohmann-json3-dev \
+    libssl-dev \
+    zlib1g-dev
+
+# =========================
+# Project
+# =========================
+
+WORKDIR /tests
+
+COPY CMakeLists.txt ./
+COPY src ./src
+COPY tests ./tests
+COPY sql ./sql
+COPY api-stubs ./api-stubs
+COPY external ./external
+COPY config.txt ./
+
+# =========================
+# Configure
+# =========================
+
+RUN rm -rf build && cmake -S . -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -DBUILD_HTTP_SERVER=ON \
+    -DBUILD_E2E_TESTS=ON \
+    -DENABLE_TEST_API=ON
+
+# =========================
+# Build
+# =========================
+
+RUN cmake --build build --target e2e_tests
+
+# =========================
+# Run e2e
+# =========================
+
+CMD ["./build/tests/e2e_tests"]

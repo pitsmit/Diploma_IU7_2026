@@ -1,0 +1,6 @@
+http.port=8080
+websocket.port=9000
+db.schema=/usr/share/usbman/sql/schema/001_device_info.sql;
+        /usr/share/usbman/sql/schema/002_device.sql;
+        /usr/share/usbman/sql/schema/003_mount_record.sql
+db.path=/var/lib/usbman/app.db

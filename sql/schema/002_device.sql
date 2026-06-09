@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS Device (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    deviceInfoId INTEGER NOT NULL UNIQUE,
+    validTo DATE,
+
+    FOREIGN KEY(deviceInfoId)
+        REFERENCES DeviceInfo(id)
+);
